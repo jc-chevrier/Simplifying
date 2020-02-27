@@ -1,3 +1,3 @@
-# Simplifying
+# Simplifying.
 
-# author : chevrier jean-christophe
+# Author : chevrier jean-christophe.
