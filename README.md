@@ -1,3 +1,3 @@
-# Simplifying.
+# Framework web Simplifying.
 
-# Author : chevrier jean-christophe.
+# Author: chevrier jean-christophe.
