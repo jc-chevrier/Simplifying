@@ -6,7 +6,9 @@ namespace Simplifying;
 abstract class Template
 {
     private $parameters;
+    //private $injectedValues;
     public static $router;
+
 
 
     public function __construct($parameters = [])
@@ -16,9 +18,11 @@ abstract class Template
     }
 
 
+
     public static function initialiseStaticParameters() {
         Template::$router = Router::getInstance();
     }
+
 
 
     public function render() {
@@ -49,6 +53,9 @@ abstract class Template
             //Pour les macros implémentées, on remplace les macros par leur contenu.
             $content = Template::implementsMacros($content, $templateContent);
         }
+
+        //Pour les macro-valeur, on remplace par leur valeur.
+        $content = Template::implementsValueMacros($content);
 
         //Pour les macros non-implémentées, on remplace les macros par mot-vide.
         $content = Template::manageUnimplementedMacros($content);
@@ -117,6 +124,32 @@ abstract class Template
             $unimplementedMacro = $unimplementedMacros[0];
             $content = Util::removeOccurrences($unimplementedMacro, $content);//str_replace($unimplementedMacro, "pas implémenté", $content);
             return Template::manageUnimplementedMacros($content);
+        }
+    }
+
+
+
+    private static function implementsValueMacros($content) {
+        $implementedMacros = [];
+        $matches = preg_match("/%%[a-zA-Z0-9-]*%%+/", $content, $implementedMacros);
+
+        if(!$matches) {
+            return $content;
+        } else {
+            $implementedMacro = $implementedMacros[0];
+            $implementedMacroName = substr($implementedMacro, 2, -2);
+
+            $implementedContent = Template::$router->post($implementedMacroName);
+            if(is_bool($implementedContent)) {
+                $implementedContent = Template::$router->get($implementedMacroName);
+                if(is_bool($implementedContent)) {
+                    //TODO
+                }
+            }
+
+            $content = str_replace($implementedMacro, $implementedContent, $content);
+
+            return Template::implementsValueMacros($content);
         }
     }
 

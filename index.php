@@ -9,21 +9,18 @@ use \Simplifying\example\NotesView as NotesView;
 
 require_once('Autoloader.php');
 Autoloader::register();
+
 $router = Router::getInstance();
 
-$router->route('/parent', function () {
-    new SuperView();
-});
+$router->route('/blank', SuperView::class);
 
-$router->route('/', function () {
-    new HomeView();
-});
+$router->route('/', HomeView::class);
 
-$router->route('/home', function () {
-   new HomeView();
-});
+$router->route('/home', HomeView::class);
 
-$router->route('/notes', function () {
+$router->route('/notes', function () { //use ($router) {
+    //$router->redirect('/home');
+    //Router::getInstance()->redirect('/home');
     new NotesView([View::div(function($i) { return "Note $i";}, 10)]);
 });
 

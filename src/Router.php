@@ -12,9 +12,19 @@ class Router {
     private function __construct() {
         $this->previous_uri = null;
         $this->current_uri = null;
+
         $root = explode('/', $_SERVER['SCRIPT_NAME']);
         $this->dir_root = $root[1];
         $this->file_root = $root[2];
+
+        $this->route( '/error', '             
+             <html>
+                 <body>
+                        <div>
+                              Page inexistante sur le serveur.
+                        </div>   
+                 </body>
+             </html>');
     }
 
 
@@ -28,20 +38,10 @@ class Router {
 
     public function go() {
        $this->update();
-       if (isset($this->routes[$this->current_uri])) {
+       if(isset($this->routes[$this->current_uri])) {
            $this->routes[$this->current_uri]();
        } else {
-           View::render('
-             <hrml>
-                 <head>
-                 </head>
-                 <body>
-                        <div>
-                              Page inexistante sur le serveur.
-                        </div>   
-                 </body>
-             </hrml>
-            ');
+           $this->routes['/error']();
        }
     }
 
@@ -53,9 +53,36 @@ class Router {
         $this->current_uri = $uri;
     }
 
-    public function route($uri, $callBack) {
-        $this->routes[$uri] = $callBack;
+
+
+    public function route($uri, $serverResponse) {
+        if(is_callable($serverResponse)) {
+            $this->routes[$uri] = $serverResponse;
+        } else {
+            if(class_exists($serverResponse)) {
+                  $this->routes[$uri] = function() use ($serverResponse) {
+                      (new \ReflectionClass($serverResponse))->newInstance();
+                  };
+            } else {
+                $this->routes[$uri] = function() use ($serverResponse) {
+                    View::render($serverResponse);
+                };
+            }
+        }
     }
+
+    public function routeError($serverResponseForError){
+        $this->route("/error", $serverResponseForError);
+    }
+
+
+
+    public function redirect($uri) {
+        if(isset($this->routes[$uri])) {
+            $this->routes[$uri]();
+        }
+    }
+
 
 
     public function __get($name)

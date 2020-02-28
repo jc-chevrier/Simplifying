@@ -12,27 +12,27 @@ HTML_HERE_DOC;
     }
 
 
-    public static function node($content, $node, $times = 1, $classes = "") {
-        $sumDiv = "";
+    private static function node($node, $content, $times, $classes) {
+        $sumNodes= "";
 
         for($i = 1; $i <= $times; $i++) {
             if(is_callable($content)) {
-                $sumDiv .=  "\n<$node class=$classes>\n   " . $content($i) . "\n</$node>";
+                $sumNodes .=  "\n<$node class=$classes>\n   " . $content($i) . "\n</$node>";
             } else {
-                $sumDiv .=  "\n<$node class=$classes>\n   $content\n</$node>";
+                $sumNodes .=  "\n<$node class=$classes>\n   $content\n</$node>";
             }
         }
 
-        return $sumDiv;
+        return $sumNodes;
     }
 
 
     public static function div($content, $times = 1, $classes = "") {
-        return View::node($content, "div", $times, $classes);
+        return View::node("div", $content, $times, $classes);
     }
 
 
     public static function p($content, $times = 1, $classes = "") {
-        return View::node($content, "p", $times, $classes);
+        return View::node("p", $content, $times, $classes);
     }
 }
