@@ -1,7 +1,6 @@
 <?php
 
-namespace Simplifying\example;
-use Simplifying\Util as Util;
+namespace example;
 
 class NotesView extends SuperView
 {
@@ -12,12 +11,14 @@ class NotesView extends SuperView
                         Vous êtes dans les notes. 
                         <div>
                             <div>
+                                <br>
                                 <div>
                                     Notes : 
                                     <div>
                                         %%p0%%. 
                                     </div>
                                 </div>
+                                <br>
                                 <div>
                                     Entre autres : 
                                     <div>

@@ -1,11 +1,15 @@
 <?php
 
-namespace Simplifying\example;
+namespace example;
 
-class SuperView extends \Simplifying\Template
+class SuperView extends \simplifying\Template
 {
     public function content()
     {
+        $this->value('link-gf', "<a href='https://github.com/jc-chevrier/Simplifying'>Link to github of Simplifying framework.</a>");
+        $this->value('link-gc', "<a href='https://github.com/jc-chevrier'>Link to github of creator's Simplifying framework.</a>");
+        $this->value('link-ec', "<div>Email of creator's Simplifying framework : <b>chevrjc@gmail.com.</b></div>");
+
         return "<html lang='french'>
                         <head>
                                 [[headers]]
@@ -26,9 +30,8 @@ class SuperView extends \Simplifying\Template
                                         flex-direction: column;
                                     }
                                     .menus {
-                                        padding: auto;
+                                        padding-top: 20px;
                                         width: 100%;
-                                        b
                                     }
                                     .menus > * {
                                         margin-left: 20px;
@@ -46,12 +49,16 @@ class SuperView extends \Simplifying\Template
                                 </style>
                         </head>
                         <body>
+                                <hr>
                                 <div class='row menus'>
+                                      <a href=blank>blank</a>
                                       <a href=home>home</a>
                                       <a href=notes>notes</a>
-                                      <a href=other>divers</a>
+                                      <a href=other>documentation</a>
                                       <a href=contact>contact</a>
                                 </div>
+                                <hr>
+                                <br>
                                 [[body]]
                         </body>
                </html>";

@@ -1,7 +1,6 @@
 <?php
 
-namespace Simplifying;
-
+namespace simplifying;
 
 abstract class Template
 {
@@ -82,7 +81,7 @@ abstract class Template
     }
 
     private static function getHierarchyHelper($className, $hierarchy = []) {
-        if($className == 'Simplifying\Template') {
+        if($className == 'simplifying\Template') {
             return $hierarchy;
         } else {
             $hierarchy[] = $className;

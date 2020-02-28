@@ -1,6 +1,6 @@
 <?php
 
-namespace Simplifying;
+namespace simplifying;
 
 class Router {
     private $dir_root, $file_root;

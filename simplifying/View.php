@@ -1,6 +1,6 @@
 <?php
 
-namespace Simplifying;
+namespace simplifying;
 
 
 class View

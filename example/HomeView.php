@@ -1,6 +1,6 @@
 <?php
 
-namespace Simplifying\example;
+namespace example;
 
 class HomeView extends SuperView
 {
