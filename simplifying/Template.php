@@ -81,7 +81,7 @@ abstract class Template
     }
 
     private static function getHierarchyHelper($className, $hierarchy = []) {
-        if($className == 'simplifying\Template') {
+        if($className == __CLASS__) {
             return $hierarchy;
         } else {
             $hierarchy[] = $className;
