@@ -1,17 +1,31 @@
 <?php
 
 namespace Simplifying\example;
-
-use Simplifying\Template;
+use Simplifying\Util as Util;
 
 class NotesView extends SuperView
 {
     public function content()
     {
-        NotesView::$router->get('notes', "1-10");
         return "{{body}}
                     <div>
-                        Vous êtes dans les notes %%notes%%. Notes : <br><br>" . $this->parameters[0] . "
+                        Vous êtes dans les notes. 
+                        <div>
+                            <div>
+                                <div>
+                                    Notes : 
+                                    <div>
+                                        %%p0%%. 
+                                    </div>
+                                </div>
+                                <div>
+                                    Entre autres : 
+                                    <div>
+                                         %%p1%%. 
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 {{/body}}";
     }

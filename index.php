@@ -19,9 +19,7 @@ $router->route('/', HomeView::class);
 $router->route('/home', HomeView::class);
 
 $router->route('/notes', function () { //use ($router) {
-    //$router->redirect('/home');
-    //Router::getInstance()->redirect('/home');
-    new NotesView([View::div(function($i) { return "Note $i";}, 10)]);
+    new NotesView([View::div(function($i) { return "Note $i";}, 10), "La note 1 est pertinente"]);
 });
 
 $router->go();

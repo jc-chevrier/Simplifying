@@ -1,0 +1,25 @@
+        echo Util::each($this->parameters, function($element, $i, $acc) { return "$acc Parameter $i : $element<br>"; });
+        echo '<br><br>';
+
+        Util::each($this->parameters, function($element) { echo "$element<br>"; });
+        echo '<br><br>';
+
+        Util::each($this->parameters, function($element, $i) { echo "$i<br>"; });
+        echo '<br><br>';
+
+        echo Util::eachDec($this->parameters, function($element, $i, $acc) { return "$acc Parameter $i : $element<br>"; });
+        echo '<br><br>';
+
+            //$router->redirect('/home');
+            //Router::getInstance()->redirect('/home');
+
+                    [$content, $values] = Util::eachDec($hierarchy, function($element, $i) use($values, $content) {
+                        //On récupère le template.
+                        $template = $i == 0 ? $this : Template::newTemplate($element);
+                        //On récupère le contenu du template.
+                        $templateContent = $template->content();
+                        //On récupère les valeurs du template.
+                        $values = array_merge($values, $template->values);
+                        //Pour les macros implémentées, on les remplace par leur contenu.
+                        return [Template::implementsMacros($content, $templateContent), $values];
+                    });

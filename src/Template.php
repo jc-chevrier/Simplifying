@@ -9,7 +9,7 @@ abstract class Template
     private $parameters = [];
     //Bonne utilisation : passer davantage de l'intérieur mais possible de l'extérieur (constructeur).
     private $values = [];
-    private static $router;
+    public static $router;
 
 
 
@@ -51,21 +51,25 @@ abstract class Template
         $values =  $superTemplate->values;
 
         //On parcours la hiérarchie des templates de la super classe jusqu'à la classe de this.
-        for($i = count($hierarchy) - 1; $i >= 0; $i--) {
+       for($i = count($hierarchy) - 1; $i >= 0; $i--) {
             //On récupère le template.
             $template = $i == 0 ? $this : Template::newTemplate($hierarchy[$i]);
             //On récupère le contenu du template.
             $templateContent = $template->content();
             //On récupère les valeurs du template.
             $values = array_merge($values, $template->values);
-            //Pour les macros implémentées, on remplace les macros par leur contenu.
+            //Pour les macros implémentées, on les remplace par leur contenu.
             $content = Template::implementsMacros($content, $templateContent);
         }
 
-        //Pour les macro-valeur, on remplace par leur valeur.
+        //On ajoute les paramètres du template this aux valeurs.
+        for($i = 0; $i < count($this->parameters); $i++) {
+            $values["p$i"] = $this->parameters[$i];
+        }
+        //Pour les macro-valeur, on les remplace par leur valeur.
         $content = Template::implementsValueMacros($content, $values);
 
-        //Pour les macros non-implémentées, on remplace les macros par mot-vide.
+        //Pour les macros non-implémentées, on les remplace par mot-vide.
         $content = Template::manageUnimplementedMacros($content);
 
         return $content;
@@ -99,7 +103,7 @@ abstract class Template
 
     private static function implementsMacros($content, $templateContent) {
         $implementedMacros = [];
-        $matches = preg_match('/\{\{[a-zA-Z0-9-]*\}\}/', $templateContent, $implementedMacros);
+        $matches = preg_match('/\{\{[a-zA-Z0-9-]+\}\}/', $templateContent, $implementedMacros);
 
         if(!$matches) {
             return $content;
@@ -124,7 +128,7 @@ abstract class Template
 
     private static function manageUnimplementedMacros($content) {
         $unimplementedMacros = [];
-        $matches = preg_match("/(\[\[[a-zA-Z0-9-]*\]\])+/", $content, $unimplementedMacros);
+        $matches = preg_match("/\[\[[a-zA-Z0-9-]+\]\]/", $content, $unimplementedMacros);
 
         if(!$matches) {
             return $content;
@@ -139,7 +143,7 @@ abstract class Template
 
     private static function implementsValueMacros($content, $values) {
         $implementedMacros = [];
-        $matches = preg_match("/(%%[a-zA-Z0-9-]*%%)+/", $content, $implementedMacros);
+        $matches = preg_match("/%%[a-zA-Z0-9-]+%%/", $content, $implementedMacros);
 
         if(!$matches) {
             return $content;
@@ -158,7 +162,6 @@ abstract class Template
                     }
                 }
             }
-
             $content = str_replace($implementedMacro, $implementedContent, $content);
 
             return Template::implementsValueMacros($content, $values);

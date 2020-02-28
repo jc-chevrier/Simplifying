@@ -17,8 +17,22 @@ class Util
 
     public static function each($array, $callBack) {
         $acc = null;
-        foreach($array as $element) {
-            $callBack($element, $acc);
+        $endIndex = count($array);
+        for($i = 0; $i < $endIndex; $i++) {
+            $element = $array[$i];
+            $acc = $callBack($element, $i, $acc, $array);
+        }
+        return $acc;
+    }
+
+
+
+    public static function eachDec($array, $callBack) {
+        $acc = null;
+        $startIndex = count($array) - 1;
+        for($i = $startIndex; $i >= 0; $i--) {
+            $element = $array[$i];
+            $acc = $callBack($element, $i, $acc, $array);
         }
         return $acc;
     }
