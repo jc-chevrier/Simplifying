@@ -139,7 +139,7 @@ abstract class Template
 
     private static function implementsValueMacros($content, $values) {
         $implementedMacros = [];
-        $matches = preg_match("/%%[a-zA-Z0-9-]*%%+/", $content, $implementedMacros);
+        $matches = preg_match("/(%%[a-zA-Z0-9-]*%%)+/", $content, $implementedMacros);
 
         if(!$matches) {
             return $content;
