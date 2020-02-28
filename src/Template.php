@@ -5,15 +5,18 @@ namespace Simplifying;
 
 abstract class Template
 {
-    private $parameters;
-    //private $injectedValues;
-    public static $router;
+    //Bonne utilisation : passer de l'extérieur (constructeur).
+    private $parameters = [];
+    //Bonne utilisation : passer davantage de l'intérieur mais possible de l'extérieur (constructeur).
+    private $values = [];
+    private static $router;
 
 
 
-    public function __construct($parameters = [])
+    public function __construct($parameters = [], $values = [])
     {
         $this->parameters = $parameters;
+        $this->values = $values;
         $this->render();
     }
 
@@ -42,20 +45,25 @@ abstract class Template
 
         //On récupère le template de la super classe.
         $superTemplate = Template::newTemplate(array_pop($hierarchy));
+        //On récupère le contenu du template.
         $content = $superTemplate->content();
+        //On récupère les valeurs du template.
+        $values =  $superTemplate->values;
 
         //On parcours la hiérarchie des templates de la super classe jusqu'à la classe de this.
         for($i = count($hierarchy) - 1; $i >= 0; $i--) {
             //On récupère le template.
             $template = $i == 0 ? $this : Template::newTemplate($hierarchy[$i]);
-            //On récupère le contenu de la template.
+            //On récupère le contenu du template.
             $templateContent = $template->content();
+            //On récupère les valeurs du template.
+            $values = array_merge($values, $template->values);
             //Pour les macros implémentées, on remplace les macros par leur contenu.
             $content = Template::implementsMacros($content, $templateContent);
         }
 
         //Pour les macro-valeur, on remplace par leur valeur.
-        $content = Template::implementsValueMacros($content);
+        $content = Template::implementsValueMacros($content, $values);
 
         //Pour les macros non-implémentées, on remplace les macros par mot-vide.
         $content = Template::manageUnimplementedMacros($content);
@@ -129,7 +137,7 @@ abstract class Template
 
 
 
-    private static function implementsValueMacros($content) {
+    private static function implementsValueMacros($content, $values) {
         $implementedMacros = [];
         $matches = preg_match("/%%[a-zA-Z0-9-]*%%+/", $content, $implementedMacros);
 
@@ -143,14 +151,24 @@ abstract class Template
             if(is_bool($implementedContent)) {
                 $implementedContent = Template::$router->get($implementedMacroName);
                 if(is_bool($implementedContent)) {
-                    //TODO
+                    if(isset($values[$implementedMacroName])) {
+                        $implementedContent = $values[$implementedMacroName];
+                    } else {
+                        $implementedContent = "";
+                    }
                 }
             }
 
             $content = str_replace($implementedMacro, $implementedContent, $content);
 
-            return Template::implementsValueMacros($content);
+            return Template::implementsValueMacros($content, $values);
         }
+    }
+
+
+
+    public function value($key, $value) {
+        $this->values[$key] = $value;
     }
 
 
