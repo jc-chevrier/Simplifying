@@ -100,6 +100,13 @@ abstract class Template
 
 
 
+    private static function getMacroName($macro) {
+        $macroName = substr($macro, 2, -2);
+        return $macroName;
+    }
+
+
+
     private static function implementsMacros($content, $templateContent) {
         $implementedMacros = [];
         $matches = preg_match('/\{\{[a-zA-Z0-9-]+\}\}/', $templateContent, $implementedMacros);
@@ -108,9 +115,9 @@ abstract class Template
             return $content;
         } else {
             $implementedMacro = $implementedMacros[0];
-            $implementedMacroName = substr($implementedMacro, 2, -2);
+            $implementedMacroName = Template::getMacroName($implementedMacro);
 
-            $contentsImplemented= [];
+            $contentsImplemented = [];
             preg_match("/\{\{$implementedMacroName\}\}(.|\n)*\{\{\/$implementedMacroName\}\}/", $templateContent,
            $contentsImplemented);
             $contentImplemented =  $contentsImplemented[0];
@@ -148,7 +155,7 @@ abstract class Template
             return $content;
         } else {
             $implementedMacro = $implementedMacros[0];
-            $implementedMacroName = substr($implementedMacro, 2, -2);
+            $implementedMacroName = Template::getMacroName($implementedMacro);
 
             $implementedContent = Template::$router->post($implementedMacroName);
             if(is_bool($implementedContent)) {
