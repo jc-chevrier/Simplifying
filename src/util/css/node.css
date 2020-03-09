@@ -1,0 +1,132 @@
+/**
+  [ FACTORISATION DU CSS DE DISPOSITION. ]
+
+  Principe: creer des types d'ensemble, des types d'alignement,
+  et des types de disposition dans l'espace.
+ */
+
+.ch-row > *, .ch-rows > *, .ch-column > *, .ch-columns > *,
+.row, .rows, .column, .columns {
+    display: flex;
+}
+
+.ch-row > *, .ch-rows > *,
+.row, .rows {
+    flex-direction: row;
+}
+
+.ch-column > *, .ch-columns > *,
+.column, .columns {
+    flex-direction: column;
+}
+
+.ch-rows > *, .ch-columns > *,
+.rows, .columns {
+    flex-wrap: wrap;
+}
+
+
+
+
+.h-auto, .children-h-auto > *, .ch-h-auto > *,
+.auto, .all-auto, .children-all-auto > *, .ch-auto > *,
+.r-auto, .ch-r-auto > * {
+    margin-right: auto;
+}
+
+.h-auto, .children-h-auto > *, .ch-h-auto > *,
+.auto, .all-auto, .children-all-auto > *, .ch-auto > *,
+.l-auto, .ch-l-auto > * {
+    margin-left: auto;
+}
+
+.v-auto, .children-v-auto > *, .ch-v-auto > *,
+.auto, .all-auto, .children-all-auto > *, .ch-auto > *,
+.t-auto, .ch-t-auto > * {
+    margin-top: auto;
+}
+
+.v-auto, .children-v-auto > *, .ch-v-auto > *,
+.auto, .all-auto, .children-all-auto > *, .ch-auto > * ,
+.b-auto, .ch-b-auto > * {
+    margin-bottom: auto;
+}
+
+
+
+
+
+.ch-v-opposite > *, .ch-h-opposite > *,
+.v-opposite, .h-opposite {
+    position: relative;
+    z-index: 1;
+}
+
+.ch-v-opposite-l > *, .ch-h-opposite-r > *,
+.ch-v-opposite-t > *, .ch-h-opposite-b > *,
+.h-opposite-l, .h-opposite-r,
+.v-opposite-t, .v-opposite-b {
+    position: absolute;
+}
+
+.ch-v-opposite-t > *, .v-opposite-t {
+    top: 20px;
+}
+
+.ch-v-opposite-b > *, .v-opposite-b {
+    bottom: 20px;
+}
+
+.ch-h-opposite-l > *, .h-opposite-l {
+   left: 20px;
+}
+
+.ch-h-opposite-r > *, .h-opposite-r {
+    right: 20px;
+}
+
+
+
+
+
+
+.ch-absolute-auto > *, .absolute-auto {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+
+
+
+.ch-over > *, .over,
+.ch-absolute > *, .absolute {
+    position: absolute;
+}
+
+.ch-under > *, .under,
+.ch-relative > *, .relative {
+    position: relative;
+}
+
+.ch-fixed > *, .fixed {
+    position: fixed;
+}
+
+
+
+
+.ch-v-opposite > *, .ch-h-opposite > *,
+.v-opposite, .h-opposite,
+.ch-under > *, .under {
+    z-index: 1;
+}
+
+.ch-v-opposite-l > *, .ch-h-opposite-r > *,
+.ch-v-opposite-t > *, .ch-h-opposite-b > *,
+.h-opposite-l, .h-opposite-r,
+.v-opposite-t, .v-opposite-b,
+.ch-over > *, .over {
+    z-index: 2;
+}

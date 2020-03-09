@@ -2,7 +2,7 @@
 
 class Autoloader {
    public static function loadclass($classname){
-       $classpath =  __DIR__ . "\\" . $classname. '.php';
+       $classpath =  __DIR__ . "\\src\\" . $classname. '.php';
        require_once $classpath;
    }
 
