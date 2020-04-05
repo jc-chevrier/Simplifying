@@ -12,15 +12,15 @@ Autoloader::register();
 
 $router = Router::getInstance();
 
-$router->route('/blank', SuperView::class);
+$router->route('/blank', SuperView::class)->alias('BLANK');
 
 $router->route('/', HomeView::class);
 
-$router->route('/home', HomeView::class);
+$router->route('/home', HomeView::class)->alias('HOME');
 
 $router->route('/notes', function () { //use ($router) {
     new NotesView([View::div(function($i) { return "Note $i";}, 10), "La note 1 est pertinente"]);
-});
+})->alias('NOTES');
 
 $router->route('/notes/note/{id}', function () { //use ($router) {
     class NoteView1 extends SuperView {
@@ -56,7 +56,7 @@ $router->route('/notes/note/{idNote}/details/detail/{idDetail}', function () {
         }
     }
     new NoteView4();
-});
+})->alias("NOTE4");
 
 $router->route('/arbre', function () use ($router) {
     class TreeView extends SuperView {
@@ -65,9 +65,9 @@ $router->route('/arbre', function () use ($router) {
         }
     }
     new TreeView(["tree" => $router->tree->toString()]);
-});
+})->alias('TREE');
 
-$router->route('/contact', ContactView::class);
+$router->route('/contact', ContactView::class)->alias('CONTACT');
 
 $router->routeError(function() {
     class ErrorView extends SuperView {

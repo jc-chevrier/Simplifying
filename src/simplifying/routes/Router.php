@@ -274,14 +274,50 @@ class Router
 
 
 
-    public function __get($name)
-    {
-        if (isset($this->$name)) {
-            return $this->$name;
+    /**
+     * Récupérer une route complète à partir d'un alias.
+     */
+    public function getRoute($alias, $parameters = []) {
+        foreach($this->routes as $templateRoute => $route) {
+            if($route->alias == $alias) {
+                $effectiveRoute = null;
+                if(count($parameters) == 0) {
+                    $effectiveRoute = $templateRoute;
+                } else {
+                    $effectiveRoute = $this->prepareEffectiveRoute($templateRoute, $parameters);
+                }
+                return "/" . $this->dir_root . $effectiveRoute;
+            }
         }
-        return false;
+        return null;
     }
 
+    /**
+     * Préparer une route effective.
+     */
+    private function prepareEffectiveRoute($route, $parameters) {
+        $parameter = [];
+        $markupParameter = Route::markupParameter;
+        $matches = preg_match("/$markupParameter/", $route, $parameter);
+
+        if(!$matches) {
+            return $route;
+        } else {
+            $parameter = $parameter[0];
+            $parameterName = Route::getParamaterName($parameter);
+            $route = str_replace($parameter, $parameters[$parameterName], $route);
+            return $this->prepareEffectiveRoute($route, $parameters);
+        }
+    }
+
+
+
+
+
+    /**
+     * Accéder à ou modifier une valeur
+     * de $_GET.
+     */
     public function get($name, $value = null)
     {
         if ($value != null) {
@@ -294,6 +330,10 @@ class Router
         }
     }
 
+    /**
+     * Accéder à ou modifier une valeur
+     * de $_POST.
+     */
     public function post($name, $value = null)
     {
         if ($value != null) {
@@ -304,6 +344,17 @@ class Router
             }
             return false;
         }
+    }
+
+
+
+
+    public function __get($name)
+    {
+        if (isset($this->$name)) {
+            return $this->$name;
+        }
+        return false;
     }
 }
 

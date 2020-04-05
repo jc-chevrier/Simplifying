@@ -19,7 +19,7 @@ class Route
      *
      * C'est une expression régulière.
      */
-    private static $markupParameter =  "{.*}";
+    const markupParameter = "{[a-zA-Z0-9-]+}";
     /**
      * Route modèle et route effcetive.
      *
@@ -102,11 +102,12 @@ class Route
         return substr($parameter, 1, -1);
     }
 
+
     /**
      * Savoir si un string contient un paramètre.
      */
     public static function containsParameter($string) {
-        $markupParameter = Route::$markupParameter;
+        $markupParameter = Route::markupParameter;
         $matches = preg_match("/$markupParameter/", $string);
 
         if($matches) {

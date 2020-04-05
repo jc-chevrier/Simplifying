@@ -19,7 +19,7 @@ use \simplifying\Util as util;
  * %%pNAME_PARAMETER%%                  -> macro de valeur pour paramètres.
  *
  * Attention ! il faut toujours faire attention à ce que
- * les clés dans parameters et values soit différentes !
+ * les clés soit différentes.
  */
 abstract class Template
 {
@@ -52,7 +52,7 @@ abstract class Template
     /**
      * router pour accéder au contexte général du serveur.
      */
-    public static $router;
+    private static $router;
 
 
     /**
