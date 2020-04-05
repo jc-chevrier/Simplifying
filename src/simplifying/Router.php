@@ -2,10 +2,25 @@
 
 namespace simplifying;
 
+/**
+ * Classe Router.
+ */
 class Router {
+    /**
+     * Racine du serveur.
+     */
     private $dir_root, $file_root;
+    /**
+     * Route courante.
+     */
     private $current_uri;
+    /**
+     * Route du serveur.
+     */
     private $routes;
+    /**
+     * Un singleton router.
+     */
     private static $router;
 
 
@@ -30,6 +45,9 @@ class Router {
 
 
 
+    /**
+     * Obtenir le singleton router de l'extérieur.
+     */
     public static function getInstance() {
         if(Router::$router == null) {
             Router::$router = new Router();
@@ -39,6 +57,9 @@ class Router {
 
 
 
+    /**
+     * Effectuer l'action correspondante à la route courante.
+     */
     public function go() {
         $this->update();
         if(isset($this->routes[$this->current_uri])) {
@@ -48,6 +69,9 @@ class Router {
         }
     }
 
+    /**
+     * Mettre à jour la route courante.
+     */
     private function update() {
         $tmp = explode($this->dir_root, $_SERVER['REQUEST_URI'])[1];
         $tmp = explode($this->file_root,  $tmp);
@@ -61,6 +85,9 @@ class Router {
 
 
 
+    /**
+     * Ajouter une route au serveur.
+     */
     public function route($uri, $serverResponse) {
         if(is_callable($serverResponse)) {
             $this->routes[$uri] = $serverResponse;
@@ -77,10 +104,16 @@ class Router {
         }
     }
 
+    /**
+     * Changer la route d'érreur du serveur.
+     */
     public function routeError($serverResponseForError){
         $this->route("/error", $serverResponseForError);
     }
 
+    /**
+     * Rediriger la sortie.
+     */
     public function redirect($uri) {
         if(isset($this->routes[$uri])) {
             $this->routes[$uri]();
