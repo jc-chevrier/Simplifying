@@ -2,20 +2,65 @@
 
 namespace simplifying;
 
+/**
+ * Classe Template.
+ *
+ *
+ * Concept :
+ * [[MACRO_NAME]]                       -> macro non-implémentée.
+ *
+ * {{MACRO_NAME}}  ... {{\MACRO_NAME}}  -> macro implénentée.
+ *
+ * %%NAME_VALUE%%                       -> macro de valeur.
+ *
+ * %%pNAME_PARAMETER%                   -> macro de valeur pour paramètres.
+ *
+ *
+ * Attention ! il faut toujours faire attention à ce que
+ * les clés dans parameters et values soit différentes !
+ */
 abstract class Template
 {
-    //Bonne utilisation : passer de l'extérieur (constructeur).
-    private $parameters = [];
-    //Bonne utilisation : passer davantage de l'intérieur mais possible de l'extérieur (constructeur).
+    /**
+     * Attribut fourni pour stocker à volonté des valeurs internes
+     * de tout type à utilité pour le template.
+     *
+     * Bonne utilisation et surtout seule utilisation possible :
+     * passer de l'intérieur (via définition de la méthode content).
+     *
+     * %%NAME_VALUE%% est une macro permettant d'obtenir une valeur
+     * interne dans le contenu de son template.
+     * Avec NAME_VALUE un indice/clé du tableau values.
+     */
     private $values = [];
+    /**
+     * Attribut fourni pour stocker à volonté des paramètres externes
+     * de tout type à utilité pour le template.
+     *
+     * Bonne initialisation et surtout seule initialisation possible :
+     * passer de l'extérieur via le constructeur.
+     *
+     * %%pNAME_PARAMETER%% est une macro permettant d'obtenir un paramètre
+     * externe dans le contenu d'un template.
+     * Avec NAME_PARAMETER un indice/clé du tableau parameters.
+     *
+     * Les paramètres une fois passés, sont en interne ajoutés aux values.
+     */
+    private $parameters = [];
+    /**
+     * router pour accéder au contexte général du serveur.
+     */
     public static $router;
 
 
-
-    public function __construct($parameters = [], $values = [])
+    /**
+     * Instancier un template, et lancer son fonctionnement
+     * (conversion en html et envoi au navigateur).
+     */
+    public function __construct($parameters = [])
     {
         $this->parameters = $parameters;
-        $this->values = $values;
+        $this->values = [];
         $this->render();
     }
 
@@ -26,7 +71,11 @@ abstract class Template
     }
 
 
-
+    /**
+     * Convertir un template en code html, et envoyer
+     * le code html à un navigateur via un fichier viruel
+     * (HEREDOC).
+     */
     public function render() {
         //Initialiser les paramètres statiques.
         Template::initialiseStaticParameters();
@@ -37,7 +86,9 @@ abstract class Template
     }
 
 
-
+    /**
+     * Convertir un template en code html.
+     */
     private function toHtml() {
         //On récupère la hiérarchie des templates.
         $hierarchy = $this->getHierarchy();
@@ -47,7 +98,7 @@ abstract class Template
         //On récupère le contenu du template.
         $content = $superTemplate->content();
         //On récupère les valeurs du template.
-        $values =  $superTemplate->values;
+        $values = $superTemplate->values;
 
         //On parcours la hiérarchie des templates de la super classe jusqu'à la classe de this.
        for($i = count($hierarchy) - 1; $i >= 0; $i--) {
@@ -62,8 +113,8 @@ abstract class Template
         }
 
         //On ajoute les paramètres du template this aux valeurs.
-        for($i = 0; $i < count($this->parameters); $i++) {
-            $values["p$i"] = $this->parameters[$i];
+        foreach($this->parameters as $parameterKey) {
+            $values["p$parameterKey"] = $this->parameters[$parameterKey];
         }
         //Pour les macro-valeur, on les remplace par leur valeur.
         $content = Template::implementsValueMacros($content, $values);
@@ -75,11 +126,16 @@ abstract class Template
     }
 
 
-
+    /**
+     * Obtenir la hierarchie de templates du template this.
+     */
     private function getHierarchy() {
         return Template::getHierarchyHelper(get_class($this));
     }
 
+    /**
+     * Obtenir la hierarchie de templates d'un template.
+     */
     private static function getHierarchyHelper($className, $hierarchy = []) {
         if($className == __CLASS__) {
             return $hierarchy;
@@ -91,7 +147,9 @@ abstract class Template
     }
 
 
-
+    /**
+     * Créer une instance à partir d'un nom de classe de template.
+     */
     private static function newTemplate($className) {
         $reflection = new \ReflectionClass($className);
         $template = $reflection->newInstanceWithoutConstructor();
@@ -99,14 +157,19 @@ abstract class Template
     }
 
 
-
+    /**
+     * Récupérer le nom d'une macro.
+     */
     private static function getMacroName($macro) {
         $macroName = substr($macro, 2, -2);
         return $macroName;
     }
 
 
-
+    /**
+     * Implementer les macros de $content avec les c
+     * ontenus des macros dans $templateContent.
+     */
     private static function implementsMacros($content, $templateContent) {
         $implementedMacros = [];
         $matches = preg_match('/\{\{[a-zA-Z0-9-]+\}\}/', $templateContent, $implementedMacros);
@@ -132,6 +195,9 @@ abstract class Template
 
 
 
+    /**
+     * Gerer les macros non-implémentées.
+     */
     private static function manageUnimplementedMacros($content) {
         $unimplementedMacros = [];
         $matches = preg_match("/\[\[[a-zA-Z0-9-]+\]\]/", $content, $unimplementedMacros);
@@ -147,6 +213,9 @@ abstract class Template
 
 
 
+    /**
+     * Implémenter les macros de valeurs.
+     */
     private static function implementsValueMacros($content, $values) {
         $implementedMacros = [];
         $matches = preg_match("/%%[a-zA-Z0-9-]+%%/", $content, $implementedMacros);
@@ -157,14 +226,21 @@ abstract class Template
             $implementedMacro = $implementedMacros[0];
             $implementedMacroName = Template::getMacroName($implementedMacro);
 
-            $implementedContent = Template::$router->post($implementedMacroName);
+            //Récuperation d'une valeur dans la route.
+            $implementedContent = Template::$router->currentRoute->$implementedMacroName;
             if(is_bool($implementedContent)) {
-                $implementedContent = Template::$router->get($implementedMacroName);
+                //Récuperation d'une valeur dans $_POST.
+                $implementedContent = Template::$router->post($implementedMacroName);
                 if(is_bool($implementedContent)) {
-                    if(isset($values[$implementedMacroName])) {
-                        $implementedContent = $values[$implementedMacroName];
-                    } else {
-                        $implementedContent = "";
+                    //Récuperation d'une valeur dans $_GET.
+                    $implementedContent = Template::$router->get($implementedMacroName);
+                    if(is_bool($implementedContent)) {
+                        //Récuperation d'une valeur dans values du template.
+                        if(isset($values[$implementedMacroName])) {
+                            $implementedContent = $values[$implementedMacroName];
+                        } else {
+                            $implementedContent = "";
+                        }
                     }
                 }
             }
@@ -175,13 +251,17 @@ abstract class Template
     }
 
 
-
+    /**
+     * Ajouter une valeur interne.
+     */
     public function value($key, $value) {
         $this->values[$key] = $value;
     }
 
 
-
+    /**
+     * Méthode à définir pour écrire un template.
+     */
     public abstract function content();
 
 

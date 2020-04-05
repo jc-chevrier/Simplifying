@@ -26,8 +26,7 @@ $router->route('/contact', ContactView::class);
 
 $router->routeError(function() {
     class ErrorView extends SuperView {
-        public function content()
-        {
+        public function content() {
             return "{{body}}Cette page n'existe pas sur le serveur.{{/body}}";
         }
     }
