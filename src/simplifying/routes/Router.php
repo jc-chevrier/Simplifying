@@ -174,23 +174,24 @@ class Router
      *  Ajouter une route dans l'arbre du serveur.
      */
     private function addRouteInTree($templateRoute) {
-        //On découpe la route en parties.
+        //On découpe la route en parties d'URI.
         $uriParts = Route::toUriParts($templateRoute);
 
         $parentNode = $this->tree;
         foreach ($uriParts as $index => $uriPart) {
-            //Si la partie de l'URI étudiée est un parmètre de route.
             $isParameter = false;
+            //Si la partie de l'URI étudiée est un paramètre de route.
             if(Route::containsParameter($uriPart)) {
                 $isParameter = true;
             }
 
             //On cherche le noeud pouvant déjà existé en tant
-            //que noeud enfant du noeud parent.
+            //que noeud enfant du noeud parent $parentNode.
             $node = $parentNode->searchNodeInChildNodes($uriPart);
 
-            //Si le noeud n'existe pas.
+            //Si aucun noeud enfant existe.
             if($node == null) {
+                //On en crée un.
                 $childNode = $isParameter ? new ParameterNode($uriPart) : new Node($uriPart);
                 $parentNode->addChild($childNode);
                 $parentNode = $childNode;
