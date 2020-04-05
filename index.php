@@ -40,10 +40,10 @@ $router->route('/notes/note/{id}/details', function () {
     new NoteView2();
 });
 
-$router->route('/notes/note/{id}/rien', function () {
+$router->route('/notes/note/{id}/divers', function () {
     class NoteView3 extends SuperView {
         public function content() {
-            return "{{body}} Node %%id%% : rien.{{/body}}";
+            return "{{body}} Node %%id%% : divers.{{/body}}";
         }
     }
     new NoteView3();
