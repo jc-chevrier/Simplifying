@@ -25,7 +25,7 @@ $router->route('/notes', function () { //use ($router) {
 $router->route('/notes/note/{id}', function () { //use ($router) {
     class NoteView1 extends SuperView {
         public function content() {
-            return "{{body}} Note %%id%%.{{/body}}";
+            return "{{body}} Note %%id%%. {{/body}}";
         }
     }
     new NoteView1();
@@ -34,7 +34,7 @@ $router->route('/notes/note/{id}', function () { //use ($router) {
 $router->route('/notes/note/{id}/details', function () {
     class NoteView2 extends SuperView {
         public function content() {
-            return "{{body}} Node %%id%% : détails.{{/body}}";
+            return "{{body}} Note %%id%% : détails.{ {/body}}";
         }
     }
     new NoteView2();
@@ -43,7 +43,7 @@ $router->route('/notes/note/{id}/details', function () {
 $router->route('/notes/note/{id}/divers', function () {
     class NoteView3 extends SuperView {
         public function content() {
-            return "{{body}} Node %%id%% : divers.{{/body}}";
+            return "{{body}} Note %%id%% : divers. {{/body}}";
         }
     }
     new NoteView3();
@@ -52,7 +52,7 @@ $router->route('/notes/note/{id}/divers', function () {
 $router->route('/notes/note/{idNote}/details/detail/{idDetail}', function () {
     class NoteView4 extends SuperView {
         public function content() {
-            return "{{body}} Node %%idNote%%. Détail %%idDetail%%.{{/body}}";
+            return "{{body}} Note %%idNote%%. Détail %%idDetail%%. {{/body}}";
         }
     }
     new NoteView4();
@@ -72,7 +72,7 @@ $router->route('/contact', ContactView::class)->alias('CONTACT');
 $router->routeError(function() {
     class ErrorView extends SuperView {
         public function content() {
-            return "{{body}}Cette page n'existe pas sur le serveur.{{/body}}";
+            return "{{body}} Cette page n'existe pas sur le serveur. {{/body}}";
         }
     }
     new ErrorView();
