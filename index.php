@@ -1,7 +1,7 @@
 <?php
 
 use \simplifying\View as View;
-use \simplifying\Router as Router;
+use \simplifying\routes\Router as Router;
 use \example\SuperView as SuperView;
 use \example\HomeView as HomeView;
 use \example\NotesView as NotesView;
@@ -20,6 +20,42 @@ $router->route('/home', HomeView::class);
 
 $router->route('/notes', function () { //use ($router) {
     new NotesView([View::div(function($i) { return "Note $i";}, 10), "La note 1 est pertinente"]);
+});
+
+$router->route('/notes/note/{id}', function () { //use ($router) {
+    class NoteView1 extends SuperView {
+        public function content() {
+            return "{{body}} Node %%id%%.{{/body}}";
+        }
+    }
+    new NoteView1();
+});
+
+$router->route('/notes/note/{id}/details', function () {
+    class NoteView2 extends SuperView {
+        public function content() {
+            return "{{body}} Node %%id%% : détails.{{/body}}";
+        }
+    }
+    new NoteView2();
+});
+
+$router->route('/notes/note/{id}/rien', function () {
+    class NoteView3 extends SuperView {
+        public function content() {
+            return "{{body}} Node %%id%% : rien.{{/body}}";
+        }
+    }
+    new NoteView3();
+});
+
+$router->route('/notes/note/{idNote}/details/detail/{idDetail}', function () {
+    class NoteView4 extends SuperView {
+        public function content() {
+            return "{{body}} Node %%idNote%% : Détail %%idDetail%%.{{/body}}";
+        }
+    }
+    new NoteView4();
 });
 
 $router->route('/contact', ContactView::class);

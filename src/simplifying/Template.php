@@ -2,6 +2,8 @@
 
 namespace simplifying;
 
+use \simplifying\routes\Router as Router;
+
 /**
  * Classe Template.
  *
@@ -226,18 +228,26 @@ abstract class Template
             $implementedMacro = $implementedMacros[0];
             $implementedMacroName = Template::getMacroName($implementedMacro);
 
-            //Récuperation d'une valeur dans $_POST.
-            $implementedContent = Template::$router->post($implementedMacroName);
+            //Récuperation d'une valeur dans la route courante.
+            $implementedContent = Template::$router->currentRoute->$implementedMacroName;
+            //Si rien trouvé dans la route courante.
             if(is_bool($implementedContent)) {
-                //Récuperation d'une valeur dans $_GET.
-                $implementedContent = Template::$router->get($implementedMacroName);
+                //Récuperation d'une valeur dans $_POST.
+                $implementedContent = Template::$router->post($implementedMacroName);
+                //Si rien trouvé dans $_POST.
                 if(is_bool($implementedContent)) {
-                    //Récuperation d'une valeur dans values du template.
-                    if(isset($values[$implementedMacroName])) {
-                        $implementedContent = $values[$implementedMacroName];
-                    } else {
-                        //On remplace par mot-vide si pas de valeurs trouvées.
-                        $implementedContent = "";
+                    //Récuperation d'une valeur dans $_GET.
+                    $implementedContent = Template::$router->get($implementedMacroName);
+                    //Si rien trouvé dans $_GET.
+                    if(is_bool($implementedContent)) {
+                        //Récuperation d'une valeur dans values du template.
+                        if(isset($values[$implementedMacroName])) {
+                            $implementedContent = $values[$implementedMacroName];
+                         //Si rien trouvé ans $values.
+                        } else {
+                            //On remplace par mot-vide si pas de valeurs trouvées.
+                            $implementedContent = "";
+                        }
                     }
                 }
             }
