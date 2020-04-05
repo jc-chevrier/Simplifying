@@ -15,7 +15,8 @@ class Router {
      */
     private static $router;
     /**
-     * Listes des routes du serveur et sa route courante.
+     * Listes des routes du serveur
+     * et route courante du serveur.
      */
     private $routes, $currentRoute;
 
@@ -60,7 +61,7 @@ class Router {
      */
     public function go() {
        $this->update();
-       if(isset($this->routes[$this->currentRoute->templateRoute])) {
+       if($this->currentRoute != null) {
            $this->routes[$this->currentRoute->templateRoute]();
        } else {
            $this->routes['/error']();

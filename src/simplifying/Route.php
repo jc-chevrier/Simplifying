@@ -42,7 +42,7 @@ class Route
      * Savoir si une route a des paramètres.
      */
     public static function hasParameters($route) {
-        if(is_bool(strpos($$route, "#"))) {
+        if(is_bool(strpos($route, "#"))) {
             return false;
         }
         return true;
@@ -90,7 +90,8 @@ class Route
 
 
     /**
-     * Obtenir la forme intermédiaire pour une route effective ou une route modèle.
+     * Obtenir la forme intermédiaire pour une route
+     * effective ou une route modèle.
      */
     public static function toTransitionnalForm($route) {
         $parameter = [];
