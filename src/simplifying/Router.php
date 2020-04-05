@@ -112,7 +112,7 @@ class Router {
     }
 
     /**
-     * Rediriger la sortie.
+     * Rediriger vers une autre route.
      */
     public function redirect($uri) {
         if(isset($this->routes[$uri])) {
