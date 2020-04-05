@@ -1,8 +1,9 @@
 <?php
 
-namespace simplifying;
+namespace simplifying\views;
 
 use \simplifying\routes\Router as Router;
+use \simplifying\Util as util;
 
 /**
  * Classe Template.
@@ -16,7 +17,6 @@ use \simplifying\routes\Router as Router;
  * %%NAME_VALUE%%                       -> macro de valeur.
  *
  * %%pNAME_PARAMETER%%                  -> macro de valeur pour paramètres.
- *
  *
  * Attention ! il faut toujours faire attention à ce que
  * les clés dans parameters et values soit différentes !
@@ -243,7 +243,7 @@ abstract class Template
                         //Récuperation d'une valeur dans values du template.
                         if(isset($values[$implementedMacroName])) {
                             $implementedContent = $values[$implementedMacroName];
-                         //Si rien trouvé ans $values.
+                         //Si rien trouvé dans $values.
                         } else {
                             //On remplace par mot-vide si pas de valeurs trouvées.
                             $implementedContent = "";

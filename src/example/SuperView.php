@@ -2,7 +2,7 @@
 
 namespace example;
 
-class SuperView extends \simplifying\Template
+class SuperView extends \simplifying\views\Template
 {
     public function content()
     {
@@ -54,7 +54,7 @@ class SuperView extends \simplifying\Template
                                       <a href=blank>blank</a>
                                       <a href=home>home</a>
                                       <a href=notes>notes</a>
-                                      <a href=other>documentation</a>
+                                      <a href=arbre>arbre</a>
                                       <a href=contact>contact</a>
                                 </div>
                                 <hr>

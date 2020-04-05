@@ -1,6 +1,6 @@
 <?php
 
-use \simplifying\View as View;
+use \simplifying\views\View as View;
 use \simplifying\routes\Router as Router;
 use \example\SuperView as SuperView;
 use \example\HomeView as HomeView;
@@ -52,13 +52,23 @@ $router->route('/notes/note/{id}/rien', function () {
 $router->route('/notes/note/{idNote}/details/detail/{idDetail}', function () {
     class NoteView4 extends SuperView {
         public function content() {
-            return "{{body}} Node %%idNote%% : Détail %%idDetail%%.{{/body}}";
+            return "{{body}} Node %%idNote%%. Détail %%idDetail%%.{{/body}}";
         }
     }
     new NoteView4();
 });
 
+$router->route('/arbre', function () use ($router) {
+    class TreeView extends SuperView {
+        public function content() {
+            return "{{body}} %%ptree%% {{/body}}";
+        }
+    }
+    new TreeView(["tree" => $router->tree->toString()]);
+});
+
 $router->route('/contact', ContactView::class);
+
 
 $router->routeError(function() {
     class ErrorView extends SuperView {

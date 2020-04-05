@@ -9,7 +9,15 @@ namespace simplifying\routes;
  */
 class Node
 {
+    /**
+     * La valeur d'un noeud.
+     *
+     * Ici une partie d'URI.
+     */
     private $value;
+    /**
+     * Noeuds enfants.
+     */
     private $childNodes;
 
 
@@ -48,7 +56,7 @@ class Node
 
 
     /**
-     * Récupérer le noeud de valeur $value.
+     * Rechercher le noeud de valeur $value.
      *
      * La recherche est effectuée dans le niveau
      * des noeuds enfants uniquement.
@@ -63,7 +71,7 @@ class Node
     }
 
     /**
-     * Récupérer le noeud de valeur $value.
+     * Rechercher le noeud de valeur $value.
      *
      * La recherche est effectuée dans tous les sous-niveaux.
      */
