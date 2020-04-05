@@ -16,10 +16,14 @@ use \simplifying\Util as util;
  *
  * %%NAME_VALUE%%                       -> macro de valeur.
  *
- * %%pNAME_PARAMETER%%                  -> macro de valeur pour paramètres.
+ *
+ * Une valeur peut-être retrouvée dans :
+ * $_GET, $_POST, $Template->parameters, Template->values,
+ * Router->currentRoute->parameters.
  *
  * Attention ! il faut toujours faire attention à ce que
- * les clés soit différentes.
+ * les clés soit différentes parmis tous les ensembles dont
+ * peut provenir une valeur.
  */
 abstract class Template
 {
@@ -28,7 +32,7 @@ abstract class Template
      * de tout type à utilité pour le template.
      *
      * Bonne utilisation et surtout seule utilisation possible :
-     * passer de l'intérieur (via définition de la méthode content).
+     * passer de l'intérieur (via définition de la méthode Template->content).
      *
      * %%NAME_VALUE%% est une macro permettant d'obtenir une valeur
      * interne dans le contenu de son template.
@@ -42,11 +46,12 @@ abstract class Template
      * Bonne initialisation et surtout seule initialisation possible :
      * passer de l'extérieur via le constructeur.
      *
-     * %%pNAME_PARAMETER%% est une macro permettant d'obtenir un paramètre
+     * %%NAME_PARAMETER%% est une macro permettant d'obtenir un paramètre
      * externe dans le contenu d'un template.
      * Avec NAME_PARAMETER un indice/clé du tableau parameters.
      *
-     * Les paramètres une fois passés, sont en interne ajoutés aux values.
+     * Les paramètres une fois passés de l'extérieur, sont en interne
+     * ajoutés aux values.
      */
     private $parameters = [];
     /**
@@ -116,7 +121,7 @@ abstract class Template
 
         //On ajoute les paramètres du template this aux valeurs.
         foreach($this->parameters as $parameterKey => $parameterValue) {
-            $values["p$parameterKey"] = $parameterValue;
+            $values[$parameterKey] = $parameterValue;
         }
         //Pour les macro-valeur, on les remplace par leur valeur.
         $content = Template::implementsValueMacros($content, $values);

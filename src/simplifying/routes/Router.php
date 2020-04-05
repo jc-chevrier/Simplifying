@@ -104,7 +104,7 @@ class Router
             $URI = "/slash";
         }
 
-        $this->searchRouteInTree($URI);
+        $this->searchModelRouteInTree($URI);
     }
 
 
@@ -163,7 +163,6 @@ class Router
     {
         if (isset($this->routes[$templateRoute])) {
             $this->currentRoute = $this->routes[$templateRoute];
-            $this->currentRoute->go();
         }
     }
 
@@ -203,14 +202,14 @@ class Router
     }
 
     /**
-     * Chercher la route correspondant à une route effective
+     * Chercher la route modèle correspondant à une route effective
      * via l'arbre du serveur, et initialiser la route.
      */
-    private function searchRouteInTree($effectiveRoute) {
+    private function searchModelRouteInTree($effectiveRoute) {
         //On découpe la route effective en parties.
         $uriParts = Route::toUriParts($effectiveRoute);
         //On récupère l'arborescence de neoud correpondant à la route modèle.
-        $nodes = $this->searchRouteInTreeHelper($uriParts, $this->tree);
+        $nodes = $this->searchModelRouteInTreeHelper($uriParts, $this->tree);
         //Si pas de noeuds trouvés.
         if($nodes == null) {
             //La route cherchée n'existe pas.
@@ -222,13 +221,24 @@ class Router
             foreach($nodes as $index => $node) {
                 $templateRoute .= '/' . $node->value;
             }
-            //On rend la route effective.
-            $this->currentRoute = $this->routes[$templateRoute];
-            $this->currentRoute->beginEffective($effectiveRoute, $nodes);
+
+            //Si la route cherchée existe.
+            if(isset($this->routes[$templateRoute])) {
+                //On rend la route effective.
+                $this->currentRoute = $this->routes[$templateRoute];
+                $this->currentRoute->beginEffective($effectiveRoute, $nodes);
+            //Sinon.
+            } else {
+                //La route cherchée n'existe pas.
+                $this->currentRoute = null;
+            }
         }
     }
 
-    private function searchRouteInTreeHelper($uriParts, $parentNode, $crossedNodes = []) {
+    /**
+     * Chercher une route modèle via l'arbre du serveur.
+     */
+    private function searchModelRouteInTreeHelper($uriParts, $parentNode, $crossedNodes = []) {
         //Cas trivial.
         if(count($uriParts) == 0) {
             return $crossedNodes;
@@ -254,7 +264,7 @@ class Router
                     $uriPartsClone = (new \ArrayObject($uriParts))->getArrayCopy();
                     $crossedNodesClone = (new \ArrayObject($crossedNodes))->getArrayCopy();
                     $crossedNodesClone[] = $childParameterNode;
-                    $result = $this->searchRouteInTreeHelper($uriPartsClone, $childParameterNode, $crossedNodesClone);
+                    $result = $this->searchModelRouteInTreeHelper($uriPartsClone, $childParameterNode, $crossedNodesClone);
                     if($result != null) {
                         return $result;
                     }
@@ -266,7 +276,7 @@ class Router
             //Sinon, on a trouvé un noeud.
             } else {
                 $crossedNodes[] = $node;
-                return $this->searchRouteInTreeHelper($uriParts, $node, $crossedNodes);
+                return $this->searchModelRouteInTreeHelper($uriParts, $node, $crossedNodes);
             }
         }
     }
@@ -274,26 +284,38 @@ class Router
 
 
 
+
     /**
-     * Récupérer une route complète à partir d'un alias.
+     * Récupérer une route effective à partir d'un alias.
+     *
+     * @param $alias                    L'alias de la route.
+     *
+     * @param array $parameters         Les paramètres de la route si
+     *                                  la route doir avoir des paramètres.
+     *
+     * @return string                   La route effective.
      */
     public function getRoute($alias, $parameters = []) {
         foreach($this->routes as $templateRoute => $route) {
+            //Si on a retrouvé la route à partir de l'alias.
             if($route->alias == $alias) {
                 $effectiveRoute = null;
+                //Si c'est une route sans paramètres.
                 if(count($parameters) == 0) {
                     $effectiveRoute = $templateRoute;
+                //Sinon.
                 } else {
                     $effectiveRoute = $this->prepareEffectiveRoute($templateRoute, $parameters);
                 }
                 return "/" . $this->dir_root . $effectiveRoute;
             }
         }
+        //Sinon.
         return null;
     }
 
     /**
-     * Préparer une route effective.
+     * Préparer une route effective avec des paramètres.
      */
     private function prepareEffectiveRoute($route, $parameters) {
         $parameter = [];
