@@ -18,11 +18,11 @@ $router->route('/', HomeView::class);
 
 $router->route('/home', HomeView::class)->alias('HOME');
 
-$router->route('/notes', function () { //use ($router) {
+$router->route('/notes', function () {
     new NotesView(["notes" => View::div(function($i) { return "Note $i";}, 10), "note1" => "La note 1 est pertinente"]);
 })->alias('NOTES');
 
-$router->route('/notes/note/{id}', function () { //use ($router) {
+$router->route('/notes/note/{id}', function () {
     class NoteView1 extends SuperView {
         public function content() {
             return "{{body}} Note %%id%%. {{/body}}";
