@@ -123,7 +123,7 @@ class Node
 
         $indentation++;
         foreach($this->childNodes as $index => $childNode) {
-            $string .= $childNode->toString($indentation);
+            $string .= $childNode->toString($tabulation, $indentation);
         }
 
         return $string;

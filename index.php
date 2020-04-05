@@ -61,7 +61,7 @@ $router->route('/notes/note/{idNote}/details/detail/{idDetail}', function () {
 $router->route('/arbre', function () use ($router) {
     class TreeView extends SuperView {
         public function content() {
-            return "{{body}} %%ptree%% {{/body}}";
+            return "{{body}} %%tree%% {{/body}}";
         }
     }
     new TreeView(["tree" => $router->tree->toString()]);
