@@ -113,8 +113,8 @@ abstract class Template
         }
 
         //On ajoute les paramètres du template this aux valeurs.
-        foreach($this->parameters as $parameterKey) {
-            $values["p$parameterKey"] = $this->parameters[$parameterKey];
+        foreach($this->parameters as $parameterKey => $parameterValue) {
+            $values["p$parameterKey"] = $parameterValue;
         }
         //Pour les macro-valeur, on les remplace par leur valeur.
         $content = Template::implementsValueMacros($content, $values);
@@ -226,24 +226,21 @@ abstract class Template
             $implementedMacro = $implementedMacros[0];
             $implementedMacroName = Template::getMacroName($implementedMacro);
 
-            //Récuperation d'une valeur dans la route.
-            $implementedContent = Template::$router->currentRoute->$implementedMacroName;
+            //Récuperation d'une valeur dans $_POST.
+            $implementedContent = Template::$router->post($implementedMacroName);
             if(is_bool($implementedContent)) {
-                //Récuperation d'une valeur dans $_POST.
-                $implementedContent = Template::$router->post($implementedMacroName);
+                //Récuperation d'une valeur dans $_GET.
+                $implementedContent = Template::$router->get($implementedMacroName);
                 if(is_bool($implementedContent)) {
-                    //Récuperation d'une valeur dans $_GET.
-                    $implementedContent = Template::$router->get($implementedMacroName);
-                    if(is_bool($implementedContent)) {
-                        //Récuperation d'une valeur dans values du template.
-                        if(isset($values[$implementedMacroName])) {
-                            $implementedContent = $values[$implementedMacroName];
-                        } else {
-                            $implementedContent = "";
-                        }
+                    //Récuperation d'une valeur dans values du template.
+                    if(isset($values[$implementedMacroName])) {
+                        $implementedContent = $values[$implementedMacroName];
+                    } else {
+                        $implementedContent = "";
                     }
                 }
             }
+
             $content = str_replace($implementedMacro, $implementedContent, $content);
 
             return Template::implementsValueMacros($content, $values);
