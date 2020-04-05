@@ -13,7 +13,7 @@ namespace simplifying;
  *
  * %%NAME_VALUE%%                       -> macro de valeur.
  *
- * %%pNAME_PARAMETER%                   -> macro de valeur pour paramètres.
+ * %%pNAME_PARAMETER%%                  -> macro de valeur pour paramètres.
  *
  *
  * Attention ! il faut toujours faire attention à ce que
