@@ -69,7 +69,6 @@ $router->route('/arbre', function () use ($router) {
 
 $router->route('/contact', ContactView::class);
 
-
 $router->routeError(function() {
     class ErrorView extends SuperView {
         public function content() {
