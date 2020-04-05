@@ -235,8 +235,6 @@ abstract class Template
                     //Récuperation d'une valeur dans values du template.
                     if(isset($values[$implementedMacroName])) {
                         $implementedContent = $values[$implementedMacroName];
-                    } else {
-                        $implementedContent = "";
                     }
                 }
             }

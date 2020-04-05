@@ -4,7 +4,7 @@ namespace simplifying;
 
 class Router {
     private $dir_root, $file_root;
-    private $previous_uri, $current_uri;
+    private $current_uri;
     private $routes;
     private static $router;
 
@@ -49,11 +49,14 @@ class Router {
     }
 
     private function update() {
-        $uri = explode($this->dir_root, $_SERVER['REQUEST_URI'])[1];
-        $uris = explode($this->file_root, $uri);
-        $uri = $uris[count($uris) - 1];
-        $this->previous_uri =  $this->current_uri;
-        $this->current_uri = $uri;
+        $tmp = explode($this->dir_root, $_SERVER['REQUEST_URI'])[1];
+        $tmp = explode($this->file_root,  $tmp);
+        $tmp = $tmp[count($tmp) - 1];
+
+        $tmp = explode("?",  $tmp);
+        $tmp = $tmp[0];
+
+        $this->current_uri = $tmp;
     }
 
 
