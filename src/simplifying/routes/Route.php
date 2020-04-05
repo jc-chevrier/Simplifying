@@ -73,7 +73,7 @@ class Route
         foreach($nodes as $index => $node) {
             $value = array_shift($values);
             if($node->type() == NodeType::PARAMETER_NODE) {
-                $this->parameters[Route::getParamaterName($node->value)] = $value;
+                $this->parameters[$node->value] = $value;
             }
         }
     }

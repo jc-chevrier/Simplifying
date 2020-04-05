@@ -181,6 +181,7 @@ class Router
             $isParameter = false;
             //Si la partie de l'URI étudiée est un paramètre de route.
             if(Route::containsParameter($uriPart)) {
+                $uriPart = Route::getParamaterName($uriPart);
                 $isParameter = true;
             }
 
@@ -219,7 +220,12 @@ class Router
             $templateRoute = '';
             //On récupère la route modèle.
             foreach($nodes as $index => $node) {
-                $templateRoute .= '/' . $node->value;
+                if($node->type() == NodeType::PARAMETER_NODE) {
+                    $templateRoute .= '/{' . $node->value . '}';
+                } else {
+                    $templateRoute .= '/' . $node->value;
+                }
+
             }
 
             //Si la route cherchée existe.
