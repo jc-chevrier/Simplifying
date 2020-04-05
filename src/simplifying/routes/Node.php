@@ -112,7 +112,7 @@ class Node
     /**
      * Afficher l'arborescence à partir d'un noeud.
      */
-    public function toString($indentation = 0, $tabulation = "||>>>") {
+    public function toString($tabulation = "||>>>", $indentation = 0) {
         $string = "";
 
         $string .= "<br>";

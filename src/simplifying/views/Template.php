@@ -51,7 +51,7 @@ abstract class Template
      * Avec NAME_PARAMETER un indice/clé du tableau parameters.
      *
      * Les paramètres une fois passés de l'extérieur, sont en interne
-     * ajoutés aux values.
+     * ajoutés aux valeurs $values.
      */
     private $parameters = [];
     /**
