@@ -29,7 +29,7 @@ class NotesView extends SuperView
                                     </div>
                                 </div>
                                 <div>
-                                    <a href=%%link-note4%%>%%link-note4%%</a>
+                                    <a href=%%link-note4%%>Note 4. Détail 3.</a>
                                 </div>
                             </div>
                         </div>
