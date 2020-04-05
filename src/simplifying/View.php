@@ -2,7 +2,9 @@
 
 namespace simplifying;
 
-
+/**
+ * Classe View.
+ */
 class View
 {
     /**

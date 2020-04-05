@@ -2,6 +2,9 @@
 
 namespace simplifying;
 
+/**
+ * Classe Util.
+ */
 class Util
 {
     /**

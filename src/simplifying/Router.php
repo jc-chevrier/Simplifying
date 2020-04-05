@@ -2,6 +2,9 @@
 
 namespace simplifying;
 
+/**
+ * Classe Router.
+ */
 class Router {
     /**
      * Racines de l'url du serveur.
