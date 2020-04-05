@@ -18,14 +18,14 @@ class NotesView extends SuperView
                                 <div>
                                     Notes : 
                                     <div>
-                                        %%0%%. 
+                                        %%notes%%. 
                                     </div>
                                 </div>
                                 <br>
                                 <div>
                                     Entre autres : 
                                     <div>
-                                         %%1%%. 
+                                         %%note1%%. 
                                     </div>
                                 </div>
                                 <div>
