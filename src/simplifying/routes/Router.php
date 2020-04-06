@@ -303,14 +303,7 @@ class Router
         foreach($this->routes as $templateRoute => $route) {
             //Si on a retrouvé la route à partir de l'alias.
             if($route->alias == $alias) {
-                $effectiveRoute = null;
-                //Si c'est une route sans paramètres.
-                if(count($parameters) == 0) {
-                    $effectiveRoute = $templateRoute;
-                //Sinon.
-                } else {
-                    $effectiveRoute = $this->prepareEffectiveRoute($templateRoute, $parameters);
-                }
+                $effectiveRoute = $this->prepareEffectiveRoute($templateRoute, $parameters);
                 return "/" . $this->dir_root . $effectiveRoute;
             }
         }
