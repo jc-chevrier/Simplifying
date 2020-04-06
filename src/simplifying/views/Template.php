@@ -72,6 +72,8 @@ abstract class Template
     private static $router;
 
 
+
+
     /**
      * Instancier un template, et lancer son fonctionnement
      * (conversion en html et envoi au navigateur).
