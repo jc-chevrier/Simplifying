@@ -57,7 +57,7 @@ abstract class Template
      * Bonne utilisation et surtout seule utilisation possible :
      * passer de l'intérieur (via définition de la méthode Template->content).
      */
-    private $values;
+    private $values = [];
     /**
      * Attribut fourni pour stocker à volonté des paramètres externes
      * de tout type à utilité pour le template.
@@ -65,7 +65,7 @@ abstract class Template
      * Bonne initialisation et surtout seule initialisation possible :
      * passer de l'extérieur via le constructeur.
      */
-    private $parameters;
+    private $parameters = [];
     /**
      * router pour accéder au contexte général du serveur.
      */

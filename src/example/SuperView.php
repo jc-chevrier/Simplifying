@@ -61,7 +61,6 @@ class SuperView extends \simplifying\views\Template
                                       <a href=%%routes:NOTES%%>notes</a>
                                       <a href=%%routes:TREE%%>arbre</a>
                                       <a href=%%routes:ROUTES%%>routes</a>
-                                      <a href=%%routes:CONTACT%%>contact</a>
                                 </div>
                                 <hr>
                                 <br>
