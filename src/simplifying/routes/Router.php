@@ -339,24 +339,26 @@ class Router
     private function prepareEffectiveRoute($nodes, $parameters) {
         $effectiveRoute = '';
 
-         $i = 0;
+        if(count($parameters) != 0) {
+            $keysParamaters = array_keys($parameters);
+            $indexKey = 0;
+        }
+
         foreach ($nodes as $index => $node) {
             $effectiveRoute .= '/';
             if($node->type == NodeType::PARAMETER_NODE) {
-                if(isset($parameters[$i])) {
-                    $effectiveRoute .= $parameters[$i];
-                    $i++;
+                $keyParamater = $keysParamaters[$indexKey];
+                if(isset($parameters[$keyParamater])) {
+                    $effectiveRoute .= $parameters[$keyParamater];
+                    $indexKey++;
                 } else {
-                    if(isset($parameters[$node->value])) {
-                        $effectiveRoute .= $parameters[$node->value];
-                    } else {
-                        throw new \InvalidArgumentException("Un des paramètres de la route à préparer n'a pas été précisé !");
-                    }
+                    throw new \InvalidArgumentException("Un des paramètres de la route à préparer n'a pas été précisé !");
                 }
             }else {
                 $effectiveRoute .= $node->value;
             }
         }
+
         return $effectiveRoute;
     }
 
