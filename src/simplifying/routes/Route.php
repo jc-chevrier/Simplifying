@@ -28,6 +28,10 @@ class Route
      */
     private $templateRoute, $effectiveRoute;
     /**
+     * Route modèle en noeuds.
+     */
+    private $templateRouteNodes;
+    /**
      * Paramètres d'une Route.
      */
     private $parameters;
@@ -42,8 +46,9 @@ class Route
 
 
 
-    public function __construct($templateRoute, $action) {
+    public function __construct($templateRoute, $templateRouteNodes, $action) {
         $this->templateRoute = $templateRoute;
+        $this->templateRouteNodes = $templateRouteNodes;
         $this->action = $action;
     }
 
@@ -63,14 +68,13 @@ class Route
      *
      * @param $effectiveRoute       La route effective.
      *                              /uripart1/nuripart2/01
-     *
-     * @param $nodes                Les noeuds de la route modèle.
-     *                              /uripart1 -> /uripart2 -> /id
      */
-    public function beginEffective($effectiveRoute, $nodes) {
+    public function beginEffective($effectiveRoute) {
         $this->effectiveRoute = $effectiveRoute;
+        //Récupération des parties d'URI de la route effective.
         $values = Route::toUriParts($effectiveRoute);
-        foreach($nodes as $index => $node) {
+        //Initialisation des paramètres de la route.
+        foreach($this->templateRouteNodes as $index => $node) {
             $value = array_shift($values);
             if($node->type == NodeType::PARAMETER_NODE) {
                 $this->parameters[$node->value] = $value;

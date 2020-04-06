@@ -34,7 +34,7 @@ $router->route('/notes/note/{id}', function () {
 $router->route('/notes/note/{id}/details', function () {
     class NoteView2 extends SuperView {
         public function content() {
-            return "{{body}} Note %%id%% : détails.{ {/body}}";
+            return "{{body}} Note %%id%% : détails. {{/body}}";
         }
     }
     new NoteView2();

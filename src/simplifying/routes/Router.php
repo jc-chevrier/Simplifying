@@ -2,6 +2,8 @@
 
 namespace simplifying\routes;
 
+use http\Exception\InvalidArgumentException;
+
 /**
  * Classe Router.
  */
@@ -81,7 +83,7 @@ class Router
         $this->update();
         if ($this->currentRoute == null) {
             $this->currentRoute = $this->routes['/error'];
-            $this->currentRoute->beginEffective($this->currentRoute->templateRoute, []);
+            $this->currentRoute->beginEffective($this->currentRoute->templateRoute);
         }
         $this->currentRoute->go();
     }
@@ -118,35 +120,37 @@ class Router
      */
     public function route($templateRoute, $serverResponse)
     {
+        //On transforme la réponse en callBack si nécessaire.
+        if(!is_callable($serverResponse)) {
+            //Si l'action associée à la route est un tamplate à envoyer au navigateur.
+            if (class_exists($serverResponse)) {
+                $serverResponse = function () use ($serverResponse) {
+                    (new \ReflectionClass($serverResponse))->newInstance();
+                };
+            } else {
+                //Si l'action associée à la route est du code html à envoyer au navigateur.
+                if(is_string($serverResponse)) {
+                    $serverResponse = function () use ($serverResponse) {
+                        View::render($serverResponse);
+                    };
+                } else {
+                    //Type de réponse pas acceptée.
+                    return false;
+                }
+            }
+        }
+
         //La route / est enregistrée en tant que "slash".
         if($templateRoute == "/") {
             $templateRoute = "/slash";
         }
 
         //Ajout dans l'arbre.
-        $this->addRouteInTree($templateRoute);
-
+        $result = $this->addRouteInTree($templateRoute);
+        $templateRoute = $result[0];
+        $templateRouteNodes = $result[1];
         //Ajout dans les routes.
-        //Si l'action associée à la route est une fonction.
-        if (is_callable($serverResponse)) {
-            $this->routes[$templateRoute] = new Route($templateRoute, $serverResponse);
-        } else {
-
-            //Si l'action associée à la route est un tamplate à envoyer au navigateur.
-            if (class_exists($serverResponse)) {
-                $serverResponse = function () use ($serverResponse) {
-                    (new \ReflectionClass($serverResponse))->newInstance();
-                };
-                $this->routes[$templateRoute] = new Route($templateRoute, $serverResponse);
-
-            //Si l'action associée à la route est du code html à envoyer au navigateur.
-            } else {
-                $serverResponse = function () use ($serverResponse) {
-                    View::render($serverResponse);
-                };
-                $this->routes[$templateRoute] = new Route($templateRoute, $serverResponse);
-            }
-        }
+        $this->routes[$templateRoute] = new Route($templateRoute, $templateRouteNodes, $serverResponse);
 
         return $this->routes[$templateRoute];
     }
@@ -172,12 +176,22 @@ class Router
 
 
 
+
     /**
-     *  Ajouter une route dans l'arbre du serveur.
+     *  Ajouter une route modèle dans l'arbre du serveur, et récupérer
+     *  la route modèle normalisée, et la route modèle en noeuds.
+     *
+     * @param $templateRoute    -> route modèle non normalisée
+     *
+     * @return array            ->  [ route modèle normalisée, route modèle en noeuds ]
      */
     private function addRouteInTree($templateRoute) {
         //On découpe la route en parties d'URI.
         $uriParts = Route::toUriParts($templateRoute);
+
+        //Initilisation des structures à retourner.
+        $templateRouteNormalized = '';
+        $templateRouteNodes = [];
 
         $parentNode = $this->tree;
         foreach ($uriParts as $index => $uriPart) {
@@ -202,7 +216,13 @@ class Router
             } else {
                 $parentNode = $node;
             }
+
+            //On fait évolué les structures à retourner.
+            $templateRouteNormalized .= '/' . $uriPart;
+            $templateRouteNodes[] = $parentNode;
         }
+
+        return [$templateRouteNormalized, $templateRouteNodes];
     }
 
     /**
@@ -223,14 +243,14 @@ class Router
             $templateRoute = '';
             //On récupère la route modèle.
             foreach($nodes as $index => $node) {
-                $templateRoute .= $node->type == NodeType::PARAMETER_NODE ? '/{' . $node->value . '}' : '/' . $node->value;
+                $templateRoute .= '/' . $node->value;
             }
 
             //Si la route cherchée existe.
             if(isset($this->routes[$templateRoute])) {
                 //On rend la route effective.
                 $this->currentRoute = $this->routes[$templateRoute];
-                $this->currentRoute->beginEffective($effectiveRoute, $nodes);
+                $this->currentRoute->beginEffective($effectiveRoute);
             //Sinon.
             } else {
                 //La route cherchée n'existe pas.
@@ -303,7 +323,7 @@ class Router
         foreach($this->routes as $templateRoute => $route) {
             //Si on a retrouvé la route à partir de l'alias.
             if($route->alias == $alias) {
-                $effectiveRoute = $this->prepareEffectiveRoute($templateRoute, $parameters);
+                $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $parameters);
                 return "/" . $this->dir_root . $effectiveRoute;
             }
         }
@@ -314,19 +334,21 @@ class Router
     /**
      * Préparer une route effective avec des paramètres.
      */
-    private function prepareEffectiveRoute($route, $parameters) {
-        $parameter = [];
-        $markupParameter = Route::markupParameter;
-        $matches = preg_match("/$markupParameter/", $route, $parameter);
-
-        if(!$matches) {
-            return $route;
-        } else {
-            $parameter = $parameter[0];
-            $parameterName = Route::getParamaterName($parameter);
-            $route = str_replace($parameter, $parameters[$parameterName], $route);
-            return $this->prepareEffectiveRoute($route, $parameters);
+    private function prepareEffectiveRoute($nodes, $parameters) {
+        $effectiveRoute = '';
+        foreach ($nodes as $index => $node) {
+            $effectiveRoute .= '/';
+            if($node->type == NodeType::PARAMETER_NODE) {
+                if(isset($parameters[$node->value])) {
+                    $effectiveRoute .= $parameters[$node->value];
+                } else {
+                    throw new \InvalidArgumentException("Un des paramètres de la route à préparer n'a pas été précisé !");
+                }
+            }else {
+                $effectiveRoute .= $node->value;
+            }
         }
+        return $effectiveRoute;
     }
 
 
