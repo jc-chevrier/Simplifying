@@ -223,12 +223,7 @@ class Router
             $templateRoute = '';
             //On récupère la route modèle.
             foreach($nodes as $index => $node) {
-                if($node->type == NodeType::PARAMETER_NODE) {
-                    $templateRoute .= '/{' . $node->value . '}';
-                } else {
-                    $templateRoute .= '/' . $node->value;
-                }
-
+                $templateRoute .= $node->type == NodeType::PARAMETER_NODE ? '/{' . $node->value . '}' : '/' . $node->value;
             }
 
             //Si la route cherchée existe.
