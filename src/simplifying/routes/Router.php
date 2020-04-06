@@ -344,7 +344,7 @@ class Router
             $indexKey = 0;
         }
 
-        foreach ($nodes as $index => $node) {
+        foreach($nodes as $index => $node) {
             $effectiveRoute .= '/';
             if($node->type == NodeType::PARAMETER_NODE) {
                 $key = $keys[$indexKey];
