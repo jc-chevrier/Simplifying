@@ -2,7 +2,6 @@
 
 namespace simplifying\routes;
 
-use http\Exception\InvalidArgumentException;
 
 /**
  * Classe Router.
@@ -33,7 +32,8 @@ class Router
      * Arboresence du site stockée
      * via un arbre n-aires.
      *
-     * Cela permet les recherches de Route sur le site.
+     * Cela permet les recherches de routes
+     * dans le serveur.
      */
     private $tree;
 
