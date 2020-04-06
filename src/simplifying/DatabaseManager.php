@@ -2,6 +2,9 @@
 
 namespace simplifying;
 
+/**
+ * @author CHEVRIER Jean-Christophe.
+ */
 class DatabaseManager
 {
     private static $dbManager;

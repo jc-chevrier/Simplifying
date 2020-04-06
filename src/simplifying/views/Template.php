@@ -24,6 +24,8 @@ use \simplifying\Util as util;
  * Attention ! il faut toujours faire attention à ce que
  * les clés soit différentes parmis tous les ensembles dont
  * peut provenir une valeur.
+ *
+ * @author CHEVRIER Jean-Christophe.
  */
 abstract class Template
 {

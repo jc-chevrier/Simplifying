@@ -6,6 +6,8 @@ use http\Exception\InvalidArgumentException;
 
 /**
  * Classe Router.
+ *
+ * @author CHEVRIER Jean-Christophe.
  */
 class Router
 {

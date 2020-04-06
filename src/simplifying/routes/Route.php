@@ -10,6 +10,8 @@ namespace simplifying\routes;
  *
  * {id} -> paramètre modèle
  * /01 -> paramètre effectif
+ *
+ * @author CHEVRIER Jean-Christophe.
  */
 class Route
 {

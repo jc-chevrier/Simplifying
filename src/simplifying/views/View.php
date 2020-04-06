@@ -4,6 +4,8 @@ namespace simplifying\views;
 
 /**
  * Classe View.
+ *
+ * @author CHEVRIER Jean-Christophe.
  */
 class View
 {

@@ -6,6 +6,8 @@ namespace simplifying\routes;
  * Classe Node.
  *
  * Noeud pour faire des arbres n-aires.
+ *
+ * @author CHEVRIER Jean-Christophe.
  */
 class Node
 {

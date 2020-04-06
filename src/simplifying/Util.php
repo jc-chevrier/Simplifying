@@ -4,6 +4,8 @@ namespace simplifying;
 
 /**
  * Classe Util.
+ *
+ * @author CHEVRIER Jean-Christophe.
  */
 class Util
 {
