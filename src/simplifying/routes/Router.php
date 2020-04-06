@@ -114,6 +114,24 @@ class Router
         $this->searchModelRouteInTree($URI);
     }
 
+    /**
+     * Rediriger vers une autre route.
+     */
+    public function redirect($routeAlias, $routeParameters = [])
+    {
+        foreach($this->routes as $templateRoute => $route) {
+            //Si on a retrouvé la route à partir de l'alias.
+            if($route->alias == $routeAlias) {
+                $this->currentRoute = $this->routes[$templateRoute];
+                $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $routeParameters);
+                $this->currentRoute->beginEffective($effectiveRoute);
+                $this->currentRoute->go();
+                return;
+            }
+        }
+    }
+
+
 
 
 
@@ -165,22 +183,6 @@ class Router
         $this->route("/error", $serverResponseForError);
     }
 
-    /**
-     * Rediriger vers une autre route.
-     */
-    public function redirect($routeAlias, $routeParameters = [])
-    {
-        foreach($this->routes as $templateRoute => $route) {
-            //Si on a retrouvé la route à partir de l'alias.
-            if($route->alias == $routeAlias) {
-                $this->currentRoute = $this->routes[$templateRoute];
-                $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $routeParameters);
-                $this->currentRoute->beginEffective($effectiveRoute);
-                $this->currentRoute->go();
-                return;
-            }
-        }
-    }
 
 
 
@@ -319,7 +321,7 @@ class Router
 
 
     /**
-     * Récupérer une route effective à partir d'un alias.
+     * Récupérer une route effective à partir d'un alias et de paramètres.
      *
      * @param $routeAlias                    L'alias de la route.
      *

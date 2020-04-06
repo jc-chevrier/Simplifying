@@ -25,7 +25,17 @@ $router->route('/notes', function () {
 $router->route('/notes/note/{id}', function () {
     class NoteView1 extends SuperView {
         public function content() {
-            return "{{body}} Note %%route:id%%. {{/body}}";
+            return "{{body}} 
+                            Note %%route:id%%. 
+                            <br>
+                            <a href=%%routes:NOTE4:1:3%%>
+                                Url fixe. Note 1. Détail 3.
+                            </a>  
+                            <br>       
+                            <a href=%%routes:NOTE4:%%route:id%%:3%%>
+                                Url dépendant du paramètre id. Note %%route:id%%. Détail 3.
+                            </a>        
+                    {{/body}}";
         }
     }
     new NoteView1();

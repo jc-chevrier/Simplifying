@@ -91,7 +91,7 @@ class Route
     }
 
     /**
-     * Executer l'action de la route.
+     * Effectuer l'action de la route.
      */
     public function go() {
         $action = $this->action;
