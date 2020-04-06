@@ -28,6 +28,27 @@ use \simplifying\Util as util;
 abstract class Template
 {
     /**
+     * Balisage pour signaler une macro
+     * non-implémentée.
+     *
+     * C'est une expression régulière.
+     */
+    const markupNotImplementedMacro = "\[\[[a-zA-Z0-9-]+\]\]";
+    /**
+     * Balisage pour signaler une macro
+     * implémentée.
+     *
+     * C'est une expression régulière.
+     */
+    const markupImplementedMacro = "\{\{[a-zA-Z0-9-]+\}\}";
+    /**
+     * Balisage pour signaler une macro
+     * de valeur.
+     *
+     * C'est une expression régulière.
+     */
+    const markupValueMacro = "%%[a-zA-Z0-9-]+%%";
+    /**
      * Attribut fourni pour stocker à volonté des valeurs internes
      * de tout type à utilité pour le template.
      *
@@ -179,7 +200,8 @@ abstract class Template
      */
     private static function implementsMacros($content, $templateContent) {
         $implementedMacros = [];
-        $matches = preg_match('/\{\{[a-zA-Z0-9-]+\}\}/', $templateContent, $implementedMacros);
+        $macroImplementedMacro = Template::markupImplementedMacro;
+        $matches = preg_match("/$macroImplementedMacro/", $templateContent, $implementedMacros);
 
         if(!$matches) {
             return $content;
@@ -207,7 +229,8 @@ abstract class Template
      */
     private static function manageUnimplementedMacros($content) {
         $unimplementedMacros = [];
-        $matches = preg_match("/\[\[[a-zA-Z0-9-]+\]\]/", $content, $unimplementedMacros);
+        $markupNotImplementedMacro = Template::markupNotImplementedMacro;
+        $matches = preg_match("/$markupNotImplementedMacro/", $content, $unimplementedMacros);
 
         if(!$matches) {
             return $content;
@@ -225,7 +248,8 @@ abstract class Template
      */
     private static function implementsValueMacros($content, $values) {
         $implementedMacros = [];
-        $matches = preg_match("/%%[a-zA-Z0-9-]+%%/", $content, $implementedMacros);
+        $markupValueMacro = Template::markupValueMacro;
+        $matches = preg_match("/$markupValueMacro/", $content, $implementedMacros);
 
         if(!$matches) {
             return $content;

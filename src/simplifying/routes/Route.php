@@ -19,7 +19,7 @@ class Route
      *
      * C'est une expression régulière.
      */
-    const markupParameter = "{[a-zA-Z0-9-]+}";
+    const markupParameter = "\{[a-zA-Z0-9-]+\}";
     /**
      * Route modèle et route effcetive.
      *
