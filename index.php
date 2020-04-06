@@ -119,20 +119,17 @@ $router->route('/routes', function () {
                                     <div>
                                            Route modèle en noeuds :  
                                     </div>";
-
                 foreach($route->templateRouteNodes as $index2 => $node) {
                         $content .= "<div>
                                             ||>>>[$node->type] $node->value
                                      </div>";
                 }
-
                 $content .= "       <br>
                                     <br>
                                     <br>
                                     <hr>
                                 </div>";
             }
-
             $content .= "{{/body}}";
 
             return $content;
