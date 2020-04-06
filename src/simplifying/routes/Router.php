@@ -81,6 +81,7 @@ class Router
         $this->update();
         if ($this->currentRoute == null) {
             $this->currentRoute = $this->routes['/error'];
+            $this->currentRoute->beginEffective($this->currentRoute->templateRoute, []);
         }
         $this->currentRoute->go();
     }
@@ -220,7 +221,7 @@ class Router
             $templateRoute = '';
             //On récupère la route modèle.
             foreach($nodes as $index => $node) {
-                if($node->type() == NodeType::PARAMETER_NODE) {
+                if($node->type == NodeType::PARAMETER_NODE) {
                     $templateRoute .= '/{' . $node->value . '}';
                 } else {
                     $templateRoute .= '/' . $node->value;

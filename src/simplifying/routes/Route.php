@@ -72,7 +72,7 @@ class Route
         $values = Route::toUriParts($effectiveRoute);
         foreach($nodes as $index => $node) {
             $value = array_shift($values);
-            if($node->type() == NodeType::PARAMETER_NODE) {
+            if($node->type == NodeType::PARAMETER_NODE) {
                 $this->parameters[$node->value] = $value;
             }
         }

@@ -3,7 +3,8 @@
 namespace simplifying\routes;
 
 class ParameterNode extends Node {
-    public function type() {
-        return NodeType::PARAMETER_NODE;
+    public function __construct($value) {
+       parent::__construct($value);
+       $this->type = NodeType::PARAMETER_NODE;
     }
 }

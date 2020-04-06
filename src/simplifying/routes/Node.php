@@ -19,6 +19,10 @@ class Node
      * Noeuds enfants.
      */
     private $childNodes;
+    /**
+     * Type du noeud.
+     */
+    private $type;
 
 
 
@@ -26,7 +30,9 @@ class Node
     public function __construct($value) {
         $this->value = $value;
         $this->childNodes = [];
+        $this->type = $type = NodeType::NODE;
     }
+
 
 
 
@@ -41,15 +47,6 @@ class Node
         } else {
             $this->childNodes[] = $childNode;
         }
-    }
-
-
-
-    /**
-     * Type du noeud.
-     */
-    public function type() {
-        return NodeType::NODE;
     }
 
 
@@ -100,12 +97,13 @@ class Node
     public function searchChildParameterNodes() {
         $childParameterNodes = [];
         foreach($this->childNodes as $index => $childNode) {
-            if($childNode->type() == NodeType::PARAMETER_NODE) {
+            if($childNode->type == NodeType::PARAMETER_NODE) {
                 $childParameterNodes[] = $childNode;
             }
         }
         return $childParameterNodes;
     }
+
 
 
 
@@ -119,7 +117,7 @@ class Node
         for($i = 0; $i < $indentation; $i++) {
             $string .= $tabulation;
         }
-        $string .= $this->type() . "[" . $this->value . "]";
+        $string .= $this->type . "[" . $this->value . "]";
 
         $indentation++;
         foreach($this->childNodes as $index => $childNode) {
@@ -131,9 +129,17 @@ class Node
 
 
 
+
     public function __get($name) {
         if (isset($this->$name)) {
             return $this->$name;
+        }
+        return false;
+    }
+
+    public function __set($name, $value) {
+        if (isset($this->$name)) {
+            $this->$name = $value;
         }
         return false;
     }
