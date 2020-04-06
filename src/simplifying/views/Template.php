@@ -35,7 +35,7 @@ abstract class Template
      *
      * C'est une expression régulière.
      */
-    const markupNotImplementedMacro = "\[\[[a-zA-Z0-9-]+\]\]";
+    const markupUnimplementedMacro = "\[\[[a-zA-Z0-9-]+\]\]";
     /**
      * Balisage pour signaler une macro
      * implémentée.
@@ -279,8 +279,8 @@ abstract class Template
      */
     private static function manageUnimplementedMacros($content) {
         $unimplementedMacros = [];
-        $markupNotImplementedMacro = Template::markupNotImplementedMacro;
-        $matches = preg_match("/$markupNotImplementedMacro/", $content, $unimplementedMacros);
+        $markupUnimplementedMacro = Template::markupUnimplementedMacro;
+        $matches = preg_match("/$markupUnimplementedMacro/", $content, $unimplementedMacros);
         //Cas trivial.
         if(!$matches) {
             return $content;
