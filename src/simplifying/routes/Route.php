@@ -23,12 +23,18 @@ class Route
     /**
      * Route modèle et route effcetive.
      *
-     * Route modèle : /01/
-     * Route effective : /#id/
+     * Route modèle : /{id}/
+     * Route effective : /01/
      */
     private $templateRoute, $effectiveRoute;
     /**
      * Route modèle en noeuds.
+     *
+     * C'est une structure inetermédiaire qui permet
+     * de connaitre la structure sémantique de la route
+     * (ù sont les paramètres de la route entre autre).
+     *
+     * Concrètement c'est un tableau de noeuds.
      */
     private $templateRouteNodes;
     /**
