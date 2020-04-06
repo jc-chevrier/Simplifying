@@ -5,7 +5,6 @@ use \simplifying\routes\Router as Router;
 use \example\SuperView as SuperView;
 use \example\HomeView as HomeView;
 use \example\NotesView as NotesView;
-use \example\ContactView as ContactView;
 
 require_once('Autoloader.php');
 Autoloader::register();
