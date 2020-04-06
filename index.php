@@ -21,8 +21,6 @@ $router->route('/', HomeView::class);
 
 $router->route('/home', HomeView::class)->alias('HOME');
 
-$router->route('/contact', ContactView::class)->alias('CONTACT');
-
 
 
 
@@ -96,7 +94,7 @@ $router->route('/notes/note/{idNote}/details/detail/{idDetail}', function () {
 $router->route('/arbre', function () use ($router) {
     class TreeView extends SuperView {
         public function content() {
-            return "{{body}} %%params:tree%% {{/body}}";
+            return "{{body}} <div class=blue>%%params:tree%%</div> {{/body}}";
         }
     }
     new TreeView(["tree" => $router->tree->toString()]);
@@ -111,22 +109,30 @@ $router->route('/routes', function () {
             foreach($routes as $index => $route) {
                 $content .= "<div>
                                     <div>
-                                          Route modèle : $route->templateRoute
+                                          Route <b>modèle</b> :
+                                          <span class=blue> 
+                                                $route->templateRoute
+                                          </span>
                                     </div>
                                     <div>
-                                          Route alias : $route->alias
+                                         Route <b>alias</b> : 
+                                          <span class=green> 
+                                                " . ($route->alias ? $route->alias  : 'pas d\'alias')  . "
+                                          </span>
+
                                     </div>
                                     <div>
-                                           Route modèle en noeuds :  
-                                    </div>";
+                                           Route <b>modèle en noeuds</b> : 
+                                           <span class=red>";
 
                 foreach($route->templateRouteNodes as $index2 => $node) {
-                        $content .= "<div>
-                                            ||>>>[$node->type] $node->value
-                                     </div>";
+                        $content .= $index2 ? ">>>>" : "";
+                        $content .= "[$node->type : $node->value]";
                 }
 
-                $content .= "       <br>
+                $content .= "            </span>     
+                                    </div>
+                                    <br>
                                     <br>
                                     <br>
                                     <hr>

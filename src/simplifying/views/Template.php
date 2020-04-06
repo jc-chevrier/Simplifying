@@ -266,8 +266,10 @@ abstract class Template
                 default :
                     $value = "";
             }
+
             //Remplacement de la macro par sa valeur.
             $content = str_replace($valueMacro, $value, $content);
+
             //Appel récursif.
             return Template::implementsValueMacros($content, $values, $parameters);
         }

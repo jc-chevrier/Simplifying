@@ -6,6 +6,6 @@ class HomeView extends SuperView
 {
     public function content()
     {
-        return "{{css}} ff {{/css}}{{body}}<div>Vous êtes dans le home.</div>{{/body}}";
+        return "{{body}}<div class=blue>Vous êtes dans le home.</div>{{/body}}";
     }
 }

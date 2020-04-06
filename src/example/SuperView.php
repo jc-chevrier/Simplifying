@@ -6,9 +6,6 @@ class SuperView extends \simplifying\views\Template
 {
     public function content()
     {
-        $this->value('link-gf', "<a href='https://github.com/jc-chevrier/Simplifying'>Link to github of Simplifying framework.</a>");
-        $this->value('link-gc', "<a href='https://github.com/jc-chevrier'>Link to github of creator's Simplifying framework.</a>");
-        $this->value('link-ec', "<div>Email of creator's Simplifying framework : <b>chevrjc@gmail.com.</b></div>");
         return "<html lang='french'>
                         <head>
                                 [[headers]]
@@ -45,6 +42,15 @@ class SuperView extends \simplifying\views\Template
                                         font-style: italic;
                                         font-weight: bold;
                                     }
+                                    .blue {
+                                        color : blue;
+                                     }
+                                     .red  {
+                                        color : red;
+                                     }
+                                     .green  {
+                                        color : green;
+                                     }
                                 </style>
                         </head>
                         <body>
