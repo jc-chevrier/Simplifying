@@ -105,6 +105,8 @@ class Router
             $URI = "/slash";
         }
 
+        //Recherche de la route modèle correspondant à cette route effective,
+        //et initialisation de la route courante.
         $this->searchModelRouteInTree($URI);
     }
 
@@ -132,17 +134,17 @@ class Router
 
             //Si l'action associée à la route est un tamplate à envoyer au navigateur.
             if (class_exists($serverResponse)) {
-                $callbackServerResponse = function () use ($serverResponse) {
+                $serverResponse = function () use ($serverResponse) {
                     (new \ReflectionClass($serverResponse))->newInstance();
                 };
-                $this->routes[$templateRoute] = new Route($templateRoute, $callbackServerResponse);
+                $this->routes[$templateRoute] = new Route($templateRoute, $serverResponse);
 
             //Si l'action associée à la route est du code html à envoyer au navigateur.
             } else {
-                $callbackServerResponse = function () use ($serverResponse) {
+                $serverResponse = function () use ($serverResponse) {
                     View::render($serverResponse);
                 };
-                $this->routes[$templateRoute] = new Route($templateRoute, $callbackServerResponse);
+                $this->routes[$templateRoute] = new Route($templateRoute, $serverResponse);
             }
         }
 
