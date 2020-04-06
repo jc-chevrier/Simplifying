@@ -40,13 +40,27 @@ $router->route('/notes/note/{id}/details', function () {
     new NoteView2();
 })->alias("NOTE2");
 
-$router->route('/notes/note/{id}/divers', function () {
-    class NoteView3 extends SuperView {
+$router->route('/message/{message}', function (){
+    class MessageView extends SuperView {
         public function content() {
-            return "{{body}} Note %%route:id%% : divers. {{/body}}";
+            return "{{body}} Message : %%route:message%%. {{/body}}";
         }
     }
-    new NoteView3();
+    new MessageView();
+})->alias("MESSAGE");
+
+$router->route('/notes/note/{id}/divers', function () {
+    $pileFace = rand(1, 2);
+    if($pileFace == 1) {
+        Router::getInstance()->redirect("MESSAGE", ["PileFace vaut $pileFace" ]);
+    } else {
+        class NoteView3 extends SuperView {
+            public function content() {
+                return "{{body}} Note %%route:id%% : divers, PileFace vaut %%params:pileFace%%. {{/body}}";
+            }
+        }
+        new NoteView3(["pileFace" => $pileFace]);
+    }
 })->alias("NOTE3");
 
 $router->route('/notes/note/{idNote}/details/detail/{idDetail}', function () {

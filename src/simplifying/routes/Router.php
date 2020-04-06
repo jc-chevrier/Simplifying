@@ -168,10 +168,17 @@ class Router
     /**
      * Rediriger vers une autre route.
      */
-    public function redirect($templateRoute)
+    public function redirect($routeAlias, $routeParameters = [])
     {
-        if (isset($this->routes[$templateRoute])) {
-            $this->currentRoute = $this->routes[$templateRoute];
+        foreach($this->routes as $templateRoute => $route) {
+            //Si on a retrouvé la route à partir de l'alias.
+            if($route->alias == $routeAlias) {
+                $this->currentRoute = $this->routes[$templateRoute];
+                $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $routeParameters);
+                $this->currentRoute->beginEffective($effectiveRoute);
+                $this->currentRoute->go();
+                return;
+            }
         }
     }
 
@@ -336,20 +343,20 @@ class Router
     /**
      * Préparer une route effective avec des paramètres.
      */
-    private function prepareEffectiveRoute($nodes, $parameters) {
+    private function prepareEffectiveRoute($templateRouteNodes, $routeParameters) {
         $effectiveRoute = '';
 
-        if(count($parameters) != 0) {
-            $keys = array_keys($parameters);
+        if(count($routeParameters) != 0) {
+            $keys = array_keys($routeParameters);
             $indexKey = 0;
         }
 
-        foreach($nodes as $index => $node) {
+        foreach($templateRouteNodes as $index => $node) {
             $effectiveRoute .= '/';
             if($node->type == NodeType::PARAMETER_NODE) {
                 $key = $keys[$indexKey];
-                if(isset($parameters[$key])) {
-                    $effectiveRoute .= $parameters[$key];
+                if(isset($routeParameters[$key])) {
+                    $effectiveRoute .= $routeParameters[$key];
                     $indexKey++;
                 } else {
                     throw new \InvalidArgumentException("Un des paramètres de la route à préparer n'a pas été précisé !");
