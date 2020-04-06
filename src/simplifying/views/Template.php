@@ -8,7 +8,6 @@ use \simplifying\Util as util;
 /**
  * Classe Template.
  *
- *
  * Concept :
  * [[MACRO_NAME]]                       -> macro non-implémentée.
  *
