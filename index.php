@@ -29,7 +29,7 @@ $router->route('/notes/note/{id}', function () {
         }
     }
     new NoteView1();
-});
+})->alias("NOTE1");
 
 $router->route('/notes/note/{id}/details', function () {
     class NoteView2 extends SuperView {
@@ -38,7 +38,7 @@ $router->route('/notes/note/{id}/details', function () {
         }
     }
     new NoteView2();
-});
+})->alias("NOTE2");
 
 $router->route('/notes/note/{id}/divers', function () {
     class NoteView3 extends SuperView {
@@ -47,7 +47,7 @@ $router->route('/notes/note/{id}/divers', function () {
         }
     }
     new NoteView3();
-});
+})->alias("NOTE3");
 
 $router->route('/notes/note/{idNote}/details/detail/{idDetail}', function () {
     class NoteView4 extends SuperView {
