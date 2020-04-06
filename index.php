@@ -25,7 +25,7 @@ $router->route('/notes', function () {
 $router->route('/notes/note/{id}', function () {
     class NoteView1 extends SuperView {
         public function content() {
-            return "{{body}} Note %%id%%. {{/body}}";
+            return "{{body}} Note %%route:id%%. {{/body}}";
         }
     }
     new NoteView1();
@@ -34,7 +34,7 @@ $router->route('/notes/note/{id}', function () {
 $router->route('/notes/note/{id}/details', function () {
     class NoteView2 extends SuperView {
         public function content() {
-            return "{{body}} Note %%id%% : détails. {{/body}}";
+            return "{{body}} Note %%route:id%% : détails. {{/body}}";
         }
     }
     new NoteView2();
@@ -43,7 +43,7 @@ $router->route('/notes/note/{id}/details', function () {
 $router->route('/notes/note/{id}/divers', function () {
     class NoteView3 extends SuperView {
         public function content() {
-            return "{{body}} Note %%id%% : divers. {{/body}}";
+            return "{{body}} Note %%route:id%% : divers. {{/body}}";
         }
     }
     new NoteView3();
@@ -52,7 +52,7 @@ $router->route('/notes/note/{id}/divers', function () {
 $router->route('/notes/note/{idNote}/details/detail/{idDetail}', function () {
     class NoteView4 extends SuperView {
         public function content() {
-            return "{{body}} Note %%idNote%%. Détail %%idDetail%%. {{/body}}";
+            return "{{body}} Note %%route:idNote%%. Détail %%route:idDetail%%. {{/body}}";
         }
     }
     new NoteView4();
@@ -61,7 +61,7 @@ $router->route('/notes/note/{idNote}/details/detail/{idDetail}', function () {
 $router->route('/arbre', function () use ($router) {
     class TreeView extends SuperView {
         public function content() {
-            return "{{body}} %%tree%% {{/body}}";
+            return "{{body}} %%params:tree%% {{/body}}";
         }
     }
     new TreeView(["tree" => $router->tree->toString()]);

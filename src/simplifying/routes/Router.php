@@ -314,18 +314,18 @@ class Router
     /**
      * Récupérer une route effective à partir d'un alias.
      *
-     * @param $alias                    L'alias de la route.
+     * @param $routeAlias                    L'alias de la route.
      *
-     * @param array $parameters         Les paramètres de la route si
-     *                                  la route doir avoir des paramètres.
+     * @param array $routeParameters         Les paramètres de la route si
+     *                                       la route doir avoir des paramètres.
      *
-     * @return string                   La route effective.
+     * @return string                        La route effective.
      */
-    public function getRoute($alias, $parameters = []) {
+    public function getRoute($routeAlias, $routeParameters = []) {
         foreach($this->routes as $templateRoute => $route) {
             //Si on a retrouvé la route à partir de l'alias.
-            if($route->alias == $alias) {
-                $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $parameters);
+            if($route->alias == $routeAlias) {
+                $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $routeParameters);
                 return "/" . $this->dir_root . $effectiveRoute;
             }
         }
@@ -338,13 +338,20 @@ class Router
      */
     private function prepareEffectiveRoute($nodes, $parameters) {
         $effectiveRoute = '';
+
+         $i = 0;
         foreach ($nodes as $index => $node) {
             $effectiveRoute .= '/';
             if($node->type == NodeType::PARAMETER_NODE) {
-                if(isset($parameters[$node->value])) {
-                    $effectiveRoute .= $parameters[$node->value];
+                if(isset($parameters[$i])) {
+                    $effectiveRoute .= $parameters[$i];
+                    $i++;
                 } else {
-                    throw new \InvalidArgumentException("Un des paramètres de la route à préparer n'a pas été précisé !");
+                    if(isset($parameters[$node->value])) {
+                        $effectiveRoute .= $parameters[$node->value];
+                    } else {
+                        throw new \InvalidArgumentException("Un des paramètres de la route à préparer n'a pas été précisé !");
+                    }
                 }
             }else {
                 $effectiveRoute .= $node->value;

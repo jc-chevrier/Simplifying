@@ -13,13 +13,13 @@ class ContactView extends SuperView
                         </div>
                         <ul>
                             <li>
-                                %%link-gf%%
+                                %%values:link-gf%%
                             </li>
                             <li>
-                                %%link-gc%%
+                                %%values:link-gc%%
                             </li>
                             <li>
-                                %%link-ec%%
+                                %%values:link-ec%%
                             </li>    
                         </ul>
                 {{/body}}";

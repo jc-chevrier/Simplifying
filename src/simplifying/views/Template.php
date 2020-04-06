@@ -9,20 +9,21 @@ use \simplifying\Util as util;
  * Classe Template.
  *
  * Concept :
- * [[MACRO_NAME]]                       -> macro non-implémentée.
+ * [[MACRO_NAME]]                                              -> macro non-implémentée.
  *
- * {{MACRO_NAME}}  ... {{\MACRO_NAME}}  -> macro implénentée.
+ * {{MACRO_NAME}}  ... {{\MACRO_NAME}}                         -> macro implénentée.
  *
- * %%NAME_VALUE%%                       -> macro de valeur.
+ * %%DOMAIN_VALUE:NAME_VALUE%%                                 -> macro de valeur.
  *
+ * DOMAIN_VALUE appartient à {routes, route, post, get, values}.
+ * routes:key:...   -> obtenir une route du serveur
+ * route:key        -> obtenir un paramètre de la route courante
+ * post:key         -> obtenir une valeur de $_POST
+ * get:key          -> obtenir une valeur de $_GET
+ * values:key       -> obtenir une valeur de values
+ * params:key       -> obtenir une valeur de parameters
  *
- * Une valeur peut-être retrouvée dans :
- * $_GET, $_POST, $Template->parameters, Template->values,
- * Router->currentRoute->parameters.
- *
- * Attention ! il faut toujours faire attention à ce que
- * les clés soit différentes parmis tous les ensembles dont
- * peut provenir une valeur.
+ * %%routes:NAME_ROUTE:PARAMETER_0:...:PARAMETER_N-1%%         -> macro de route.
  *
  * @author CHEVRIER Jean-Christophe.
  */
@@ -48,34 +49,23 @@ abstract class Template
      *
      * C'est une expression régulière.
      */
-    const markupValueMacro = "%%[a-zA-Z0-9-]+%%";
+    const markupValueMacro = "%%[a-zA-Z0-9-]+(:[a-zA-Z0-9-]+)+%%";
     /**
      * Attribut fourni pour stocker à volonté des valeurs internes
      * de tout type à utilité pour le template.
      *
      * Bonne utilisation et surtout seule utilisation possible :
      * passer de l'intérieur (via définition de la méthode Template->content).
-     *
-     * %%NAME_VALUE%% est une macro permettant d'obtenir une valeur
-     * interne dans le contenu de son template.
-     * Avec NAME_VALUE un indice/clé du tableau values.
      */
-    private $values = [];
+    private $values;
     /**
      * Attribut fourni pour stocker à volonté des paramètres externes
      * de tout type à utilité pour le template.
      *
      * Bonne initialisation et surtout seule initialisation possible :
      * passer de l'extérieur via le constructeur.
-     *
-     * %%NAME_PARAMETER%% est une macro permettant d'obtenir un paramètre
-     * externe dans le contenu d'un template.
-     * Avec NAME_PARAMETER un indice/clé du tableau parameters.
-     *
-     * Les paramètres une fois passés de l'extérieur, sont en interne
-     * ajoutés aux valeurs $values.
      */
-    private $parameters = [];
+    private $parameters;
     /**
      * router pour accéder au contexte général du serveur.
      */
@@ -93,11 +83,11 @@ abstract class Template
         $this->render();
     }
 
-
-
     public static function initialiseStaticParameters() {
         Template::$router = Router::getInstance();
     }
+
+
 
 
     /**
@@ -113,6 +103,8 @@ abstract class Template
         //On envoie la template.
         View::render($content);
     }
+
+
 
 
     /**
@@ -141,18 +133,16 @@ abstract class Template
             $content = Template::implementsMacros($content, $templateContent);
         }
 
-        //On ajoute les paramètres du template this aux valeurs.
-        foreach($this->parameters as $parameterKey => $parameterValue) {
-            $values[$parameterKey] = $parameterValue;
-        }
         //Pour les macro-valeur, on les remplace par leur valeur.
-        $content = Template::implementsValueMacros($content, $values);
+        $content = Template::implementsValueMacros($content, $values, $this->parameters);
 
         //Pour les macros non-implémentées, on les remplace par mot-vide.
         $content = Template::manageUnimplementedMacros($content);
 
         return $content;
     }
+
+
 
 
     /**
@@ -176,6 +166,8 @@ abstract class Template
     }
 
 
+
+
     /**
      * Créer une instance à partir d'un nom de classe de template.
      */
@@ -184,7 +176,6 @@ abstract class Template
         $template = $reflection->newInstanceWithoutConstructor();
         return $template;
     }
-
 
     /**
      * Récupérer le nom d'une macro.
@@ -195,6 +186,9 @@ abstract class Template
     }
 
 
+
+
+
     /**
      * Implementer les macros de $content avec les c
      * ontenus des macros dans $templateContent.
@@ -203,9 +197,10 @@ abstract class Template
         $implementedMacros = [];
         $macroImplementedMacro = Template::markupImplementedMacro;
         $matches = preg_match("/$macroImplementedMacro/", $templateContent, $implementedMacros);
-
+        //Cas trivial.
         if(!$matches) {
             return $content;
+         //Cas récursif.
         } else {
             $implementedMacro = $implementedMacros[0];
             $implementedMacroName = Template::getMacroName($implementedMacro);
@@ -223,7 +218,61 @@ abstract class Template
         }
     }
 
+    /**
+     * Implémenter les macros de valeurs.
+     */
+    private static function implementsValueMacros($content, $values, $parameters) {
+        $valueMacro = [];
+        $markupValueMacro = Template::markupValueMacro;
+        $matches = preg_match("/$markupValueMacro/", $content,  $valueMacro);
+        //Cas trivial.
+        if(!$matches) {
+            return $content;
+        //Cas récursif.
+        } else {
+            $valueMacro  = $valueMacro[0];
+            $valueMacroContent = Template::getMacroName($valueMacro);
+            $valueMacroContents = explode(":", $valueMacroContent);
 
+            $firstContent = $valueMacroContents[0];
+            $secondContent = $valueMacroContents[1];
+
+            $value = null;
+            switch($firstContent) {
+                case "routes" :
+                    $routeParameters = array_slice($valueMacroContents, 2, count($valueMacroContents) - 1);
+                    $value = Template::$router->getRoute($secondContent, $routeParameters);
+                    break;
+
+                case "route" :
+                    $value = Template::$router->currentRoute->$secondContent;
+                break;
+
+                case "get" :
+                    $value = Template::$router->get($secondContent);
+                    break;
+
+                case "post" :
+                    $value = Template::$router->post($secondContent);
+                    break;
+
+                case "values" :
+                    $value = $values[$secondContent];
+                    break;
+
+                case "params" :
+                    $value = $parameters[$secondContent];
+                    break;
+
+                default :
+                    $value = "";
+            }
+            //Remplacement de la macro par sa valeur.
+            $content = str_replace($valueMacro, $value, $content);
+            //Appel récursif.
+            return Template::implementsValueMacros($content, $values, $parameters);
+        }
+    }
 
     /**
      * Gerer les macros non-implémentées.
@@ -232,61 +281,19 @@ abstract class Template
         $unimplementedMacros = [];
         $markupNotImplementedMacro = Template::markupNotImplementedMacro;
         $matches = preg_match("/$markupNotImplementedMacro/", $content, $unimplementedMacros);
-
+        //Cas trivial.
         if(!$matches) {
             return $content;
+        //Cas récursif.
         } else {
             $unimplementedMacro = $unimplementedMacros[0];
-            $content = Util::removeOccurrences($unimplementedMacro, $content);//str_replace($unimplementedMacro, "pas implémenté", $content);
+            $content = Util::removeOccurrences($unimplementedMacro, $content);
             return Template::manageUnimplementedMacros($content);
         }
     }
 
 
 
-    /**
-     * Implémenter les macros de valeurs.
-     */
-    private static function implementsValueMacros($content, $values) {
-        $implementedMacros = [];
-        $markupValueMacro = Template::markupValueMacro;
-        $matches = preg_match("/$markupValueMacro/", $content, $implementedMacros);
-
-        if(!$matches) {
-            return $content;
-        } else {
-            $implementedMacro = $implementedMacros[0];
-            $implementedMacroName = Template::getMacroName($implementedMacro);
-
-            //Récuperation d'une valeur dans la route courante.
-            $implementedContent = Template::$router->currentRoute->$implementedMacroName;
-            //Si rien trouvé dans la route courante.
-            if(is_bool($implementedContent)) {
-                //Récuperation d'une valeur dans $_POST.
-                $implementedContent = Template::$router->post($implementedMacroName);
-                //Si rien trouvé dans $_POST.
-                if(is_bool($implementedContent)) {
-                    //Récuperation d'une valeur dans $_GET.
-                    $implementedContent = Template::$router->get($implementedMacroName);
-                    //Si rien trouvé dans $_GET.
-                    if(is_bool($implementedContent)) {
-                        //Récuperation d'une valeur dans values du template.
-                        if(isset($values[$implementedMacroName])) {
-                            $implementedContent = $values[$implementedMacroName];
-                         //Si rien trouvé dans $values.
-                        } else {
-                            //On remplace par mot-vide si pas de valeurs trouvées.
-                            $implementedContent = "";
-                        }
-                    }
-                }
-            }
-
-            $content = str_replace($implementedMacro, $implementedContent, $content);
-
-            return Template::implementsValueMacros($content, $values);
-        }
-    }
 
 
     /**
@@ -297,10 +304,13 @@ abstract class Template
     }
 
 
+
+
     /**
      * Méthode à définir pour écrire un template.
      */
     public abstract function content();
+
 
 
 

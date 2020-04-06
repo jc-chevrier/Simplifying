@@ -9,8 +9,7 @@ class NotesView extends SuperView
         $router = \simplifying\routes\Router::getInstance();
         $this->value('link-note1', $router->getRoute('NOTE1', [ 'id' => 4 ]));
         $this->value('link-note2', $router->getRoute('NOTE2', [ 'id' => 4 ]));
-        $this->value('link-note3', $router->getRoute('NOTE3', [ 'id' => 4 ]));
-        $this->value('link-note4', $router->getRoute('NOTE4', ['idNote' => 4 ,'idDetail' => 3]));
+        $this->value('link-note3', $router->getRoute('NOTE3', [ 4 ]));
 
         return "{{body}}
                     <div>
@@ -21,24 +20,24 @@ class NotesView extends SuperView
                                 <div>
                                     Notes : 
                                     <div>
-                                        %%notes%%. 
+                                        %%params:notes%%. 
                                     </div>
                                 </div>
                                 <br>
                                 <div>
                                     Entre autres : 
                                     <div>
-                                         %%note1%%. 
+                                         %%params:note1%%. 
                                     </div>
                                 </div>
                                 <div>
-                                    <a href=%%link-note1%%>Note 4.</a>
+                                    <a href=%%values:link-note1%%>Note 4.</a>
                                     <br>
-                                    <a href=%%link-note2%%>Note 4 : détails.</a>
+                                    <a href=%%values:link-note2%%>Note 4 : détails.</a>
                                     <br>
-                                    <a href=%%link-note3%%>Note 4 : divers.</a>
+                                    <a href=%%values:link-note3%%>Note 4 : divers.</a>
                                     <br>
-                                    <a href=%%link-note4%%>Note 4. Détail 3.</a>
+                                    <a href=%%routes:NOTE4:4:3%%>Note 4. Détail 3.</a>
                                 </div>
                             </div>
                         </div>

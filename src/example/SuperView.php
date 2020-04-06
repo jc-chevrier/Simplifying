@@ -2,8 +2,6 @@
 
 namespace example;
 
-use simplifying\views\Template;
-
 class SuperView extends \simplifying\views\Template
 {
     public function content()
@@ -11,15 +9,6 @@ class SuperView extends \simplifying\views\Template
         $this->value('link-gf', "<a href='https://github.com/jc-chevrier/Simplifying'>Link to github of Simplifying framework.</a>");
         $this->value('link-gc', "<a href='https://github.com/jc-chevrier'>Link to github of creator's Simplifying framework.</a>");
         $this->value('link-ec', "<div>Email of creator's Simplifying framework : <b>chevrjc@gmail.com.</b></div>");
-
-        $router = \simplifying\routes\Router::getInstance();
-        $this->value('link-blank', $router->getRoute('BLANK'));
-        $this->value('link-home', $router->getRoute('HOME'));
-        $this->value('link-tree', $router->getRoute('TREE'));
-        $this->value('link-notes', $router->getRoute('NOTES'));
-        $this->value('link-contact',$router->getRoute('CONTACT'));
-
-
         return "<html lang='french'>
                         <head>
                                 [[headers]]
@@ -61,11 +50,11 @@ class SuperView extends \simplifying\views\Template
                         <body>
                                 <hr>
                                 <div class='row menus'>
-                                      <a href=%%link-blank%%>blank</a>
-                                      <a href=%%link-home%%>home</a>
-                                      <a href=%%link-notes%%>notes</a>
-                                      <a href=%%link-tree%%>arbre</a>
-                                      <a href=%%link-contact%%>contact</a>
+                                      <a href=%%routes:BLANK%%>blank</a>
+                                      <a href=%%routes:HOME%%>home</a>
+                                      <a href=%%routes:NOTES%%>notes</a>
+                                      <a href=%%routes:TREE%%>arbre</a>
+                                      <a href=%%routes:CONTACT%%>contact</a>
                                 </div>
                                 <hr>
                                 <br>
