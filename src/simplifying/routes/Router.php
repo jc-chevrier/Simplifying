@@ -340,16 +340,16 @@ class Router
         $effectiveRoute = '';
 
         if(count($parameters) != 0) {
-            $keysParamaters = array_keys($parameters);
+            $keys = array_keys($parameters);
             $indexKey = 0;
         }
 
         foreach ($nodes as $index => $node) {
             $effectiveRoute .= '/';
             if($node->type == NodeType::PARAMETER_NODE) {
-                $keyParamater = $keysParamaters[$indexKey];
-                if(isset($parameters[$keyParamater])) {
-                    $effectiveRoute .= $parameters[$keyParamater];
+                $key = $keys[$indexKey];
+                if(isset($parameters[$key])) {
+                    $effectiveRoute .= $parameters[$key];
                     $indexKey++;
                 } else {
                     throw new \InvalidArgumentException("Un des paramètres de la route à préparer n'a pas été précisé !");
