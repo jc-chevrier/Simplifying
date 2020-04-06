@@ -12,11 +12,19 @@ Autoloader::register();
 
 $router = Router::getInstance();
 
+
+
+
 $router->route('/blank', SuperView::class)->alias('BLANK');
 
 $router->route('/', HomeView::class);
 
 $router->route('/home', HomeView::class)->alias('HOME');
+
+$router->route('/contact', ContactView::class)->alias('CONTACT');
+
+
+
 
 $router->route('/notes', function () {
     new NotesView(["notes" => View::div(function($i) { return "Note $i";}, 10), "note1" => "La note 1 est pertinente"]);
@@ -82,6 +90,9 @@ $router->route('/notes/note/{idNote}/details/detail/{idDetail}', function () {
     new NoteView4();
 })->alias("NOTE4");
 
+
+
+
 $router->route('/arbre', function () use ($router) {
     class TreeView extends SuperView {
         public function content() {
@@ -91,7 +102,47 @@ $router->route('/arbre', function () use ($router) {
     new TreeView(["tree" => $router->tree->toString()]);
 })->alias('TREE');
 
-$router->route('/contact', ContactView::class)->alias('CONTACT');
+$router->route('/routes', function () {
+    class RoutesView extends SuperView {
+        public function content() {
+            $routes = Router::getInstance()->routes;
+
+            $content = "{{body}}";
+            foreach($routes as $index => $route) {
+                $content .= "<div>
+                                    <div>
+                                          Route modèle : $route->templateRoute
+                                    </div>
+                                    <div>
+                                          Route alias : $route->alias
+                                    </div>
+                                    <div>
+                                           Route modèle en noeuds :  
+                                    </div>";
+
+                foreach($route->templateRouteNodes as $index2 => $node) {
+                        $content .= "<div>
+                                            ||>>>[$node->type] $node->value
+                                     </div>";
+                }
+
+                $content .= "       <br>
+                                    <br>
+                                    <br>
+                                    <hr>
+                                </div>";
+            }
+
+            $content .= "{{/body}}";
+
+            return $content;
+        }
+    }
+    new RoutesView();
+})->alias('ROUTES');
+
+
+
 
 $router->routeError(function() {
     class ErrorView extends SuperView {
@@ -101,5 +152,8 @@ $router->routeError(function() {
     }
     new ErrorView();
 });
+
+
+
 
 $router->go();

@@ -206,8 +206,7 @@ abstract class Template
             $implementedMacroName = Template::getMacroName($implementedMacro);
 
             $contentsImplemented = [];
-            preg_match("/\{\{$implementedMacroName\}\}(.|\n)*\{\{\/$implementedMacroName\}\}/", $templateContent,
-           $contentsImplemented);
+            preg_match("/\{\{$implementedMacroName\}\}.*\{\{\/$implementedMacroName\}\}/s", $templateContent, $contentsImplemented);
             $contentImplemented =  $contentsImplemented[0];
             $templateContent = Util::removeOccurrences($contentImplemented, $templateContent);
 
