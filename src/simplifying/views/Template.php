@@ -156,8 +156,10 @@ abstract class Template
      * Obtenir la hierarchie de templates d'un template.
      */
     private static function getHierarchyHelper($className, $hierarchy = []) {
+        //Cas trivial.
         if($className == __CLASS__) {
             return $hierarchy;
+        //Cas récursif.
         } else {
             $hierarchy[] = $className;
             $parentClassName = get_parent_class($className);
