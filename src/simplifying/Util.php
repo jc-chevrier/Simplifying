@@ -10,18 +10,6 @@ namespace simplifying;
 class Util
 {
     /**
-     * Transformer un tableau en chaine de caractères.
-     */
-    public static function toString($array) {
-        $string = "";
-        foreach($array as $element) {
-            $string .= $element;
-        }
-        return $string;
-    }
-
-
-    /**
      * Appliquer une action ($callback) à tous les
      * éléments d'un tableau ($array).
      *

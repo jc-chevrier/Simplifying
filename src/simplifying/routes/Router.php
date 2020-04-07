@@ -3,6 +3,8 @@
 namespace simplifying\routes;
 
 
+use simplifying\Util;
+
 /**
  * Classe Router.
  *
@@ -11,9 +13,11 @@ namespace simplifying\routes;
 class Router
 {
     /**
-     * Racine du serveur.
+     * Nom du serveur,
+     * répertoire à la racine racine,
+     * fichier à la racine.
      */
-    private $dir_root, $file_root;
+    private $ROOT_DIRECTORY, $ROOT_FILE;
     /**
      * Route courante.
      */
@@ -29,6 +33,12 @@ class Router
      */
     private static $router;
     /**
+     * Les singleton de http.
+     *
+     * Permmet un acces de l'extérieur.
+     */
+    private static $http;
+    /**
      * Arboresence du site stockée
      * via un arbre n-aires.
      *
@@ -42,14 +52,19 @@ class Router
 
     private function __construct()
     {
+        //Initialisation des attributs du router.
+        //Route courante nulle.
         $this->currentRoute = null;
 
+        //Racine des routes du serveur.
         $root = explode('/', $_SERVER['SCRIPT_NAME']);
-        $this->dir_root = $root[1];
-        $this->file_root = $root[2];
+        $this->ROOT_FILE = $root[count($root) - 1];
+        $this->ROOT_DIRECTORY = Util::removeOccurrences( "/".$this->ROOT_FILE, $_SERVER['SCRIPT_NAME']);
 
+        //Noeud racine de l'arbre du serveur.
         $this->tree = new Node("root");
 
+        //Route d'erreur par défaut.
         $this->route('/error', '             
              <html>
                  <body>
@@ -95,38 +110,40 @@ class Router
      */
     private function update()
     {
-        //On retire ce qui n"appartient pas à la route au début de l'URI.
-        $URI = explode($this->dir_root, $_SERVER['REQUEST_URI'])[1];
-        $URI = explode($this->file_root, $URI);
-        $URI = $URI[count($URI) - 1];
-
-        //On retire ce qui n"appartient pas à la route à la fin de l'URI.
-        $URI = explode("?", $URI);
-        $URI = $URI[0];
+        //On retire ce qui ne nous intéresse pas.
+        //(1) on retire le ROOT_DIRECTORY s'il est précisé au début de l'uri.
+        $requestUriParts = explode($this->ROOT_DIRECTORY, $_SERVER['REQUEST_URI']);
+        $requestUriParts = $requestUriParts[count($requestUriParts) - 1];
+        //(2) on retire le ROOT_FILE s'il est précisé au début de l'uri.
+        $requestUriParts = explode($this->ROOT_FILE, $requestUriParts);
+        $requestUriParts = $requestUriParts[count($requestUriParts) - 1];
+        //(3) On retire ce qui n"appartient pas à la route à la fin de l'uri.
+        $requestUriParts = explode("?", $requestUriParts);
+        $effectiveRoute = $requestUriParts[0];
 
         //La route / est enregistrée en tant que "slash".
-        if($URI == "/") {
-            $URI = "/slash";
+        if($effectiveRoute == "/") {
+            $effectiveRoute = "/slash";
         }
 
         //Recherche de la route modèle correspondant à cette route effective,
         //et initialisation de la route courante.
-        $this->searchModelRouteInTree($URI);
+        $this->searchModelRouteInTree($effectiveRoute);
     }
 
     /**
      * Rediriger vers une autre route.
      */
-    public function redirect($routeAlias, $routeParameters = [])
+    public function redirect($routeAlias, $routeParameters = [], $statusCode = 302)
     {
         foreach($this->routes as $templateRoute => $route) {
             //Si on a retrouvé la route à partir de l'alias.
             if($route->alias == $routeAlias) {
                 $this->currentRoute = $route;
                 $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $routeParameters);
-                $this->currentRoute->beginEffective($effectiveRoute);
-                $this->currentRoute->go();
-                return;
+                $url =  $_SERVER['REQUEST_SCHEME']."://" . $_SERVER['SERVER_NAME'] . $this->ROOT_DIRECTORY . $effectiveRoute;
+                header("Location:" . $url , true, $statusCode);
+                exit();
             }
         }
     }
@@ -166,9 +183,7 @@ class Router
         }
 
         //Ajout dans l'arbre.
-        $result = $this->addRouteInTree($templateRoute);
-        $templateRoute = $result[0];
-        $templateRouteNodes = $result[1];
+        list($templateRoute, $templateRouteNodes) = $this->addRouteInTree($templateRoute);
         //Ajout dans les routes.
         $this->routes[$templateRoute] = new Route($templateRoute, $templateRouteNodes, $serverResponse);
 
@@ -335,7 +350,7 @@ class Router
             //Si on a retrouvé la route à partir de l'alias.
             if($route->alias == $routeAlias) {
                 $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $routeParameters);
-                return "/" . $this->dir_root . $effectiveRoute;
+                return $this->ROOT_DIRECTORY . $effectiveRoute;
             }
         }
         //Sinon.
@@ -366,41 +381,6 @@ class Router
         return $effectiveRoute;
     }
 
-
-
-
-
-    /**
-     * Accéder à ou modifier une valeur
-     * de $_GET.
-     */
-    public function get($name, $value = null)
-    {
-        if ($value != null) {
-            $_GET[$name] = $value;
-        } else {
-            if (isset($_GET[$name])) {
-                return $_GET[$name];
-            }
-            return false;
-        }
-    }
-
-    /**
-     * Accéder à ou modifier une valeur
-     * de $_POST.
-     */
-    public function post($name, $value = null)
-    {
-        if ($value != null) {
-            $_POST[$name] = $value;
-        } else {
-            if (isset($_POST[$name])) {
-                return $_POST[$name];
-            }
-            return false;
-        }
-    }
 
 
 

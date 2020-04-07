@@ -67,7 +67,7 @@ $router->route('/message/{message}', function (){
 $router->route('/notes/note/{id}/divers', function () {
     $pileFace = rand(1, 2);
     if($pileFace == 1) {
-        Router::getInstance()->redirect("MESSAGE", ["PileFace vaut $pileFace" ]);
+        Router::getInstance()->redirect("MESSAGE", ["PileFace-vaut-$pileFace"]);
     } else {
         class NoteView3 extends SuperView {
             public function content() {
@@ -90,7 +90,7 @@ $router->route('/notes/note/{idNote}/details/detail/{idDetail}', function () {
 
 
 
-$router->route('/arbre', function () use ($router) {
+$router->route('/tree', function () use ($router) {
     class TreeView extends SuperView {
         public function content() {
             return "{{body}} <div class=blue>%%params:tree%%</div> {{/body}}";
@@ -163,6 +163,23 @@ $router->routeError(function() {
     }
     new ErrorView();
 });
+
+
+
+
+$router->route('/server-values', function () use ($router) {
+    class ServerView extends SuperView {
+        public function content() {
+            $content = "{{body}}<div>";
+            foreach ($_SERVER as $key => $value) {
+                $content .= "<span class=blue>$key</span> => <span class=red>$value</span><br>";
+            }
+            $content .= "</div>{{/body}}";
+            return $content;
+        }
+    }
+    new ServerView();
+})->alias('SERVER-VALUES');
 
 
 

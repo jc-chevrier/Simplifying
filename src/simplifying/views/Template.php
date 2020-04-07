@@ -252,11 +252,11 @@ abstract class Template
                 break;
 
                 case DomainValueMacro::GET :
-                    $value = Template::$router->get($secondContent);
+                    $value = $_GET[$secondContent];
                     break;
 
                 case DomainValueMacro::POST :
-                    $value = Template::$router->post($secondContent);
+                    $value = $_POST[$secondContent];
                     break;
 
                 case DomainValueMacro::VALUES :
