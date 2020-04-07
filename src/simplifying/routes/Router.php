@@ -122,7 +122,7 @@ class Router
         foreach($this->routes as $templateRoute => $route) {
             //Si on a retrouvé la route à partir de l'alias.
             if($route->alias == $routeAlias) {
-                $this->currentRoute = $this->routes[$templateRoute];
+                $this->currentRoute = $route;
                 $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $routeParameters);
                 $this->currentRoute->beginEffective($effectiveRoute);
                 $this->currentRoute->go();
@@ -180,7 +180,7 @@ class Router
      */
     public function routeError($serverResponseForError)
     {
-        $this->route("/error", $serverResponseForError);
+        return $this->route("/error", $serverResponseForError);
     }
 
 
@@ -356,13 +356,8 @@ class Router
         foreach($templateRouteNodes as $index => $node) {
             $effectiveRoute .= '/';
             if($node->type == NodeType::PARAMETER_NODE) {
-                $key = $keys[$indexKey];
-                if(isset($routeParameters[$key])) {
-                    $effectiveRoute .= $routeParameters[$key];
-                    $indexKey++;
-                } else {
-                    throw new \InvalidArgumentException("Un des paramètres de la route à préparer n'a pas été précisé !");
-                }
+                $effectiveRoute .= $routeParameters[$keys[$indexKey]];
+                $indexKey++;
             }else {
                 $effectiveRoute .= $node->value;
             }
