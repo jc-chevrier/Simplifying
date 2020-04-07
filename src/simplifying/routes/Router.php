@@ -33,12 +33,6 @@ class Router
      */
     private static $router;
     /**
-     * Les singleton de http.
-     *
-     * Permmet un acces de l'extérieur.
-     */
-    private static $http;
-    /**
      * Arboresence du site stockée
      * via un arbre n-aires.
      *
