@@ -76,7 +76,7 @@ $router->route('/notes/note/{id}/divers', function () {
             }
         }
         new NoteView3(["pileFace" => $pileFace]);
-        echo "<br>Note : " . simplifying\routes\Router::getInstance()->currentRoute->id;
+        echo "<br>Note : " . simplifying\routes\Router::getInstance()->currentRoute->id . ".";
     }
 })->alias("NOTE3");
 
