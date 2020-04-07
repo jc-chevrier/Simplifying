@@ -65,6 +65,7 @@ $router->route('/message/{message}', function (){
 })->alias("MESSAGE");
 
 $router->route('/notes/note/{id}/divers', function () {
+    //\simplifying\routes\Router::getInstance()->currentRoute->id; <=> %%route:id%%
     $pileFace = rand(1, 2);
     if($pileFace == 1) {
         Router::getInstance()->redirect("MESSAGE", ["PileFace-vaut-$pileFace"]);
@@ -75,6 +76,7 @@ $router->route('/notes/note/{id}/divers', function () {
             }
         }
         new NoteView3(["pileFace" => $pileFace]);
+        echo "<br>Note : " . simplifying\routes\Router::getInstance()->currentRoute->id;
     }
 })->alias("NOTE3");
 

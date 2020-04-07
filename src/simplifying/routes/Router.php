@@ -120,12 +120,10 @@ class Router
         //(3) On retire ce qui n"appartient pas à la route à la fin de l'uri.
         $requestUriParts = explode("?", $requestUriParts);
         $effectiveRoute = $requestUriParts[0];
-
         //La route / est enregistrée en tant que "slash".
         if($effectiveRoute == "/") {
             $effectiveRoute = "/slash";
         }
-
         //Recherche de la route modèle correspondant à cette route effective,
         //et initialisation de la route courante.
         $this->searchModelRouteInTree($effectiveRoute);
@@ -141,7 +139,7 @@ class Router
             if($route->alias == $routeAlias) {
                 $this->currentRoute = $route;
                 $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $routeParameters);
-                $url =  $_SERVER['REQUEST_SCHEME']."://" . $_SERVER['SERVER_NAME'] . $this->ROOT_DIRECTORY . $effectiveRoute;
+                $url =  $_SERVER['REQUEST_SCHEME'] . "://" . $_SERVER['SERVER_NAME'] . $this->ROOT_DIRECTORY . $effectiveRoute;
                 header("Location:" . $url , true, $statusCode);
                 exit();
             }
