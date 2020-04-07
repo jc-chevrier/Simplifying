@@ -321,6 +321,14 @@ abstract class Template
     {
         if(isset($this->$name)) {
             return $this->$name;
+        } else {
+            if(isset($this->parameters[$name])) {
+                return $this->parameters[$name];
+            } else {
+                if(isset($this->values[$name])) {
+                    return $this->values[$name];
+                }
+            }
         }
         return false;
     }
