@@ -242,28 +242,28 @@ abstract class Template
 
             $value = null;
             switch($firstContent) {
-                case "routes" :
+                case DomainValueMacro::ROUTES :
                     $routeParameters = array_slice($valueMacroContents, 2, count($valueMacroContents) - 1);
                     $value = Template::$router->getRoute($secondContent, $routeParameters);
                     break;
 
-                case "route" :
+                case DomainValueMacro::ROUTE :
                     $value = Template::$router->currentRoute->$secondContent;
                 break;
 
-                case "get" :
+                case DomainValueMacro::GET :
                     $value = Template::$router->get($secondContent);
                     break;
 
-                case "post" :
+                case DomainValueMacro::POST :
                     $value = Template::$router->post($secondContent);
                     break;
 
-                case "values" :
+                case DomainValueMacro::VALUES :
                     $value = $values[$secondContent];
                     break;
 
-                case "params" :
+                case DomainValueMacro::PARAMS :
                     $value = $parameters[$secondContent];
                     break;
 
