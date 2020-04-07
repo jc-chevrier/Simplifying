@@ -151,7 +151,14 @@ $router->route('/routes', function () {
 $router->routeError(function() {
     class ErrorView extends SuperView {
         public function content() {
-            return "{{body}} Cette page n'existe pas sur le serveur. {{/body}}";
+            return "{{body}} 
+                        <div>
+                            Cette page est introuvable sur le serveur. 
+                        </div>
+                        <a href=%%routes:HOME%% class=green>
+                            Se rendre vers le home ?
+                        </a>
+                     {{/body}}";
         }
     }
     new ErrorView();
