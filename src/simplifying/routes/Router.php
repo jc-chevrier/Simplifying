@@ -117,7 +117,7 @@ class Router
         //On retire ce qui ne nous intéresse pas.
         $requestUriParts = $_SERVER['REQUEST_URI'];
 
-        //Si il y a un répertoire à la racine.
+        //Si il y a un/des répertoire(s) à la racine.
         if($this->ROOT_DIRECTORY != "") {
             //(1) on retire le ROOT_DIRECTORY s'il est précisé au début de l'uri.
             $requestUriParts = explode($this->ROOT_DIRECTORY, $requestUriParts);
