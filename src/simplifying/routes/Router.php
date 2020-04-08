@@ -149,7 +149,6 @@ class Router
         foreach($this->routes as $templateRoute => $route) {
             //Si on a retrouvé la route à partir de l'alias.
             if($route->alias == $routeAlias) {
-                $this->currentRoute = $route;
                 $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $routeParameters);
                 $url =  $_SERVER['REQUEST_SCHEME'] . "://" . $_SERVER['SERVER_NAME'] . $this->rootPathUsed . $effectiveRoute;
                 header("Location:" . $url , true, $statusCode);
