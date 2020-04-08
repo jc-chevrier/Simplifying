@@ -174,7 +174,7 @@ $router->route('/server-values', function () use ($router) {
         public function content() {
             $content = "{{body}}<div>";
             foreach ($_SERVER as $key => $value) {
-                $content .= "<span class=blue>$key</span> => <span class=red>$value</span><br>";
+                $content .= "<span class=blue>$key</span> <b>=></b> <span class=red>$value</span><br>";
             }
             $content .= "</div>{{/body}}";
             return $content;

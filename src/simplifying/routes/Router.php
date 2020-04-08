@@ -14,10 +14,15 @@ class Router
 {
     /**
      * Nom du serveur,
-     * répertoire à la racine racine,
-     * fichier à la racine.
+     * Répertoire(s) à la racine racine,
+     * Fichier à la racine.
      */
     private $ROOT_DIRECTORY, $ROOT_FILE;
+    /**
+     * Le chemin racine emprunté pour
+     * se rendre sur une page.
+     */
+    private $rootPathUsed;
     /**
      * Route courante.
      */
@@ -52,8 +57,8 @@ class Router
 
         //Racine des routes du serveur.
         $root = explode('/', $_SERVER['SCRIPT_NAME']);
-        $this->ROOT_FILE = $root[count($root) - 1];
-        $this->ROOT_DIRECTORY = Util::removeOccurrences( "/".$this->ROOT_FILE, $_SERVER['SCRIPT_NAME']);
+        $this->ROOT_FILE = '/' . $root[count($root) - 1];
+        $this->ROOT_DIRECTORY = Util::removeOccurrences($this->ROOT_FILE, $_SERVER['SCRIPT_NAME']);
 
         //Noeud racine de l'arbre du serveur.
         $this->tree = new Node("root");
@@ -105,19 +110,32 @@ class Router
     private function update()
     {
         //On retire ce qui ne nous intéresse pas.
+
         //(1) on retire le ROOT_DIRECTORY s'il est précisé au début de l'uri.
         $requestUriParts = explode($this->ROOT_DIRECTORY, $_SERVER['REQUEST_URI']);
-        $requestUriParts = $requestUriParts[count($requestUriParts) - 1];
+        $countParts = count($requestUriParts);
+        $requestUriParts = $requestUriParts[$countParts - 1];
+        if($countParts == 2) {
+            $this->rootPathUsed = $this->ROOT_DIRECTORY;
+        }
+
         //(2) on retire le ROOT_FILE s'il est précisé au début de l'uri.
         $requestUriParts = explode($this->ROOT_FILE, $requestUriParts);
-        $requestUriParts = $requestUriParts[count($requestUriParts) - 1];
+        $countParts = count($requestUriParts);
+        $requestUriParts = $requestUriParts[$countParts - 1];
+        if($countParts == 2) {
+            $this->rootPathUsed .= $this->ROOT_FILE;
+        }
+
         //(3) On retire ce qui n"appartient pas à la route à la fin de l'uri.
         $requestUriParts = explode("?", $requestUriParts);
         $effectiveRoute = $requestUriParts[0];
+
         //La route / est enregistrée en tant que "slash".
         if($effectiveRoute == "/") {
             $effectiveRoute = "/slash";
         }
+
         //Recherche de la route modèle correspondant à cette route effective,
         //et initialisation de la route courante.
         $this->searchModelRouteInTree($effectiveRoute);
@@ -133,7 +151,7 @@ class Router
             if($route->alias == $routeAlias) {
                 $this->currentRoute = $route;
                 $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $routeParameters);
-                $url =  $_SERVER['REQUEST_SCHEME'] . "://" . $_SERVER['SERVER_NAME'] . $this->ROOT_DIRECTORY . $effectiveRoute;
+                $url =  $_SERVER['REQUEST_SCHEME'] . "://" . $_SERVER['SERVER_NAME'] . $this->rootPathUsed . $effectiveRoute;
                 header("Location:" . $url , true, $statusCode);
                 exit();
             }
@@ -342,7 +360,7 @@ class Router
             //Si on a retrouvé la route à partir de l'alias.
             if($route->alias == $routeAlias) {
                 $effectiveRoute = $this->prepareEffectiveRoute($route->templateRouteNodes, $routeParameters);
-                return $this->ROOT_DIRECTORY . $effectiveRoute;
+                return $this->rootPathUsed . $effectiveRoute;
             }
         }
         //Sinon.
