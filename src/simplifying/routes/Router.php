@@ -13,7 +13,6 @@ use simplifying\Util;
 class Router
 {
     /**
-     * Nom du serveur,
      * Répertoire(s) à la racine racine,
      * Fichier à la racine.
      */
