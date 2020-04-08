@@ -57,7 +57,9 @@ class Router
 
         //Racine des routes du serveur.
         $root = explode('/', $_SERVER['SCRIPT_NAME']);
+        //Fichier à la racine des routes.
         $this->ROOT_FILE = '/' . $root[count($root) - 1];
+        //Repertoire(s) à la racine des routes.
         $this->ROOT_DIRECTORY = Util::removeOccurrences($this->ROOT_FILE, $_SERVER['SCRIPT_NAME']);
 
         //Noeud racine de l'arbre du serveur.
@@ -96,11 +98,14 @@ class Router
      */
     public function go()
     {
+        //Mise à jour du la route courante du serveur.
         $this->update();
+        //Si null, alors la route indquée n'existe pas.
         if ($this->currentRoute == null) {
             $this->currentRoute = $this->routes['/error'];
             $this->currentRoute->beginEffective($this->currentRoute->templateRoute);
         }
+        //Rendre la mise à jour de la route courante effective.
         $this->currentRoute->go();
     }
 
@@ -110,15 +115,20 @@ class Router
     private function update()
     {
         //On retire ce qui ne nous intéresse pas.
+        $requestUriParts = $_SERVER['REQUEST_URI'];
 
-        //(1) on retire le ROOT_DIRECTORY s'il est précisé au début de l'uri.
-        $requestUriParts = explode($this->ROOT_DIRECTORY, $_SERVER['REQUEST_URI']);
-        $countParts = count($requestUriParts);
-        $requestUriParts = $requestUriParts[$countParts - 1];
-        if($countParts == 2) {
-            $this->rootPathUsed = $this->ROOT_DIRECTORY;
+        //Si il y a un répertoire à la racine.
+        if($this->ROOT_DIRECTORY != "") {
+            //(1) on retire le ROOT_DIRECTORY s'il est précisé au début de l'uri.
+            $requestUriParts = explode($this->ROOT_DIRECTORY, $requestUriParts);
+            $countParts = count($requestUriParts);
+            $requestUriParts = $requestUriParts[$countParts - 1];
+            if ($countParts == 2) {
+                $this->rootPathUsed = $this->ROOT_DIRECTORY;
+            }
         }
 
+        //Il y a forcément un fichier à la racine.
         //(2) on retire le ROOT_FILE s'il est précisé au début de l'uri.
         $requestUriParts = explode($this->ROOT_FILE, $requestUriParts);
         $countParts = count($requestUriParts);
@@ -127,7 +137,8 @@ class Router
             $this->rootPathUsed .= $this->ROOT_FILE;
         }
 
-        //(3) On retire ce qui n"appartient pas à la route à la fin de l'uri.
+        //(3) On retire ce qui n"appartient pas à la route mais au $_GET,
+        //ce qui est à la fin de l'uri.
         $requestUriParts = explode("?", $requestUriParts);
         $effectiveRoute = $requestUriParts[0];
 
