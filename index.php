@@ -160,7 +160,7 @@ $router->routeError(function() {
                         <a href=%%routes:HOME%% class=green>
                             Se rendre vers le home ?
                         </a>
-                     {{/body}}";
+                    {{/body}}";
         }
     }
     new ErrorView();
@@ -197,8 +197,7 @@ $router->route('/controller2/{id}/{id-2}/{id-3}', function($id, $id2, $id3) {
 //Niveau Controleur.
 class Controller {
     public static function showIds($id, $id2, $id3) {
-        $id++; $id2++; $id3++;
-        new ControllerTestView(['id' => $id, 'id_2' => $id2, 'id_3' => $id3]);
+        new ControllerTestView(['id' => ++$id, 'id_2' => ++$id2, 'id_3' => ++$id3]);
     }
 }
 
