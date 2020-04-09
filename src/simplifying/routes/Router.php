@@ -178,9 +178,9 @@ class Router
      *
      * @param $serverResponse       -> Réponse liée à la route.
      *        Peut valoir :
-     *        -> template
-     *        -> code html
+     *        -> classe de type template
      *        -> [classe, méthode]
+     *        -> code html
      *        -> callback
      *
      * @return La route créée.
