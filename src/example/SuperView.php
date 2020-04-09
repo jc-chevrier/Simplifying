@@ -62,6 +62,7 @@ class SuperView extends \simplifying\views\Template
                                       <a href=%%routes:TREE%%>tree</a>
                                       <a href=%%routes:ROUTES%%>routes</a>
                                       <a href=%%routes:SERVER-VALUES%%>server values</a>
+                                      <a href=%%routes:CONTROLLER:6:7:9%%>controller</a>
                                 </div>
                                 <hr>
                                 <br>

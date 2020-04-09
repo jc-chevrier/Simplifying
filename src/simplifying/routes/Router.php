@@ -2,8 +2,8 @@
 
 namespace simplifying\routes;
 
-
-use simplifying\Util;
+use simplifying\views\View as View;
+use simplifying\Util as Util;
 
 /**
  * Classe Router.
@@ -173,18 +173,29 @@ class Router
 
     /**
      * Ajouter une route au serveur.
+     *
+     * @param $templateRoute        -> route modèle
+     *
+     * @param $serverResponse       -> Réponse liée à la route.
+     *        Peut valoir :
+     *        -> template
+     *        -> code html
+     *        -> [classe, méthode]
+     *        -> callback
+     *
+     * @return La route créée.
      */
     public function route($templateRoute, $serverResponse)
     {
         //On transforme la réponse en callBack si nécessaire.
         if(!is_callable($serverResponse)) {
-            //Si l'action associée à la route est un tamplate à envoyer au navigateur.
+            //Si l'action associée à la route est un template.
             if (class_exists($serverResponse)) {
                 $serverResponse = function () use ($serverResponse) {
                     (new \ReflectionClass($serverResponse))->newInstance();
                 };
             } else {
-                //Si l'action associée à la route est du code html à envoyer au navigateur.
+                //Si l'action associée à la route est du code html.
                 if(is_string($serverResponse)) {
                     $serverResponse = function () use ($serverResponse) {
                         View::render($serverResponse);

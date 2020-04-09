@@ -35,21 +35,21 @@ abstract class Template
      *
      * C'est une expression régulière.
      */
-    const markupUnimplementedMacro = "\[\[[a-zA-Z0-9-]+\]\]";
+    const markupUnimplementedMacro = "\[\[[a-zA-Z0-9-_]+\]\]";
     /**
      * Balisage pour signaler une macro
      * implémentée.
      *
      * C'est une expression régulière.
      */
-    const markupImplementedMacro = "\{\{[a-zA-Z0-9-]+\}\}";
+    const markupImplementedMacro = "\{\{[a-zA-Z0-9-_]+\}\}";
     /**
      * Balisage pour signaler une macro
      * de valeur.
      *
      * C'est une expression régulière.
      */
-    const markupValueMacro = "%%[a-zA-Z0-9-]+(:[a-zA-Z0-9-]+)+%%";
+    const markupValueMacro = "%%[a-zA-Z0-9-_]+(:[a-zA-Z0-9-_]+)+%%";
     /**
      * Attribut fourni pour stocker à volonté des valeurs internes
      * de tout type à utilité pour le template.

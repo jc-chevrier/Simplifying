@@ -21,7 +21,7 @@ class Route
      *
      * C'est une expression régulière.
      */
-    const markupParameter = "\{[a-zA-Z0-9-]+\}";
+    const markupParameter = "\{[a-zA-Z0-9-_]+\}";
     /**
      * Route modèle et route effcetive.
      *
@@ -82,6 +82,7 @@ class Route
         //Récupération des parties d'URI de la route effective.
         $values = Route::toUriParts($effectiveRoute);
         //Initialisation des paramètres de la route.
+        $this->parameters = [];
         foreach($this->templateRouteNodes as $index => $node) {
             $value = array_shift($values);
             if($node->type == NodeType::PARAMETER_NODE) {
@@ -94,8 +95,7 @@ class Route
      * Effectuer l'action de la route.
      */
     public function go() {
-        $action = $this->action;
-        $action();
+        call_user_func_array($this->action, $this->parameters);
     }
 
 

@@ -185,5 +185,30 @@ $router->route('/server-values', function () use ($router) {
 
 
 
+//MVC.
+
+//Route dans l'index.
+//$router->route('/controller/{id}/{id-2}/{id-3}', function($id, $id2, $id3) {
+  //  Controller::showIds($id, $id2, $id3);
+//})->alias('CONTROLLER');
+//OU
+$router->route('/controller2/{id}/{id-2}/{id-3}', [Controller::class, 'showIds'])->alias('CONTROLLER2');
+
+//Niveau Controleur.
+class Controller {
+    public static function showIds($id, $id2, $id3) {
+        $id++;
+        $id2++;
+        $id3++;
+        new ControllerTestView(['id' => $id, 'id_2' => $id2, 'id_3' => $id3]);
+    }
+}
+
+//Niveau Vue.
+class ControllerTestView extends SuperView {
+    public function content() {
+        return "{{body}}<div>%%params:id%%, %%params:id_2%%, %%params:id_3%%.</div>{{/body}}";
+    }
+}
 
 $router->go();
