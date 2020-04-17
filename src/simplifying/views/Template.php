@@ -199,8 +199,8 @@ abstract class Template
      */
     private static function implementsMacros($content, $templateContent) {
         $implementedMacros = [];
-        $macroImplementedMacro = Template::markupImplementedMacro;
-        $matches = preg_match("/$macroImplementedMacro/", $templateContent, $implementedMacros);
+        $markupImplementedMacro = Template::markupImplementedMacro;
+        $matches = preg_match("/$markupImplementedMacro/", $templateContent, $implementedMacros);
         //Cas trivial.
         if(!$matches) {
             return $content;
@@ -249,7 +249,7 @@ abstract class Template
 
                 case DomainValueMacro::ROUTE :
                     $value = Template::$router->currentRoute->$secondContent;
-                break;
+                    break;
 
                 case DomainValueMacro::GET :
                     $value = $_GET[$secondContent];

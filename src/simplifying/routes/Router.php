@@ -176,7 +176,7 @@ class Router
      *
      * @param $templateRoute        -> route modèle
      *
-     * @param $serverResponse       -> Réponse liée à la route.
+     * @param $serverResponse       -> réponse liée à la route
      *        Peut valoir :
      *        -> classe de type template
      *        -> [classe, méthode]
@@ -350,7 +350,7 @@ class Router
                     }
                 }
 
-                //Sinon, si le noeud parent n'a pas de neouds de type ParameterNode,
+                //Sinon, si le noeud parent n'a pas de noeuds de type ParameterNode,
                 //alors on abandonne cette branche d'appel.
                 return null;
             //Sinon, on a trouvé un noeud.

@@ -34,7 +34,7 @@ class Route
      *
      * C'est une structure inetermédiaire qui permet
      * de connaitre la structure sémantique de la route
-     * (ù sont les paramètres de la route entre autre).
+     * (où sont les paramètres de la route entre autre).
      *
      * Concrètement c'est un tableau de noeuds.
      */

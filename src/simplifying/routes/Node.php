@@ -32,7 +32,7 @@ class Node
     public function __construct($value) {
         $this->value = $value;
         $this->childNodes = [];
-        $this->type = $type = NodeType::NODE;
+        $this->type = NodeType::NODE;
     }
 
 
