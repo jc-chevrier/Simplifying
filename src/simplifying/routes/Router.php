@@ -190,13 +190,13 @@ class Router
         //On transforme la réponse en callBack si nécessaire.
         if(!is_callable($serverResponse)) {
             //Si l'action associée à la route est un template.
-            if (class_exists($serverResponse)) {
+            if (class_exists($serverResponse) && is_subclass_of($serverResponse, \simplifying\views\Template::class)) {
                 $serverResponse = function () use ($serverResponse) {
                     (new \ReflectionClass($serverResponse))->newInstance();
                 };
             } else {
                 //Si l'action associée à la route est du code html.
-                if(is_string($serverResponse)) {
+                if(!class_exists($serverResponse) && is_string($serverResponse)) {
                     $serverResponse = function () use ($serverResponse) {
                         View::render($serverResponse);
                     };
