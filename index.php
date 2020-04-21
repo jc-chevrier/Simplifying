@@ -15,9 +15,7 @@ $router = Router::getInstance();
 
 
 $router->route('/blank', SuperView::class)->alias('BLANK');
-
 $router->route('/', HomeView::class);
-
 $router->route('/home', HomeView::class)->alias('HOME');
 
 
