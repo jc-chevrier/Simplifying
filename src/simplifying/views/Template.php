@@ -116,29 +116,29 @@ abstract class Template
         //On récupère la hiérarchie des templates.
         $hierarchy = $this->getHierarchy();
 
-        //On récupère le template de la super classe.
-        $superTemplate = Template::newTemplate(array_pop($hierarchy));
-        //On récupère le contenu du template.
+        //On récupère le super-template.
+        $superTemplate = Template::newTemplate(array_shift($hierarchy));
+        //On récupère le contenu du super-template.
         $content = $superTemplate->content();
-        //On récupère les valeurs du template.
+        //On récupère les valeurs du super-template.
         $values = $superTemplate->values;
 
         //On parcours la hiérarchie des templates de la super classe jusqu'à la classe de this.
-       for($i = count($hierarchy) - 1; $i >= 0; $i--) {
+       for($i = 0; $i < count($hierarchy); $i++) {
             //On récupère le template.
             $template = $i == 0 ? $this : Template::newTemplate($hierarchy[$i]);
             //On récupère le contenu du template.
             $templateContent = $template->content();
             //On récupère les valeurs du template.
             $values = array_merge($values, $template->values);
-            //Pour les macros implémentées, on les remplace par leur contenu.
+            //Pour les macros implémentées, on remplace avec leur contenu les macros implementables correspondantes.
             $content = Template::implementsMacros($content, $templateContent);
         }
 
         //Pour les macro-valeur, on les remplace par leur valeur.
         $content = Template::implementsValueMacros($content, $values, $this->parameters);
 
-        //Pour les macros non-implémentées, on les remplace par mot-vide.
+        //Pour les macros implementables non-implémentées, on les remplace par mot-vide.
         $content = Template::manageUnimplementedMacros($content);
 
         return $content;
@@ -157,16 +157,14 @@ abstract class Template
     /**
      * Obtenir la hierarchie de templates d'un template.
      */
-    private static function getHierarchyHelper($className, $hierarchy = []) {
-        //Cas trivial.
-        if($className == __CLASS__) {
-            return $hierarchy;
-        //Cas récursif.
-        } else {
-            $hierarchy[] = $className;
-            $parentClassName = get_parent_class($className);
-            return Template::getHierarchyHelper($parentClassName, $hierarchy);
+    private static function getHierarchyHelper($className) {
+        $hierarchy = [];
+        //On remonte la hierarchie de this.
+        while($className != __CLASS__) {
+            array_unshift($hierarchy,  $className);
+            $className = get_parent_class($className);
         }
+        return $hierarchy;
     }
 
 
