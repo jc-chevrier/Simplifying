@@ -9,7 +9,7 @@ use \simplifying\Util as util;
  * Classe Template.
  *
  * Concept :
- * [[MACRO_NAME]]                                              -> macro non-implémentée.
+ * [[MACRO_NAME]]                                              -> macro implementable.
  *
  * {{MACRO_NAME}}  ... {{\MACRO_NAME}}                         -> macro implénentée.
  *
@@ -31,7 +31,7 @@ abstract class Template
 {
     /**
      * Balisage pour signaler une macro
-     * non-implémentée.
+     * implementable.
      *
      * C'est une expression régulière.
      */
@@ -194,18 +194,16 @@ abstract class Template
 
 
     /**
-     * Implementer les macros de $content avec les c
-     * ontenus des macros dans $templateContent.
+     * Implementer les macros de $content avec les
+     * contenus des macros implementables dans $templateContent.
      */
     private static function implementsMacros($content, $templateContent) {
-        $implementedMacros = [];
         $markupImplementedMacro = Template::markupImplementedMacro;
+
+        $implementedMacros = [];
         $matches = preg_match("/$markupImplementedMacro/", $templateContent, $implementedMacros);
-        //Cas trivial.
-        if(!$matches) {
-            return $content;
-         //Cas récursif.
-        } else {
+        //Tant qu'on trouve des macros implémentées.
+        while($matches) {
             $implementedMacro = $implementedMacros[0];
             $implementedMacroName = Template::getMacroName($implementedMacro);
 
@@ -217,22 +215,23 @@ abstract class Template
             $contentImplemented = Util::removeOccurrences([$implementedMacro, "{{/$implementedMacroName}}"], $contentImplemented);
             $content = str_replace("[[$implementedMacroName]]", $contentImplemented, $content);
 
-            return Template::implementsMacros($content, $templateContent);
+            $implementedMacros = [];
+            $matches = preg_match("/$markupImplementedMacro/", $templateContent, $implementedMacros);
         }
+
+        return $content;
     }
 
     /**
      * Implémenter les macros de valeurs.
      */
     private static function implementsValueMacros($content, $values, $parameters) {
-        $valueMacro = [];
         $markupValueMacro = Template::markupValueMacro;
+
+        $valueMacro = [];
         $matches = preg_match("/$markupValueMacro/", $content,  $valueMacro);
-        //Cas trivial.
-        if(!$matches) {
-            return $content;
-        //Cas récursif.
-        } else {
+        //Tant qu'on trouve des macros de valeur.
+        while($matches) {
             $valueMacro  = $valueMacro[0];
             $valueMacroContent = Template::getMacroName($valueMacro);
             $valueMacroContents = explode(":", $valueMacroContent);
@@ -270,29 +269,35 @@ abstract class Template
                 default :
                     $value = "";
             }
+
             //Remplacement de la macro par sa valeur.
             $content = str_replace($valueMacro, $value, $content);
-            //Appel récursif.
-            return Template::implementsValueMacros($content, $values, $parameters);
+
+            $valueMacro = [];
+            $matches = preg_match("/$markupValueMacro/", $content,  $valueMacro);
         }
+
+        return $content;
     }
 
     /**
-     * Gerer les macros non-implémentées.
+     * Gerer les macros implemntables non-implémentées.
      */
     private static function manageUnimplementedMacros($content) {
-        $unimplementedMacros = [];
         $markupUnimplementedMacro = Template::markupUnimplementedMacro;
+
+        $unimplementedMacros = [];
         $matches = preg_match("/$markupUnimplementedMacro/", $content, $unimplementedMacros);
-        //Cas trivial.
-        if(!$matches) {
-            return $content;
-        //Cas récursif.
-        } else {
+        //Tant qu'on trouve des macros implemntables non-implémentées.
+        while($matches) {
             $unimplementedMacro = $unimplementedMacros[0];
             $content = Util::removeOccurrences($unimplementedMacro, $content);
-            return Template::manageUnimplementedMacros($content);
+
+            $unimplementedMacros = [];
+            $matches = preg_match("/$markupUnimplementedMacro/", $content, $unimplementedMacros);
         }
+
+        return $content;
     }
 
 
