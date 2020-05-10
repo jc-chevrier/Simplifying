@@ -1,3 +1,5 @@
-# Framework web Simplifying.
+# Micro-framework web Simplifying.
 
-# Author: chevrier jean-christophe.
+Auteur:
+Chevrier Jean-Christophe.
+Etudiant à Nancy à l'université de lorraine en France.
