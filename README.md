@@ -12,14 +12,19 @@
 <hr>
 
 <b> Description </b> : 
-<br> Micro-framework entièrement en PHP, professionel,
-et pratique d'utilisation.  
+<br> Micro-framework entièrement en PHP, professionel, et pratique d'utilisation.  
+<br> Il propose :
+<br> (1) un système de routes de serveur
+<br>     -> route avec paramètres ou non
+<br> (2) un système de templates
+<br>	 -> heritage / familles de templates
+<br>	 -> macro de valeurs
+<br>	 -> boucles et conditionnelles (en développement).
 
 <hr>
 
 <b> Usages </b>: 
-<br> Aller dans la branche example du repertoire GIT du 
-micro-framework pour voir des exemples d'utilisation. 
+<br> Aller dans la branche example du repertoire GIT du micro-framework pour voir des exemples d'utilisation. 
 
 <hr>
 
