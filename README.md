@@ -1,23 +1,23 @@
 # Micro-framework PHP WEB Simplifying.
 
-Auteur: 
+<b> Auteur </b> : 
 <br> Chevrier Jean-Christophe.
 <br> Etudiant à Nancy à l'université de lorraine en France.
 
-Création :
+<b> Création </b> :
 <br> Début 2020.
 
-Description : 
+<b> Description </b> : 
 <br> Micro-framework entièrement en PHP, professionel,
 et pratique d'utilisation.  
 
-Usages : 
+<b> Usages </b>: 
 <br> Aller dans la branche example du repertoire GIT du 
 micro-framework pour voir des exemples d'utilisation. 
 
-Version actuelle : 
+<b> Version actuelle </b> : 
 <br> 1.1.
 
-Toutes les versions : 
+<b> Toutes les versions </b> : 
 <br> 1.0. : première version.
 <br> 1.1. : passage de récursif à itératif dans les méthodes de conversion des templates en html.
