@@ -1,8 +1,8 @@
 # Micro-framework PHP WEB Simplifying.
 
 Auteur: 
-*Chevrier Jean-Christophe.
-*Etudiant à Nancy à l'université de lorraine en France.
+* Chevrier Jean-Christophe.
+* Etudiant à Nancy à l'université de lorraine en France.
 
 Création :
 * Début 2020.
@@ -19,5 +19,5 @@ Version actuelle :
 * 1.1.
 
 Toutes les versions : 
-* 1.0. : première version.
-* 1.1. : passage de récursif à itératif dans les méthodes de conversion des templates en html.
+<br> 1.0. : première version.
+<br> 1.1. : passage de récursif à itératif dans les méthodes de conversion des templates en html.
