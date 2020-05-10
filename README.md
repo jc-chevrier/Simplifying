@@ -16,6 +16,8 @@
 <br> Il propose :
 <br> (1) un système de routes de serveur
 <br>     -> route avec paramètres ou non
+<br>     -> redirection
+<br>	 -> route d'erreur par défaut
 <br> (2) un système de templates
 <br>	 -> heritage / familles de templates
 <br>	 -> macro de valeurs
@@ -34,5 +36,5 @@
 <hr>
 
 <b> Toutes les versions </b> : 
-<br> 1.0. : première version.
-<br> 1.1. : passage de récursif à itératif dans les méthodes de conversion des templates en html.
+<br> 1.0. : première version
+<br> 1.1. : passage de récursif à itératif dans les méthodes de conversion des templates en html
