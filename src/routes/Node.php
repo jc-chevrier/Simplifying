@@ -94,7 +94,10 @@ class Node
     }
 
     /**
-     * Récupérer les noeuds enfants de type ParameterNode.
+     * Rechercher les noeuds enfants de type ParameterNode.
+     *
+     * La recherche est effectuée dans le niveau
+     * des noeuds enfants uniquement.
      */
     public function searchChildParameterNodes() {
         $childParameterNodes = [];

@@ -40,7 +40,7 @@ class Route
      */
     private $templateRouteNodes;
     /**
-     * Paramètres d'une Route.
+     * Paramètres d'une route.
      */
     private $parameters;
     /**
