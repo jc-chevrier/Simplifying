@@ -15,7 +15,7 @@
 <br> Micro-framework entièrement en PHP, professionel, et pratique d'utilisation.  
 <br> Il propose :
 <br> (1) un système de routes de serveur
-<br>     -> route avec paramètres ou non
+<br>     -> routes avec paramètres ou non
 <br>     -> redirection
 <br>	 -> route d'erreur par défaut
 <br>	 -> arbre n-aire de routes du serveur	
