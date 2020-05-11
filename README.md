@@ -18,10 +18,13 @@
 <br>     -> route avec paramètres ou non
 <br>     -> redirection
 <br>	 -> route d'erreur par défaut
+<br>	 -> arbre n-aire de routes du serveur	
 <br> (2) un système de templates
-<br>	 -> heritage / familles de templates
-<br>	 -> macro de valeurs
-<br>	 -> boucles et conditionnelles (en développement).
+<br>	 -> heritages / familles de templates
+<br>	 -> macros implémentables et implémentées
+<br>	 -> macros de valeur
+<br>	 -> parammètres passables de l'extérieur disponibles dans le template courant
+<br>	 -> valeurs internes disponibles dans tout l'heritage de templates
 
 <hr>
 
