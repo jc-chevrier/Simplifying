@@ -23,7 +23,7 @@
 <br>	 -> heritages / familles de templates
 <br>	 -> macros implémentables et implémentées
 <br>	 -> macros de valeur
-<br>	 -> parammètres passables de l'extérieur disponibles dans le template courant
+<br>	 -> paramètres passables de l'extérieur disponibles dans le template courant
 <br>	 -> valeurs internes disponibles dans tout l'heritage de templates
 
 <hr>
