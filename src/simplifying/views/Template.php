@@ -101,7 +101,7 @@ abstract class Template
         //Initialiser les paramètres statiques.
         Template::initialiseStaticParameters();
         //Transformer une template en html.
-        $content = $this->toHtml();
+        $content = $this->parse();
         //On envoie la template.
         View::render($content);
     }
@@ -112,7 +112,7 @@ abstract class Template
     /**
      * Convertir un template en code html.
      */
-    private function toHtml() {
+    private function parse() {
         //On récupère la hiérarchie des templates.
         $hierarchy = $this->getHierarchy();
 
@@ -132,11 +132,11 @@ abstract class Template
             //On récupère les valeurs du template.
             $values = array_merge($values, $template->values);
             //Pour les macros implémentées, on remplace avec leur contenu les macros implementables correspondantes.
-            $content = Template::implementsMacros($content, $templateContent);
+            $content = Template::parseMacros($content, $templateContent);
         }
 
         //Pour les macro-valeur, on les remplace par leur valeur.
-        $content = Template::implementsValueMacros($content, $values, $this->parameters);
+        $content = Template::parseValueMacros($content, $values, $this->parameters);
 
         //Pour les macros implementables non-implémentées, on les remplace par mot-vide.
         $content = Template::manageUnimplementedMacros($content);
@@ -195,7 +195,7 @@ abstract class Template
      * Implementer les macros de $content avec les
      * contenus des macros implementables dans $templateContent.
      */
-    private static function implementsMacros($content, $templateContent) {
+    private static function parseMacros($content, $templateContent) {
         $markupImplementedMacro = Template::markupImplementedMacro;
 
         $implementedMacros = [];
@@ -223,7 +223,7 @@ abstract class Template
     /**
      * Implémenter les macros de valeurs.
      */
-    private static function implementsValueMacros($content, $values, $parameters) {
+    private static function parseValueMacros($content, $values, $parameters) {
         $markupValueMacro = Template::markupValueMacro;
 
         $valueMacro = [];
