@@ -100,9 +100,9 @@ abstract class Template
     public function render() {
         //Initialiser les paramètres statiques.
         Template::initialiseStaticParameters();
-        //Transformer une template en html.
+        //Transformer un template en html.
         $content = $this->parse();
-        //On envoie la template.
+        //On envoie le template.
         View::render($content);
     }
 
