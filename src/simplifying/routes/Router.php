@@ -393,16 +393,10 @@ class Router
     private function prepareEffectiveRoute($templateRouteNodes, $routeParameters) {
         $effectiveRoute = '';
 
-        if(count($routeParameters) != 0) {
-            $keys = array_keys($routeParameters);
-            $indexKey = 0;
-        }
-
         foreach($templateRouteNodes as $index => $node) {
             $effectiveRoute .= '/';
             if($node->type == NodeType::PARAMETER_NODE) {
-                $effectiveRoute .= $routeParameters[$keys[$indexKey]];
-                $indexKey++;
+                $effectiveRoute .= $routeParameters[$node->value];
             }else {
                 $effectiveRoute .= $node->value;
             }
@@ -410,6 +404,7 @@ class Router
 
         return $effectiveRoute;
     }
+
 
 
 

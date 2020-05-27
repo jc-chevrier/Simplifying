@@ -9,7 +9,7 @@ class NotesView extends SuperView
         $router = \simplifying\routes\Router::getInstance();
         $this->value('link-note1', $router->getRoute('NOTE1', [ 'id' => 4 ]));
         $this->value('link-note2', $router->getRoute('NOTE2', [ 'id' => 4 ]));
-        $this->value('link-note3', $router->getRoute('NOTE3', [ 4 ]));
+        $this->value('link-note3', $router->getRoute('NOTE3', [ 'id' => 4 ]));
 
         return "{{body}}
                     <div>
