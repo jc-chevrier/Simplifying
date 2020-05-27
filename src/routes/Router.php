@@ -401,9 +401,13 @@ class Router
         foreach($templateRouteNodes as $index => $node) {
             $effectiveRoute .= '/';
             if($node->type == NodeType::PARAMETER_NODE) {
-                $effectiveRoute .= $routeParameters[$keys[$indexKey]];
-                $indexKey++;
-            }else {
+                if(isset($routeParameters[$node->value])) {
+                    $effectiveRoute .= $routeParameters[$node->value];
+                } else {
+                    $effectiveRoute .= $routeParameters[$keys[$indexKey]];
+                    $indexKey++;
+                }
+            } else {
                 $effectiveRoute .= $node->value;
             }
         }
