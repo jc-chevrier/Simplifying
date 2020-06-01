@@ -326,13 +326,19 @@ abstract class Template
             return $this->$name;
         } else {
             if(isset($this->parameters[$name])) {
-                return $this->parameters[$name];
+                if(isset($this->values[$name])) {
+                    throw new \InvalidArgumentException('Une valeur et un paramètre utilise cette même clef : ' . $name  .
+                                                        ', on ne peut pas les différencier !');
+                } else {
+                    return $this->parameters[$name];
+                }
             } else {
                 if(isset($this->values[$name])) {
                     return $this->values[$name];
                 }
             }
         }
+
         return false;
     }
 }
