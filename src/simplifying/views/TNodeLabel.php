@@ -6,7 +6,7 @@ namespace simplifying\views;
  * Classe TNodeLabel.
  *
  * TNode <=> Template Node, noeud de nature <<...>>.
- * regExp <=> regular expression
+ * regExp <=> regular expression.
  *
  * @author CHEVRIER Jean-Christophe.
  */

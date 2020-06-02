@@ -66,6 +66,12 @@ class Route
      * Declarer un alias pour une route.
      */
     public function alias($alias) {
+        foreach($this->routes as $templateRoute => $route) {
+            //Si on a retrouvé la route à partir de l'alias.
+            if($route->alias == $alias) {
+                throw new \InvalidArgumentException("Cet alias : $alias est déjà utilisé !");
+            }
+        }
         $this->alias = $alias;
     }
 
