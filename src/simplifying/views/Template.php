@@ -15,7 +15,7 @@ namespace simplifying\views;
  */
 class Template
 {
-    const regExpTNode = "/<{2}\/{0,1}[a-zA-Z0-9-_ ]+>{2}/";
+    const regExpTNode = "<{2}\/{0,1}[a-zA-Z0-9-_ \.]+>{2}";
 
     private static $rootPath;
 
@@ -41,7 +41,6 @@ class Template
     }
 
     public static function render($path, $params = []) {
-        //Chargement du template.
         $template = new Template($path, $params);
         $template->_render();
     }
@@ -90,7 +89,7 @@ class Template
 
     private function nextTNode($content) {
         $matches = [];
-        $matchesFound = preg_match(Template::regExpTNode, $content, $matches);
+        $matchesFound = preg_match('/' . Template::regExpTNode . '/', $content, $matches);
         if($matchesFound) {
             return $matches[0];
         } else {
