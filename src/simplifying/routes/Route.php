@@ -119,8 +119,7 @@ class Route
      * Savoir si un string contient un paramètre.
      */
     public static function containsParameter($string) {
-        $markupParameter = Route::markupParameter;
-        $matches = preg_match("/$markupParameter/", $string);
+        $matches = preg_match('/' . Route::markupParameter . '/', $string);
 
         if($matches) {
             return true;
