@@ -2,343 +2,192 @@
 
 namespace simplifying\views;
 
-use \simplifying\routes\Router as Router;
-use \simplifying\Util as util;
-
 /**
  * Classe Template.
  *
- * Concept :
- * [[MACRO_NAME]]                                              -> macro implementable.
+ * THierarchy <=> Template Hierarchy.
+ * TNode <=> Template Node, noeud de nature <<...>>.
+ * TVar <=> Template Variable.
  *
- * {{MACRO_NAME}}  ... {{\MACRO_NAME}}                         -> macro implénentée.
- *
- * %%DOMAIN_VALUE:NAME_VALUE%%                                 -> macro de valeur.
- *
- * DOMAIN_VALUE appartient à {routes, route, post, get, values}.
- * routes:key:...   -> obtenir une route du serveur
- * route:key        -> obtenir un paramètre de la route courante
- * post:key         -> obtenir une valeur de $_POST
- * get:key          -> obtenir une valeur de $_GET
- * values:key       -> obtenir une valeur de values
- * params:key       -> obtenir une valeur de parameters
- *
- * %%routes:NAME_ROUTE:PARAMETER_0:...:PARAMETER_N-1%%         -> macro de route.
+ * regExp <=> regular expression
  *
  * @author CHEVRIER Jean-Christophe.
  */
-abstract class Template
+class Template
 {
-    /**
-     * Balisage pour signaler une macro
-     * implementable.
-     *
-     * C'est une expression régulière.
-     */
-    const markupUnimplementedMacro = "\[\[[a-zA-Z0-9-_]+\]\]";
-    /**
-     * Balisage pour signaler une macro
-     * implémentée.
-     *
-     * C'est une expression régulière.
-     */
-    const markupImplementedMacro = "\{\{[a-zA-Z0-9-_]+\}\}";
-    /**
-     * Balisage pour signaler une macro
-     * de valeur.
-     *
-     * C'est une expression régulière.
-     */
-    const markupValueMacro = "%%[a-zA-Z0-9-_]+(:[a-zA-Z0-9-_]+)+%%";
-    /**
-     * Attribut fourni pour stocker à volonté des valeurs internes
-     * de tout type à utilité pour le template.
-     *
-     * Bonne utilisation et surtout seule utilisation possible :
-     * passer de l'intérieur (via définition de la méthode Template->content).
-     */
-    private $values = [];
-    /**
-     * Attribut fourni pour stocker à volonté des paramètres externes
-     * de tout type à utilité pour le template.
-     *
-     * Bonne initialisation et surtout seule initialisation possible :
-     * passer de l'extérieur via le constructeur.
-     */
-    private $parameters = [];
-    /**
-     * router pour accéder au contexte général du serveur.
-     */
-    private static $router;
+    const regExpTNode = "/<{2}\/{0,1}[a-zA-Z0-9-_ ]+>{2}/";
+
+    private static $rootPath;
+
+    private $path;
+    private $params;
+
+    private $loopSequence;
+    private $conditionSequence;
 
 
 
-
-    /**
-     * Instancier un template, et lancer son fonctionnement
-     * (conversion en html et envoi au navigateur).
-     */
-    public function __construct($parameters = [])
+    public function __construct($path, $params = [])
     {
-        $this->parameters = $parameters;
-        $this->values = [];
-        $this->render();
-    }
+        $this->path = $path;
+        $this->params = $params;
 
-    public static function initialiseStaticParameters() {
-        Template::$router = Router::getInstance();
-    }
+        $loopSequence = 0;
+        $conditionSequence = 0;
 
-
-
-
-    /**
-     * Convertir un template en code html, et envoyer
-     * le code html à un navigateur via un fichier viruel
-     * (HEREDOC).
-     */
-    public function render() {
-        //Initialiser les paramètres statiques.
-        Template::initialiseStaticParameters();
-        //Transformer une template en html.
-        $content = $this->parse();
-        //On envoie la template.
-        View::render($content);
-    }
-
-
-
-
-    /**
-     * Convertir un template en code html.
-     */
-    private function parse() {
-        //On récupère la hiérarchie des templates.
-        $hierarchy = $this->getHierarchy();
-
-        //On récupère le super-template.
-        $superTemplate = Template::newTemplate(array_shift($hierarchy));
-        //On récupère le contenu du super-template.
-        $content = $superTemplate->content();
-        //On récupère les valeurs du super-template.
-        $values = $superTemplate->values;
-
-        //On parcours la hiérarchie des templates de la super classe jusqu'à la classe de this.
-       for($i = 0; $i < count($hierarchy); $i++) {
-            //On récupère le template.
-            $template = $i == 0 ? $this : Template::newTemplate($hierarchy[$i]);
-            //On récupère le contenu du template.
-            $templateContent = $template->content();
-            //On récupère les valeurs du template.
-            $values = array_merge($values, $template->values);
-            //Pour les macros implémentées, on remplace avec leur contenu les macros implementables correspondantes.
-            $content = Template::parseMacros($content, $templateContent);
+        if(Template::$rootPath == null) {
+            Template::buildRootPath();
         }
+    }
 
-        //Pour les macro-valeur, on les remplace par leur valeur.
-        $content = Template::parseValueMacros($content, $values, $this->parameters);
+    public static function render($path, $params = []) {
+        //Chargement du template.
+        $template = new Template($path, $params);
+        $template->_render();
+    }
 
-        //Pour les macros implementables non-implémentées, on les remplace par mot-vide.
-        $content = Template::manageUnimplementedMacros($content);
+    public function _render() {
+        $parsedContent = $this->parse();
+        View::render($parsedContent);
+    }
 
+
+
+
+    private function getAbsolutePath($path) {
+        return Template::$rootPath . $path . '.html';
+    }
+
+    private function getContent($path) {
+        $content = file_get_contents($path);
+        if($content == false) {
+            throw new \InvalidArgumentException('Le chargement du template a échoué !');
+        }
         return $content;
     }
 
 
 
+    private function getTHierarchy() {
+        $path = $this->getAbsolutePath($this->path);
+        $paths = [ $path ];
+        $content = $this->getContent($path);
+        $contents = [ $content ];
 
-    /**
-     * Obtenir la hierarchie de templates du template this.
-     */
-    private function getHierarchy() {
-        return Template::getHierarchyHelper(get_class($this));
-    }
-
-    /**
-     * Obtenir la hierarchie de templates d'un template.
-     */
-    private static function getHierarchyHelper($className) {
-        $hierarchy = [];
-        //On remonte la hierarchie de this.
-        while($className != __CLASS__) {
-            array_unshift($hierarchy,  $className);
-            $className = get_parent_class($className);
-        }
-        return $hierarchy;
-    }
-
-
-
-
-    /**
-     * Créer une instance à partir d'un nom de classe de template.
-     */
-    private static function newTemplate($className) {
-        $reflection = new \ReflectionClass($className);
-        $template = $reflection->newInstanceWithoutConstructor();
-        return $template;
-    }
-
-    /**
-     * Récupérer le nom d'une macro.
-     */
-    private static function getMacroName($macro) {
-        $macroName = substr($macro, 2, -2);
-        return $macroName;
-    }
-
-
-
-
-
-    /**
-     * Implementer les macros de $content avec les
-     * contenus des macros implementables dans $templateContent.
-     */
-    private static function parseMacros($content, $templateContent) {
-        $markupImplementedMacro = Template::markupImplementedMacro;
-
-        $implementedMacros = [];
-        $matches = preg_match("/$markupImplementedMacro/", $templateContent, $implementedMacros);
-        //Tant qu'on trouve des macros implémentées.
-        while($matches) {
-            $implementedMacro = $implementedMacros[0];
-            $implementedMacroName = Template::getMacroName($implementedMacro);
-
-            $contentsImplemented = [];
-            preg_match("/\{\{$implementedMacroName\}\}.*\{\{\/$implementedMacroName\}\}/s", $templateContent, $contentsImplemented);
-            $contentImplemented =  $contentsImplemented[0];
-            $templateContent = Util::removeOccurrences($contentImplemented, $templateContent);
-
-            $contentImplemented = Util::removeOccurrences([$implementedMacro, "{{/$implementedMacroName}}"], $contentImplemented);
-            $content = str_replace("[[$implementedMacroName]]", $contentImplemented, $content);
-
-            $implementedMacros = [];
-            $matches = preg_match("/$markupImplementedMacro/", $templateContent, $implementedMacros);
+        $firstTNode = $this->nextTNodeAndItsContents($content);
+        while($firstTNode != false && $firstTNode['TNodeLabel'] === TNodeLabel::PARENT) {
+            $pathOfParent = $this->getAbsolutePath($firstTNode['otherContents'][0]);
+            $contentOfParent = $this->getContent($pathOfParent);
+            array_unshift($contents, $contentOfParent);
+            array_unshift($paths, $pathOfParent);
+            $firstTNode = $this->nextTNodeAndItsContents($contentOfParent);
         }
 
-        return $content;
-    }
-
-    /**
-     * Implémenter les macros de valeurs.
-     */
-    private static function parseValueMacros($content, $values, $parameters) {
-        $markupValueMacro = Template::markupValueMacro;
-
-        $valueMacro = [];
-        $matches = preg_match("/$markupValueMacro/", $content,  $valueMacro);
-        //Tant qu'on trouve des macros de valeur.
-        while($matches) {
-            $valueMacro  = $valueMacro[0];
-            $valueMacroContent = Template::getMacroName($valueMacro);
-            $valueMacroContents = explode(":", $valueMacroContent);
-
-            $firstContent = $valueMacroContents[0];
-            $secondContent = $valueMacroContents[1];
-
-            $value = null;
-            switch($firstContent) {
-                case DomainValueMacro::ROUTES :
-                    $routeParameters = array_slice($valueMacroContents, 2, count($valueMacroContents) - 1);
-                    $value = Template::$router->getRoute($secondContent, $routeParameters);
-                    break;
-
-                case DomainValueMacro::ROUTE :
-                    $value = Template::$router->currentRoute->$secondContent;
-                    break;
-
-                case DomainValueMacro::GET :
-                    $value = $_GET[$secondContent];
-                    break;
-
-                case DomainValueMacro::POST :
-                    $value = $_POST[$secondContent];
-                    break;
-
-                case DomainValueMacro::VALUES :
-                    $value = $values[$secondContent];
-                    break;
-
-                case DomainValueMacro::PARAMS :
-                    $value = $parameters[$secondContent];
-                    break;
-
-                default :
-                    $value = "";
-            }
-
-            //Remplacement de la macro par sa valeur.
-            $content = str_replace($valueMacro, $value, $content);
-
-            $valueMacro = [];
-            $matches = preg_match("/$markupValueMacro/", $content,  $valueMacro);
-        }
-
-        return $content;
-    }
-
-    /**
-     * Gerer les macros implemntables non-implémentées.
-     */
-    private static function manageUnimplementedMacros($content) {
-        $markupUnimplementedMacro = Template::markupUnimplementedMacro;
-
-        $unimplementedMacros = [];
-        $matches = preg_match("/$markupUnimplementedMacro/", $content, $unimplementedMacros);
-        //Tant qu'on trouve des macros implemntables non-implémentées.
-        while($matches) {
-            $unimplementedMacro = $unimplementedMacros[0];
-            $content = Util::removeOccurrences($unimplementedMacro, $content);
-
-            $unimplementedMacros = [];
-            $matches = preg_match("/$markupUnimplementedMacro/", $content, $unimplementedMacros);
-        }
-
-        return $content;
+        return [ $paths, $contents ];
     }
 
 
 
-
-
-    /**
-     * Ajouter une valeur interne.
-     */
-    public function value($key, $value) {
-        $this->values[$key] = $value;
-    }
-
-
-
-
-    /**
-     * Méthode à définir pour écrire un template.
-     */
-    public abstract function content();
-
-
-
-
-    public function __get($name)
-    {
-        if(isset($this->$name)) {
-            return $this->$name;
+    private function nextTNode($content) {
+        $matches = [];
+        $matchesFound = preg_match(Template::regExpTNode, $content, $matches);
+        if($matchesFound) {
+            return $matches[0];
         } else {
-            if(isset($this->parameters[$name])) {
-                if(isset($this->values[$name])) {
-                    throw new \InvalidArgumentException('Une valeur et un paramètre utilise cette même clef : ' . $name  .
-                                                        ', on ne peut pas les différencier !');
-                } else {
-                    return $this->parameters[$name];
-                }
+            return false;
+        }
+    }
+
+    private function nextTNodeAndItsContents($content) {
+        $nextTNode = $this->nextTNode($content);
+        if($nextTNode == false) {
+            return false;
+        } else {
+            $contentsStr = $this->getTNodeContents($nextTNode);
+            $contentsArray = preg_split("/ +/", $contentsStr);
+            if(count($contentsArray) == 0) {
+                throw new \InvalidArgumentException("Noeud de template vide : $nextTNode !");
             } else {
-                if(isset($this->values[$name])) {
-                    return $this->values[$name];
+                $TNodeStructure = [ 'TNode' => $nextTNode ];
+
+                $aContent = strtolower(array_shift($contentsArray));
+                if($this->isTNodeLabel($aContent)) {
+                    $TNodeStructure['TNodeLabel'] = $aContent;
+                    $TNodeStructure['isEndTNode'] = $this->isEndTNode($aContent);
+                } else {
+                    throw new \InvalidArgumentException("Noeud de template incorrect : $nextTNode !");
                 }
+                $TNodeStructure['otherContents'] = $contentsArray;
+                return $TNodeStructure;
             }
         }
+    }
 
-        return false;
+    private function getTNodeContents($aTNode) {
+        return substr($aTNode, 2, -2);
+    }
+
+    private function isEndTNode($word) {
+        switch ($word) {
+            case TNodeLabel::END_BLOCK :
+            case TNodeLabel::END_CONDITION :
+            case TNodeLabel::END_LOOP :
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private function isTNodeLabel($word) {
+        switch ($word) {
+            case TNodeLabel::VAL :
+            case TNodeLabel::ROUTE :
+            case TNodeLabel::PARENT:
+            case TNodeLabel::BLOCK :
+            case TNodeLabel::END_BLOCK :
+            case TNodeLabel::CONDITION :
+            case TNodeLabel::END_CONDITION :
+            case TNodeLabel::LOOP :
+            case TNodeLabel::END_LOOP :
+                return true;
+            default:
+                return false;
+        }
+    }
+
+
+    private function parse() {
+        //Chargement de la hiérarchie de template.
+        list($paths, $contents) = $this->getTHierarchy();
+
+        //Parsing en arbre n-aire du template enfants et des templates parents.
+        $parsedContent = "";
+        foreach($contents as $key => $content) {
+            //$tree = parseInTree($content);
+            $parsedContent .= $content;
+        }
+
+        return $parsedContent;
+    }
+
+    private function parseInTree($content) {
+
+    }
+
+    private function parseInHtml() {
+
+    }
+
+
+
+    private static function buildRootPath() {
+        $dirs = explode('\\', __DIR__);
+        array_pop($dirs);
+        array_pop($dirs);
+        Template::$rootPath = implode('\\', $dirs) . "\\app\\views\\";
+    }
+
+    public static function rootPath($rootPath) {
+        Template::$rootPath = $rootPath;
     }
 }

@@ -1,0 +1,19 @@
+<html>
+    <</block body>>
+
+    <<for ep.set : e>>
+        <div>
+            <<val e.name>>
+        <div>
+    <</for>>
+
+    <<if ep.isConnectable>>
+
+    <<else>
+
+    <</if>>
+
+    <a href='<<route note:<<val cr.idNote>>:2>>'>
+        Lien vers le détail 2 de la note <<val cr.idNote>>.
+    </a>
+</html>
