@@ -209,7 +209,7 @@ class Template
 
 
     private function parse() {
-        //Chargement de la hiérarchie de template.
+        //Chargement de la hiérarchie de templates.
         $hierarchy = $this->getTHierarchy();
         $TContents = $hierarchy['TContents'];
 
