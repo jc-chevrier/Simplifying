@@ -17,7 +17,8 @@ class Template
 {
     const regExpTNode = "<{2}\/{0,1}[a-zA-Z0-9-_ \.]+>{2}";
 
-    private static $rootPath;
+    private static $rootRelativePath = ".\\..\\..\\app\\views\\";
+    private static $rootAbsolutePath;
 
     private $path;
     private $params;
@@ -35,10 +36,56 @@ class Template
         $loopSequence = 0;
         $conditionSequence = 0;
 
-        if(Template::$rootPath == null) {
-            Template::buildRootPath();
+        Template::initialiseRootAbsolutePath();
+    }
+
+
+
+    public static function rootRelativePath($rootRelativePath) {
+        Template::$rootRelativePath = $rootRelativePath;
+    }
+
+    private static function initialiseRootAbsolutePath() {
+        if(Template::$rootAbsolutePath == null) {
+            if(Template::isRelativePath(Template::$rootRelativePath)) {
+                Template::$rootAbsolutePath = Template::parseInAbsolutePath(Template::$rootRelativePath);
+            } else {
+                Template::$rootAbsolutePath = Template::$rootRelativePath;
+            }
         }
     }
+
+    private static function isRelativePath($path) {
+        $dirs = explode('\\', $path);
+        return array_search('.', $dirs) != false || array_search('..', $dirs) != false;
+    }
+
+    private static function parseInAbsolutePath($relativePath) {
+        $dirs = explode('\\', $relativePath);
+        $i = 0;
+        while($i < count($dirs)) {
+            $dir = $dirs[$i];
+            if($dir == '.') {
+                unset($dirs[$i]);
+                $currentDir = explode('\\', __DIR__);
+                $dirs = array_merge($currentDir, $dirs);
+                $i += count($currentDir);
+            } else {
+                if($dir == '..') {
+                    unset($dirs[$i]);
+                    unset($dirs[$i - 1]);
+                    $dirs = array_values($dirs);
+                    $i--;
+                } else {
+                    $i++;
+                }
+            }
+        }
+        $absolutePath = implode('\\', $dirs);
+        return $absolutePath;
+    }
+
+
 
     public static function render($path, $params = []) {
         $template = new Template($path, $params);
@@ -52,12 +99,11 @@ class Template
 
 
 
-
-    private function getAbsolutePath($path) {
-        return Template::$rootPath . $path . '.html';
+    private function getTemplateAbsolutePath($templateName) {
+        return Template::$rootAbsolutePath . $templateName . '.html';
     }
 
-    private function getContent($path) {
+    private function getTemplateContent($path) {
         $content = file_get_contents($path);
         if($content == false) {
             throw new \InvalidArgumentException('Le chargement du template a échoué !');
@@ -68,15 +114,15 @@ class Template
 
 
     private function getTHierarchy() {
-        $path = $this->getAbsolutePath($this->path);
+        $path = $this->getTemplateAbsolutePath($this->path);
         $paths = [ $path ];
-        $content = $this->getContent($path);
+        $content = $this->getTemplateContent($path);
         $contents = [ $content ];
 
         $firstTNode = $this->nextTNodeAndItsContents($content);
         while($firstTNode != false && $firstTNode['TNodeLabel'] === TNodeLabel::PARENT) {
-            $pathOfParent = $this->getAbsolutePath($firstTNode['otherContents'][0]);
-            $contentOfParent = $this->getContent($pathOfParent);
+            $pathOfParent = $this->getTemplateAbsolutePath($firstTNode['otherContents'][0]);
+            $contentOfParent = $this->getTemplateContent($pathOfParent);
             array_unshift($contents, $contentOfParent);
             array_unshift($paths, $pathOfParent);
             $firstTNode = $this->nextTNodeAndItsContents($contentOfParent);
@@ -126,8 +172,8 @@ class Template
         return substr($aTNode, 2, -2);
     }
 
-    private function isEndTNode($word) {
-        switch ($word) {
+    private function isEndTNode($label) {
+        switch ($label) {
             case TNodeLabel::END_BLOCK :
             case TNodeLabel::END_CONDITION :
             case TNodeLabel::END_LOOP :
@@ -137,8 +183,8 @@ class Template
         }
     }
 
-    private function isTNodeLabel($word) {
-        switch ($word) {
+    private function isTNodeLabel($label) {
+        switch ($label) {
             case TNodeLabel::VAL :
             case TNodeLabel::ROUTE :
             case TNodeLabel::PARENT:
@@ -153,6 +199,7 @@ class Template
                 return false;
         }
     }
+
 
 
     private function parse() {
@@ -175,18 +222,5 @@ class Template
 
     private function parseInHtml() {
 
-    }
-
-
-
-    private static function buildRootPath() {
-        $dirs = explode('\\', __DIR__);
-        array_pop($dirs);
-        array_pop($dirs);
-        Template::$rootPath = implode('\\', $dirs) . "\\app\\views\\";
-    }
-
-    public static function rootPath($rootPath) {
-        Template::$rootPath = $rootPath;
     }
 }
