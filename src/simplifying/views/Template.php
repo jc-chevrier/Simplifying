@@ -43,6 +43,7 @@ class Template
 
     public static function rootRelativePath($rootRelativePath) {
         Template::$rootRelativePath = $rootRelativePath;
+        Template::$rootAbsolutePath = null;
     }
 
     private static function initialiseRootAbsolutePath() {
