@@ -167,6 +167,7 @@ class Template
                 }
                 $TNodeStructure['otherContents'] = $contentsArray;
 
+                //TODO
                 switch ($TNodeStructure['label']) {
                     case TNodeLabel::VALUE :
                         $nextTNode = $this->getTNode2Contents($TNodeStructure);
@@ -279,6 +280,7 @@ class Template
         $parsedTContent = "";
         foreach($TContents as $key => $TContent) {
             //$tree = parseInTree($content);
+            //TODO
             $parsedTContent .= $TContent;
         }
 
@@ -350,6 +352,7 @@ class Template
         for($i = 0; $i < $nbTNodes; $i++) {
             $TNode = $TNodes[$i];
             switch ($TNode) {
+                //TODO
                 case TNodeLabel::BLOCK :
                 case TNodeLabel::END_BLOCK :
                 case TNodeLabel::CONDITION :
@@ -366,11 +369,11 @@ class Template
 
     private function mergeTrees($parentTree, $childTree) {
         $mergeTree = new TNode();
-
+        //TODO
         return $mergeTree;
     }
 
     private function parseInHtml() {
-
+        //TODO
     }
 }
