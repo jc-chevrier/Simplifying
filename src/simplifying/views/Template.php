@@ -13,7 +13,7 @@ namespace simplifying\views;
  */
 class Template
 {
-    const regExpTNode = "<{2}\/{0,1}[a-zA-Z0-9-_ \.]+>{2}";
+    const regExpTNode = "<{2} *\/{0,1}[a-zA-Z]+ *[a-zA-Z0-9-_ \.]+>{2}";
 
     private static $rootRelativePath = ".\\..\\..\\app\\views\\";
     private static $rootAbsolutePath;
@@ -103,11 +103,11 @@ class Template
     }
 
     private function getTContent($path) {
-        $content = file_get_contents($path);
-        if($content == false) {
+        $TContent = file_get_contents($path);
+        if($TContent == false) {
             throw new \InvalidArgumentException('Le chargement du template a échoué !');
         }
-        return $content;
+        return $TContent;
     }
 
 
