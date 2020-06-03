@@ -32,9 +32,6 @@ class Template
         $this->externalParameters = $externalParameters;
         $this->internalValues = [];
 
-        $loopSequence = 0;
-        $conditionSequence = 0;
-
         Template::initialiseRootAbsolutePath();
     }
 
