@@ -1,0 +1,3 @@
+                //$Label = ucfirst($TNodeStructure['label']);
+                //$function = "getTNode$Label";
+                //$nextTNode = $this->$function($TNodeStructure);

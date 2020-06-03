@@ -1,6 +1,6 @@
 <?php
 
-namespace simplifying\views;
+namespace simplifying\templates;
 
 /**
  * Classe TNodeLabel.
@@ -14,6 +14,7 @@ class TNodeLabel
 {
     const PARENT = 'parent';
 
+    const ABSTRACT_BLOCK = 'ablock';
     const BLOCK = 'block';
     const END_BLOCK = '/block';
 
@@ -23,7 +24,9 @@ class TNodeLabel
     const CONDITION = 'if';
     const END_CONDITION = '/if';
 
-    const VAL = 'val';
+    const VALUE = 'val';
 
     const ROUTE = 'route';
+
+    const IGNORED = 'ignored';
 }

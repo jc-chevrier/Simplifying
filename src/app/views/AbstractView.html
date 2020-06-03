@@ -1,19 +1,28 @@
 <html>
-    <</block body>>
-
-    <<for ep.set : e>>
-        <div>
-            <<val e.name>>
-        <div>
-    <</for>>
-
-    <<if ep.isConnectable>>
-
-    <<else>>
-
-    <</if>>
-
-    <a href='<<route note:<<val cr.idNote>>:2>>'>
-        Lien vers le détail 2 de la note <<val cr.idNote>>.
-    </a>
+    <head>
+        <a href='<<ROUTE test2:2:2>>'>
+            Lien vers le test2 : 2 : 2.
+        </a>
+        <<ablock css>>
+        <<ablock js>>
+    </head>
+    <body>
+        Texte body 1.
+        <<ablock body>>
+        Texte body 2.
+        <<for ep.set : e>>
+            <div>
+                <<val e.name>>
+            <div>
+        <</for>>
+        <<if ep.isConnectable>>
+            Est connecté !
+        <<else>>
+            N'est pas connecté
+        <</if>>
+        Texte body 3.
+        <a href='<<route note:<<val cr.idNote>>:2>>'>
+            Lien vers le détail 2 de la note <<val cr.idNote>>.
+        </a>
+    </body>
 </html>

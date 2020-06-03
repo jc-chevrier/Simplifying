@@ -66,10 +66,10 @@ class Route
      * Declarer un alias pour une route.
      */
     public function alias($alias) {
-        foreach($this->routes as $templateRoute => $route) {
+        foreach(Router::getInstance()->routes as $templateRoute => $route) {
             //Si on a retrouvé la route à partir de l'alias.
-            if($route->alias == $alias) {
-                throw new \InvalidArgumentException("Cet alias : $alias est déjà utilisé !");
+            if($route != $this && $route->alias == $alias) {
+                throw new \InvalidArgumentException("Route->alias() : cet alias : $alias est déjà utilisé !");
             }
         }
         $this->alias = $alias;
@@ -140,8 +140,7 @@ class Route
      * Récuperer un tableau des parties de l'URI.
      */
     public static function toUriParts($route) {
-        $uriParts = explode("/", $route);
-        unset($uriParts[array_search("", $uriParts)]);
+        $uriParts = preg_split('/\//', $route, -1, PREG_SPLIT_NO_EMPTY);
         return $uriParts;
     }
 

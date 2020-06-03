@@ -1,6 +1,6 @@
 <?php
 
-namespace simplifying\views;
+namespace simplifying\templates;
 
 /**
  * Classe TVarLabel.
