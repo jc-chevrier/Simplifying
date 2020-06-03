@@ -7,7 +7,7 @@ namespace simplifying\templates;
  *
  * T <=> Template.
  *
- * regExp <=> regular expression
+ * regExp <=> regular expression.
  *
  * @author CHEVRIER Jean-Christophe.
  */

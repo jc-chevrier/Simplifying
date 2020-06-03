@@ -3,6 +3,8 @@
 namespace simplifying\routes;
 
 /**
+ * Classe ParameterNode.
+ *
  * @author CHEVRIER Jean-Christophe.
  */
 class ParameterNode extends Node {

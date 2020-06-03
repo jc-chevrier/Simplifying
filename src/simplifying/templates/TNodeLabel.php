@@ -5,8 +5,7 @@ namespace simplifying\templates;
 /**
  * Classe TNodeLabel.
  *
- * TNode <=> Template Node, noeud de nature <<...>>.
- * regExp <=> regular expression.
+ * T <=> Template.
  *
  * @author CHEVRIER Jean-Christophe.
  */
