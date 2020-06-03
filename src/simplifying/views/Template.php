@@ -5,9 +5,7 @@ namespace simplifying\views;
 /**
  * Classe Template.
  *
- * THierarchy <=> Template Hierarchy.
- * TNode <=> Template Node, noeud de nature <<...>>.
- * TVar <=> Template Variable.
+ * T <=> Template.
  *
  * regExp <=> regular expression
  *
@@ -20,7 +18,7 @@ class Template
     private static $rootRelativePath = ".\\..\\..\\app\\views\\";
     private static $rootAbsolutePath;
 
-    private $path;
+    private $name;
     private $params;
 
     private $loopSequence;
@@ -28,9 +26,9 @@ class Template
 
 
 
-    public function __construct($path, $params = [])
+    public function __construct($name, $params = [])
     {
-        $this->path = $path;
+        $this->name = $name;
         $this->params = $params;
 
         $loopSequence = 0;
@@ -100,11 +98,11 @@ class Template
 
 
 
-    private function getTemplateAbsolutePath($templateName) {
-        return Template::$rootAbsolutePath . $templateName . '.html';
+    private function getTAbsolutePath($TName) {
+        return Template::$rootAbsolutePath . $TName . '.html';
     }
 
-    private function getTemplateContent($path) {
+    private function getTContent($path) {
         $content = file_get_contents($path);
         if($content == false) {
             throw new \InvalidArgumentException('Le chargement du template a échoué !');
@@ -115,21 +113,28 @@ class Template
 
 
     private function getTHierarchy() {
-        $path = $this->getTemplateAbsolutePath($this->path);
-        $paths = [ $path ];
-        $content = $this->getTemplateContent($path);
-        $contents = [ $content ];
+        $TNames = [ $this->name ];
+        $TPath = $this->getTAbsolutePath($this->name);
+        $TPaths = [ $TPath ];
+        $TContent = $this->getTContent($TPath);
+        $TContents = [ $TContent ];
 
-        $firstTNode = $this->nextTNodeAndItsContents($content);
+        $firstTNode = $this->nextTNodeAndItsContents($TContent);
         while($firstTNode != false && $firstTNode['TNodeLabel'] === TNodeLabel::PARENT) {
-            $pathOfParent = $this->getTemplateAbsolutePath($firstTNode['otherContents'][0]);
-            $contentOfParent = $this->getTemplateContent($pathOfParent);
-            array_unshift($contents, $contentOfParent);
-            array_unshift($paths, $pathOfParent);
-            $firstTNode = $this->nextTNodeAndItsContents($contentOfParent);
+            $nameOfTParent = $firstTNode['otherContents'][0];
+            $pathOfTParent = $this->getTAbsolutePath($nameOfTParent);
+            $contentOfTParent = $this->getTContent($pathOfTParent);
+
+            array_unshift($TNames, $nameOfTParent);
+            array_unshift($TPaths, $pathOfTParent);
+            array_unshift($TContents, $contentOfTParent);
+
+            $firstTNode = $this->nextTNodeAndItsContents($contentOfTParent);
         }
 
-        return [ $paths, $contents ];
+        return [ 'TNames' => $TNames,
+                 'TPaths' => $TPaths,
+                 'TContents' => $TContents ];
     }
 
 
@@ -169,8 +174,8 @@ class Template
         }
     }
 
-    private function getTNodeContents($aTNode) {
-        return substr($aTNode, 2, -2);
+    private function getTNodeContents($TNode) {
+        return substr($TNode, 2, -2);
     }
 
     private function isEndTNode($label) {
@@ -205,16 +210,17 @@ class Template
 
     private function parse() {
         //Chargement de la hiérarchie de template.
-        list($paths, $contents) = $this->getTHierarchy();
+        $hierarchy = $this->getTHierarchy();
+        $TContents = $hierarchy['TContents'];
 
-        //Parsing en arbre n-aire du template enfants et des templates parents.
-        $parsedContent = "";
-        foreach($contents as $key => $content) {
+        //Parsing en arbre n-aire du template this et des templates parents si existant.
+        $parsedTContent = "";
+        foreach($TContents as $key => $TContent) {
             //$tree = parseInTree($content);
-            $parsedContent .= $content;
+            $parsedTContent .= $TContent;
         }
 
-        return $parsedContent;
+        return $parsedTContent;
     }
 
     private function parseInTree($content) {
