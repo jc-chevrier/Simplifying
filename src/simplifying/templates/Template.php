@@ -344,7 +344,7 @@ class Template
 
         if($content != "") {
             $TNodeIgnored = new TNode(['label' => TNodeLabel::IGNORED, 'content' => $content]);
-            $TNodes[] = addChild($TNodeIgnored);
+            $TNodes[] = $TNodeIgnored;
         }
 
         $rootTNode = new TNode();
