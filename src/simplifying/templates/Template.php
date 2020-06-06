@@ -24,8 +24,12 @@ class Template
     private $internalValues;
 
 
-
-    public function __construct($name, $externalParameters = [])
+    /**
+     * Template constructor.
+     * @param string $name
+     * @param array $externalParameters
+     */
+    public function __construct(string $name, array $externalParameters = [])
     {
         $this->name = $name;
 
@@ -36,12 +40,9 @@ class Template
     }
 
 
-
-    public static function rootRelativePath($rootRelativePath) {
-        Template::$rootRelativePath = $rootRelativePath;
-        Template::$rootAbsolutePath = null;
-    }
-
+    /**
+     *
+     */
     private static function initialiseRootAbsolutePath() {
         if(Template::$rootAbsolutePath == null) {
             if(Template::isRelativePath(Template::$rootRelativePath)) {
@@ -52,12 +53,20 @@ class Template
         }
     }
 
-    private static function isRelativePath($path) {
+    /**
+     * @param string $path
+     * @return bool
+     */
+    private static function isRelativePath(string $path) : bool {
         $dirs = explode('\\', $path);
         return array_search('.', $dirs) != false || array_search('..', $dirs) != false;
     }
 
-    private static function parseInAbsolutePath($relativePath) {
+    /**
+     * @param string $relativePath
+     * @return string
+     */
+    private static function parseInAbsolutePath(string $relativePath) : string {
         $dirs = explode('\\', $relativePath);
         $i = 0;
         $dir = $dirs[$i];
@@ -83,24 +92,39 @@ class Template
     }
 
 
-
-    public static function render($path, $params = []) {
+    /**
+     * @param string $path
+     * @param array $params
+     * @throws SyntaxException
+     */
+    public static function render($path, $params = []) : void {
         $template = new Template($path, $params);
         $template->_render();
     }
 
-    public function _render() {
+    /**
+     *
+     * @throws SyntaxException
+     */
+    public function _render() : void {
         $parsedContent = $this->parse();
         View::render($parsedContent);
     }
 
 
-
-    private function getTAbsolutePath($TName) {
+    /**
+     * @param string $TName
+     * @return string
+     */
+    private function getTAbsolutePath(string $TName) : string {
         return Template::$rootAbsolutePath . $TName . '.html';
     }
 
-    private function getTContent($path) {
+    /**
+     * @param string $path
+     * @return bool|string
+     */
+    private function getTContent(string $path) : string {
         $TContent = file_get_contents($path);
         if($TContent == false) {
             throw new \InvalidArgumentException('Le chargement du template a échoué !');
@@ -109,8 +133,11 @@ class Template
     }
 
 
-
-    private function getTHierarchy() {
+    /**
+     * @return array
+     * @throws SyntaxException
+     */
+    private function getTHierarchy() : array {
         $TNames = [ $this->name ];
         $TPath = $this->getTAbsolutePath($this->name);
         $TPaths = [ $TPath ];
@@ -135,8 +162,11 @@ class Template
     }
 
 
-
-    private function nextSimpleTNode($content) {
+    /**
+     * @param string $content
+     * @return bool|mixed
+     */
+    private function nextTNodeContents(string $content) {
         $matches = [];
         $matchesFound = preg_match('/' . Template::regExpTNode . '/', $content, $matches);
         if($matchesFound) {
@@ -146,10 +176,15 @@ class Template
         }
     }
 
-    private function nextTNode($content) {
-        $nextTNode = $this->nextSimpleTNode($content);
+    /**
+     * @param string $content
+     * @return bool|mixed|TNode
+     * @throws SyntaxException
+     */
+    private function nextTNode(string $content) {
+        $nextTNode = $this->nextTNodeContents($content);
         if($nextTNode == false) {
-            return false;
+            return ;
         } else {
             $contentsStr = $this->getSimpleTNodeContents($nextTNode);
             $contentsArray = preg_split("/ +/", $contentsStr, -1, PREG_SPLIT_NO_EMPTY);
@@ -167,7 +202,6 @@ class Template
                 }
                 $TNodeStructure['otherContents'] = $contentsArray;
 
-                //TODO
                 switch ($TNodeStructure['label']) {
                     case TNodeLabel::VALUE :
                         $nextTNode = $this->getTNode2Contents($TNodeStructure);
@@ -188,13 +222,16 @@ class Template
                         $nextTNode = $this->getTNode1Content($TNodeStructure);
                         break;
                     case TNodeLabel::CONDITION :
-                        //$nextTNode = ;
+                        $nextTNode = $this->getTNodeCondition($TNodeStructure);
+                        break;
+                    case TNodeLabel::CONDITION_ELSE :
+                        $nextTNode = $this->getTNode1Content($TNodeStructure);
                         break;
                     case TNodeLabel::END_CONDITION :
                         $nextTNode = $this->getTNode1Content($TNodeStructure);
                         break;
                     case TNodeLabel::LOOP :
-                        //$nextTNode = ;
+                        $nextTNode = $this->getTNodeLoop($TNodeStructure);
                         break;
                     case TNodeLabel::END_LOOP :
                         $nextTNode = $this->getTNode1Content($TNodeStructure);
@@ -206,11 +243,19 @@ class Template
         }
     }
 
-    private function getSimpleTNodeContents($TNode) {
+    /**
+     * @param string $TNode
+     * @return bool|string
+     */
+    private function getSimpleTNodeContents(string $TNode) : string {
         return substr($TNode, 2, -2);
     }
 
-    private function isTNodeLabel($label) {
+    /**
+     * @param string $label
+     * @return bool
+     */
+    private function isTNodeLabel(string $label) : bool {
         switch ($label) {
             case TNodeLabel::VALUE :
             case TNodeLabel::ROUTE :
@@ -219,6 +264,7 @@ class Template
             case TNodeLabel::BLOCK :
             case TNodeLabel::END_BLOCK :
             case TNodeLabel::CONDITION :
+            case TNodeLabel::CONDITION_ELSE :
             case TNodeLabel::END_CONDITION :
             case TNodeLabel::LOOP :
             case TNodeLabel::END_LOOP :
@@ -228,19 +274,29 @@ class Template
         }
     }
 
-    public function getTNode1Content($TNodeStructure) {
+    /**
+     * @param  array $TNodeStructure
+     * @return TNode
+     * @throws SyntaxException
+     */
+    public function getTNode1Content(array $TNodeStructure) : TNode {
         $nbOtherContents = count($TNodeStructure['otherContents']);
         if($nbOtherContents != 0) {
             throw new SyntaxException(
                 'Template->getTNode1Content() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
         } else {
             unset($TNodeStructure['otherContents']);
-            $TNodeParent = new TNode($TNodeStructure);
-            return $TNodeParent;
+            $TNode = new TNode($TNodeStructure);
+            return $TNode;
         }
     }
 
-    public function getTNode2Contents($TNodeStructure) {
+    /**
+     * @param array $TNodeStructure
+     * @return TNode
+     * @throws SyntaxException
+     */
+    public function getTNode2Contents(array $TNodeStructure) : TNode {
         $nbOtherContents = count($TNodeStructure['otherContents']);
         if($nbOtherContents != 1) {
             throw new SyntaxException(
@@ -248,12 +304,17 @@ class Template
         } else {
             $TNodeStructure['name'] = $TNodeStructure['otherContents'][0];
             unset($TNodeStructure['otherContents']);
-            $TNodeParent = new TNode($TNodeStructure);
-            return $TNodeParent;
+            $TNode = new TNode($TNodeStructure);
+            return $TNode;
         }
     }
 
-    public function getTNodeRoute($TNodeStructure) {
+    /**
+     * @param array $TNodeStructure
+     * @return TNode
+     * @throws SyntaxException
+     */
+    public function getTNodeRoute(array $TNodeStructure) : TNode {
         $nbOtherContents = count($TNodeStructure['otherContents']);
         if($nbOtherContents != 1) {
             throw new SyntaxException(
@@ -264,80 +325,122 @@ class Template
             $routeParameters = array_slice($routeContents, 1);
             $TNodeStructure['route'] = \simplifying\routes\Router::getInstance()->getRoute($routeAlias, $routeParameters);
             unset($TNodeStructure['otherContents']);
-            $TNodeParent = new TNode($TNodeStructure);
-            return $TNodeParent;
+            $TNode = new TNode($TNodeStructure);
+            return $TNode;
+        }
+    }
+
+    /**
+     * @param array $TNodeStructure
+     * @return TNode
+     * @throws SyntaxException
+     */
+    public function getTNodeLoop(array $TNodeStructure) : TNode {
+        $nbOtherContents = count($TNodeStructure['otherContents']);
+        if($nbOtherContents != 3) {
+            throw new SyntaxException(
+                'Template->getTNodeLoop() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
+        } else {
+            $TNodeStructure['set'] = $TNodeStructure['otherContents'][0];
+            if($TNodeStructure['otherContents'][1] != ':') {
+                throw new SyntaxException(
+                    'Template->getTNodeLoop() : syntaxe incorrecte dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
+            }
+            $TNodeStructure['element'] = $TNodeStructure['otherContents'][2];
+            unset($TNodeStructure['otherContents']);
+            $TNode = new TNode($TNodeStructure);
+            return $TNode;
+        }
+    }
+
+    /**
+     * @param array $TNodeStructure
+     * @return TNode
+     * @throws SyntaxException
+     */
+    public function getTNodeCondition(array $TNodeStructure) : TNode {
+        $nbOtherContents = count($TNodeStructure['otherContents']);
+        if($nbOtherContents != 1) {
+            throw new SyntaxException(
+                'Template->getTNodeCondition() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
+        } else {
+            $TNodeStructure['condition'] = $TNodeStructure['otherContents'][0];
+            unset($TNodeStructure['otherContents']);
+            $TNode = new TNode($TNodeStructure);
+            return $TNode;
         }
     }
 
 
 
-    private function parse() {
+    /**
+     * @return string
+     * @throws SyntaxException
+     */
+    private function parse() : string {
         //Chargement de la hiérarchie de templates.
         $hierarchy = $this->getTHierarchy();
         $TContents = $hierarchy['TContents'];
-
-        //Parsing en arbre n-aire du template this et des templates parents si existant.
-        $parsedTContent = "";
-        foreach($TContents as $key => $TContent) {
-            //$tree = parseInTree($content);
-            //TODO
-            $parsedTContent .= $TContent;
+        //Parsing template -> arbre.
+        $firstTContent = array_shift($TContents);
+        //Parsing en arbre n-aire du template this.
+        $tree = $this->parseInTree($firstTContent);
+        echo $tree;
+        foreach($TContents as $key => $TChildContent) {
+            //Parsing des templates parents si existant.
+            $childTree = $this->parseInTree($TChildContent);
+            //Fusion des arbres.
+            $tree = $this->mergeTrees($tree, $childTree);
         }
-
+        //Parsing arbre -> html.
+        $parsedTContent = $this->parseInHtml($tree);
         return $parsedTContent;
     }
 
-    private function parseInTree($content) {
+    /**
+     * @param string $content
+     * @return TNode
+     * @throws SyntaxException
+     */
+    private function parseInTree(string $content) : TNode {
         $loopsSequence = 0;
         $endsLoopSequence = 0;
         $conditionsSequence = 0;
         $endsConditionSequence = 0;
-        $blocksSequence = 0;
-        $endsBlockSequence = 0;
-
         $TNodes = [];
-
         $nextTNode = $this->nextTNode($content);
-
-        while($nextTNode != null) {
+        while($nextTNode != false) {
             $pos = strpos($content, $nextTNode->TNode);
-            $beforeContent = substr(0, $pos - 1);
-            $beforeTNodeIgnored = new TNode(['label' => TNodeLabel::IGNORED, 'content' => $beforeContent]);
-            $content = substr_replace($content, "", 0, $pos - 1 + strlen($nextTNode->TNode));
+            $beforeContent = substr($content, 0, $pos);
+            $beforeTNodeIgnored = new TNode(['label' => TNodeLabel::IGNORED, 'TNode' => $beforeContent]);
+            $content = substr_replace($content, "", 0, $pos + strlen($nextTNode->TNode));
 
             switch($nextTNode->label) {
                 case TNodeLabel::CONDITION :
-                    $nextTNode->addProperty('id', $conditionsSequence);
+                    $nextTNode->id = $conditionsSequence;
                     $conditionsSequence++;
                     $endsConditionSequence++;
                     break;
+                case TNodeLabel::CONDITION_ELSE :
+                    $nextTNode->id = $conditionsSequence;
+                    break;
                 case TNodeLabel::LOOP :
-                    $nextTNode->addProperty('id', $loopsSequence);
+                    $nextTNode->id = $loopsSequence;
                     $loopsSequence++;
                     $endsLoopSequence++;
                     break;
-                case TNodeLabel::BLOCK :
-                    $nextTNode->addProperty('id', $blocksSequence);
-                    $blocksSequence++;
-                    $endsBlockSequence++;
-                    break;
                 case TNodeLabel::END_CONDITION :
-                    $nextTNode->addProperty('id', $endsConditionSequence);
+                    $nextTNode->id = $endsConditionSequence;
                     $endsConditionSequence--;
                     break;
                 case TNodeLabel::END_LOOP :
-                    $nextTNode->addProperty('id', $endsLoopSequence);
+                    $nextTNode->id = $endsLoopSequence;
                     $endsLoopSequence--;
-                    break;
-                case TNodeLabel::END_BLOCK :
-                    $nextTNode->addProperty('id', $endsBlockSequence);
-                    $endsBlockSequence--;
                     break;
             }
 
             $TNodes[] = $beforeTNodeIgnored;
             $TNodes[] = $nextTNode;
-
             $nextTNode = $this->nextTNode($content);
         }
 
@@ -347,18 +450,35 @@ class Template
         }
 
         $rootTNode = new TNode();
-        $nbTNodes = count($TNodes);
         $parentTNode = $rootTNode;
-        for($i = 0; $i < $nbTNodes; $i++) {
-            $TNode = $TNodes[$i];
-            switch ($TNode) {
-                //TODO
-                case TNodeLabel::BLOCK :
-                case TNodeLabel::END_BLOCK :
-                case TNodeLabel::CONDITION :
-                case TNodeLabel::END_CONDITION :
+        $previousParentsTNode = [];
+        foreach($TNodes as $key => $TNode) {
+            switch ($TNode->label) {
                 case TNodeLabel::LOOP :
+                case TNodeLabel::BLOCK :
+                case TNodeLabel::CONDITION :
+                    $previousParentsTNode[] = $parentTNode;
+                    $parentTNode->addChild($TNode);
+                    $parentTNode = $TNode;
+                    break;
+                case TNodeLabel::CONDITION_ELSE :
+                    $previousParentsTNode[count($previousParentsTNode) - 1]->addChild($TNode);
+                    $parentTNode = $TNode;
+                    break;
+                case TNodeLabel::END_BLOCK :
                 case TNodeLabel::END_LOOP :
+                case TNodeLabel::END_CONDITION :
+                    //!$parentTNode->hasSameLabel($TNode)
+                    if(!$parentTNode->hasSameId($TNode) ) {
+                        //echo $parentTNode->id;
+                        //echo $TNode->id;
+                        throw new SyntaxException(
+                            "Template->parseInTree() : désordre dans les noeuds de template de fin, noeud ouvrant : " .
+                            $parentTNode->TNode .", noeud fermant : " . $TNode->TNode . " !");
+                    }
+                    $parentTNode = array_pop($previousParentsTNode);
+                    $parentTNode->addChild($TNode);
+                    break;
                 default :
                     $parentTNode->addChild($TNode);
             }
@@ -367,13 +487,34 @@ class Template
         return $rootTNode;
     }
 
-    private function mergeTrees($parentTree, $childTree) {
-        $mergeTree = new TNode();
-        //TODO
-        return $mergeTree;
+    /**
+     * @param TNode $parentTree
+     * @param TNode $childTree
+     * @return TNode
+     */
+    private function mergeTrees(TNode $parentTree, TNode $childTree) : TNode {
+        $parentTreeClone = $parentTree->clone();
+        $childTreeClone = $childTree->clone();
+        $abstractBlocksInParentTree = $parentTreeClone->searchTNodes(function($child){return $child->label == TNodeLabel::ABSTRACT_BLOCK;});
+        $blocksInChildTree = $childTreeClone->searchTNodes(function($child){return $child->label == TNodeLabel::BLOCK;});
+        foreach($blocksInChildTree as $key => $block) {
+            foreach($abstractBlocksInParentTree as $key2 => $abstractBlock) {
+                if($abstractBlock->name == $block->name) {
+                    $parent = $abstractBlock->parent;
+                    $parent->replaceChild($abstractBlock, $block);
+                    break;
+                }
+            }
+        }
+        return $parentTreeClone;
     }
 
-    private function parseInHtml() {
+    /**
+     * @param TNode $tree
+     * @return string
+     */
+    private function parseInHtml(TNode $tree) : string {
         //TODO
+        return "";
     }
 }

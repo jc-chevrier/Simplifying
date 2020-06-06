@@ -21,6 +21,7 @@ class TNodeLabel
     const END_LOOP = '/for';
 
     const CONDITION = 'if';
+    const CONDITION_ELSE = 'else';
     const END_CONDITION = '/if';
 
     const VALUE = 'val';

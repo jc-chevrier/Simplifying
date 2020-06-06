@@ -107,12 +107,18 @@ class Node
     }
 
 
-
+    /**
+     * @return string
+     */
+    public function __toString() : string
+    {
+        return $this->toString();
+    }
 
     /**
      * Afficher l'arborescence à partir d'un noeud.
      */
-    public function toString($tabulation = "||>>>", $indentation = 0) {
+    public function toString(string $tabulation = "||>>>", int $indentation = 0) : string {
         $string = "";
 
         $string .= "<br>";
