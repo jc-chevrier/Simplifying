@@ -59,7 +59,7 @@ class Template
      */
     private static function isRelativePath(string $path) : bool {
         $dirs = explode('\\', $path);
-        return array_search('.', $dirs) != false || array_search('..', $dirs) != false;
+        return array_search('.', $dirs) !== false || array_search('..', $dirs) !== false;
     }
 
     /**
@@ -385,15 +385,18 @@ class Template
         $firstTContent = array_shift($TContents);
         //Parsing en arbre n-aire du template this.
         $tree = $this->parseInTree($firstTContent);
-        echo $tree;
+        //Pour vérifier le contenu des arbres :
+        //echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
+        //echo $tree;
         foreach($TContents as $key => $TChildContent) {
             //Parsing des templates parents si existant.
             $childTree = $this->parseInTree($TChildContent);
             //Fusion des arbres.
             $tree = $this->mergeTrees($tree, $childTree);
         }
-        //Parsing arbre -> html.
-        $parsedTContent = $this->parseInHtml($tree);
+        echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
+        //Parsing arbre -> contenu.
+        $parsedTContent = $this->parseInContent($tree);
         return $parsedTContent;
     }
 
@@ -403,57 +406,58 @@ class Template
      * @throws SyntaxException
      */
     private function parseInTree(string $content) : TNode {
-        $loopsSequence = 0;
-        $endsLoopSequence = 0;
-        $conditionsSequence = 0;
-        $endsConditionSequence = 0;
+        $sequence = 0;
+        $id = $sequence;
         $TNodes = [];
         $nextTNode = $this->nextTNode($content);
         while($nextTNode != false) {
-            $pos = strpos($content, $nextTNode->TNode);
-            $beforeContent = substr($content, 0, $pos);
-            $beforeTNodeIgnored = new TNode(['label' => TNodeLabel::IGNORED, 'TNode' => $beforeContent]);
-            $content = substr_replace($content, "", 0, $pos + strlen($nextTNode->TNode));
-
             switch($nextTNode->label) {
                 case TNodeLabel::CONDITION :
-                    $nextTNode->id = $conditionsSequence;
-                    $conditionsSequence++;
-                    $endsConditionSequence++;
+                case TNodeLabel::LOOP :
+                    $nextTNode->id = $sequence;
+                    $id = $sequence;
+                    $sequence++;
                     break;
                 case TNodeLabel::CONDITION_ELSE :
-                    $nextTNode->id = $conditionsSequence;
-                    break;
-                case TNodeLabel::LOOP :
-                    $nextTNode->id = $loopsSequence;
-                    $loopsSequence++;
-                    $endsLoopSequence++;
+                    $nextTNode->id = $id;
                     break;
                 case TNodeLabel::END_CONDITION :
-                    $nextTNode->id = $endsConditionSequence;
-                    $endsConditionSequence--;
-                    break;
                 case TNodeLabel::END_LOOP :
-                    $nextTNode->id = $endsLoopSequence;
-                    $endsLoopSequence--;
+                    $nextTNode->id = $id;
+                    $id--;
                     break;
             }
 
-            $TNodes[] = $beforeTNodeIgnored;
+            $pos = strpos($content, $nextTNode->TNode);
+            $beforeContent = substr($content, 0, $pos);
+            if($beforeContent != '') {
+                $beforeTNodeIgnored = new TNode(['label' => TNodeLabel::IGNORED, 'TNode' => $beforeContent]);
+                $TNodes[] = $beforeTNodeIgnored;
+            }
+
             $TNodes[] = $nextTNode;
+
+            $content = substr_replace($content, "", 0, $pos + strlen($nextTNode->TNode));
             $nextTNode = $this->nextTNode($content);
         }
 
         if($content != "") {
-            $TNodeIgnored = new TNode(['label' => TNodeLabel::IGNORED, 'content' => $content]);
+            $TNodeIgnored = new TNode(['label' => TNodeLabel::IGNORED, 'TNode' => $content]);
             $TNodes[] = $TNodeIgnored;
         }
 
-        $rootTNode = new TNode();
+        $rootTNode = TNode::getATNodeRoot();
         $parentTNode = $rootTNode;
         $previousParentsTNode = [];
         foreach($TNodes as $key => $TNode) {
             switch ($TNode->label) {
+                case TNodeLabel::PARENT :
+                    if(!($parentTNode->label == TNodeLabel::ROOT && $parentTNode->nbChildren == 0)) {
+                        throw new SyntaxException(
+                            "Template->parseInTree() : un noeud <<parent ...> doit toujours être déclaré en premier noeud d'un template !
+                             Voici le neoud à l'origine de l'erreur : " . $TNode->TNode . " !");
+                    }
+                    break;
                 case TNodeLabel::LOOP :
                 case TNodeLabel::BLOCK :
                 case TNodeLabel::CONDITION :
@@ -468,10 +472,7 @@ class Template
                 case TNodeLabel::END_BLOCK :
                 case TNodeLabel::END_LOOP :
                 case TNodeLabel::END_CONDITION :
-                    //!$parentTNode->hasSameLabel($TNode)
-                    if(!$parentTNode->hasSameId($TNode) ) {
-                        //echo $parentTNode->id;
-                        //echo $TNode->id;
+                    if(!$parentTNode->isComplementaryWith($TNode) || !$parentTNode->hasSameIdThat($TNode) ) {
                         throw new SyntaxException(
                             "Template->parseInTree() : désordre dans les noeuds de template de fin, noeud ouvrant : " .
                             $parentTNode->TNode .", noeud fermant : " . $TNode->TNode . " !");
@@ -513,8 +514,36 @@ class Template
      * @param TNode $tree
      * @return string
      */
-    private function parseInHtml(TNode $tree) : string {
-        //TODO
-        return "";
+    private function parseInContent(TNode $TNode) : string {
+        $parsingContent = "";
+
+        switch ($TNode->label) {
+            case TNodeLabel::VALUE :
+                break;
+            case TNodeLabel::ROUTE :
+                break;
+            case TNodeLabel::BLOCK :
+                break;
+            case TNodeLabel::CONDITION :
+                break;
+            case TNodeLabel::CONDITION_ELSE :
+                break;
+            case TNodeLabel::LOOP :
+                break;
+            case TNodeLabel::IGNORED :
+                break;
+            //Noeuds pas à parser :
+            //case TNodeLabel::PARENT :
+            //case TNodeLabel::ABSTRACT_BLOCK :
+            //case TNodeLabel::END_LOOP :
+            //case TNodeLabel::END_CONDITION :
+            //case TNodeLabel::END_BLOCK :
+        }
+
+        foreach($TNode->children as $key => $child) {
+            $parsingContent .= $this->parseInContent($child);
+        }
+
+        return $parsingContent;
     }
 }

@@ -7,6 +7,7 @@ class TNode
     private $parent;
     private $properties;
     private $children;
+    private $nbChildren;
 
 
 
@@ -18,9 +19,19 @@ class TNode
     public function __construct(array $properties = [],  array $children = []) {
         $this->properties = $properties;
         $this->children = [];
+        $this->nbChildren = 0;
         foreach($children as $key => $child) {
             $this->addChild($child);
         }
+    }
+
+    /***
+     * @return TNode
+     */
+    public static function getATNodeRoot() : TNode {
+        $root = new TNode();
+        $root->label = TNodeLabel::ROOT;
+        return $root;
     }
 
 
@@ -38,19 +49,21 @@ class TNode
     /**
      * @param TNode $child
      */
-    public function addChild($child) {
+    public function addChild(TNode $child) {
         $child->parent = $this;
         $this->children[] = $child;
+        $this->nbChildren++;
     }
 
     /**
      * @param TNode $child
      */
-    public function removeChild($child) {
+    public function removeChild(TNode $child) : void {
         foreach($this->children as $key => $aChild) {
             if($aChild == $child) {
                 unset($aChild);
-                break;
+                $this->nbChildren--;
+                return;
             }
         }
         throw new \InvalidArgumentException("TNode->removeChild() : noeud à supprimer introuvable !");
@@ -61,12 +74,13 @@ class TNode
      * @param TNode $newChild
      */
     public function replaceChild(TNode $oldChild, TNode $newChild) : void {
-        $nbChildren = count($this->children);
+        $nbChildren = $this->nbChildren;
         for($i = 0; $i < $nbChildren; $i++) {
             $child = $this->children[$i];
-            if($oldChild == $child) {
+            if($oldChild->TNode == $child->TNode) {
                 $this->children[$i] = $newChild;
-                break;
+                $newChild->parent = $this;
+                return;
             }
         }
         throw new \InvalidArgumentException("TNode->replaceChild() : noeud à remplacer introuvable !");
@@ -94,9 +108,6 @@ class TNode
      */
     public function searchChildTNodes(callable $predicateForSelection, callable $filterForResult = null) : array {
         $searchedChildTNodes = [];
-        if($predicateForSelection($this)) {
-            $searchedChildTNodes[] = $filterForResult == null ? $this : $filterForResult($this);
-        }
         foreach($this->children as $key => $child) {
             if($predicateForSelection($child)) {
                 $searchedChildTNodes[] = $filterForResult == null ? $child : $filterForResult($child);
@@ -130,7 +141,7 @@ class TNode
      * @param TNode $cloneOfThis
      * @return TNode
      */
-    private function cloneChildren(TNode $cloneOfThis) : TNode {
+    private function cloneChildren(TNode $cloneOfThis) {
         foreach($this->children as $key => $child) {
             $childClone = $child->cloneProperties();
             $childClone->parent = $cloneOfThis;
@@ -145,7 +156,7 @@ class TNode
      * @param TNode $aTNode
      * @return bool
      */
-    public function hasSameProperty(string $property, TNode $aTNode) : bool {
+    public function hasSamePropertyThat(string $property, TNode $aTNode) : bool {
         return $this->$property == $aTNode->$property;
     }
 
@@ -153,16 +164,26 @@ class TNode
      * @param TNode $aTNode
      * @return bool
      */
-    public function hasSameLabel(TNode $aTNode) : bool {
-        return $this->hasSameProperty('label', $aTNode);
+    public function hasSameLabelThat(TNode $aTNode) : bool {
+        return $this->hasSamePropertyThat('label', $aTNode);
     }
 
     /**
      * @param TNode $aTNode
      * @return bool
      */
-    public function hasSameId(TNode $aTNode) : bool {
-        return $this->hasSameProperty('id', $aTNode);
+    public function hasSameIdThat(TNode $aTNode) : bool {
+        return $this->hasSamePropertyThat('id', $aTNode);
+    }
+
+
+
+    /**
+     * @param TNode $TNode
+     * @return bool
+     */
+    public function isComplementaryWith(TNode $TNode) : bool {
+        return TNodeLabel::TNodeLabelsAreComplementary($this->label, $TNode->label);
     }
 
 
@@ -208,33 +229,46 @@ class TNode
     }
 
     /**
-     * @param string $tabulation
+     * @param callable|null $filterProperties
+     * @param int $tabulationPx
      * @param int $indentation
      * @return string
      */
-    public function toString(string $tabulation = "||>>>", int $indentation = 0) : string {
+    public function toString(callable $filterProperties = null, int $tabulationPx = 40, int $indentation = 0) : string {
         $string = "";
-
-        $string .= "<br>";
-        for($i = 0; $i < $indentation; $i++) {
-            $string .= $tabulation;
+        if($indentation == 0) {
+            $string .= "
+            <style>
+                .keyProperty {
+                    color: orange;
+                }
+                .valueProperty {
+                    color: green;
+                }
+            </style>";
         }
 
-        $string .= "[ ";
+        $string .= "<div class='TNode$indentation'>[ ";
         if(count($this->properties) != 0) {
             $keysProperties = array_keys($this->properties);
-            $keyLastProperty = array_pop($keysProperties);
             foreach($keysProperties as $key => $keyProperty) {
-                $property = $this->properties[$keyProperty];
-                $string .= "$keyProperty=$property | ";
+                if($filterProperties == null || $filterProperties($keyProperty)) {
+                    $property = $this->properties[$keyProperty];
+                    $string .= "<span class='keyProperty'>$keyProperty</span>=<span class='valueProperty'>$property</span> | ";
+                }
             }
-            $string .= "$keyLastProperty=". $this->properties[$keyLastProperty] . " | ";
         }
-        $string .= " nbChildren=" . count($this->children) . " ]";
+        if($filterProperties == null || $filterProperties("nbChildren")) {
+            $string .= " <span class='keyProperty'>nbChildren</span>=<span class='valueProperty'>$this->nbChildren</span>";
+        }
+        $string .= " ]</div>";
 
         $indentation++;
+        if($this->nbChildren != 0) {
+            $string .= "<style> .TNode$indentation{margin-left: " . ($tabulationPx * $indentation) ."px;} </style>";
+        }
         foreach($this->children as $index => $child) {
-            $string .= $child->toString($tabulation, $indentation);
+            $string .= $child->toString($filterProperties, $tabulationPx, $indentation);
         }
 
         return $string;

@@ -117,19 +117,20 @@ class Node
 
     /**
      * Afficher l'arborescence à partir d'un noeud.
+     *
+     * @param int $tabulationPx
+     * @param int $indentation
+     * @return string
      */
-    public function toString(string $tabulation = "||>>>", int $indentation = 0) : string {
-        $string = "";
-
-        $string .= "<br>";
-        for($i = 0; $i < $indentation; $i++) {
-            $string .= $tabulation;
-        }
-        $string .= $this->type . "[" . $this->value . "]";
+    public function toString(int $tabulationPx = 40, int $indentation = 0) : string {
+        $string = "<div class='Node$indentation'>" . $this->type . "[" . $this->value . "]</div>";
 
         $indentation++;
+        if(count($this->childNodes) != 0) {
+            $string .= "<style> .Node$indentation{margin-left: " . ($tabulationPx * $indentation) ."px;} </style>";
+        }
         foreach($this->childNodes as $index => $childNode) {
-            $string .= $childNode->toString($tabulation, $indentation);
+            $string .= $childNode->toString($tabulationPx, $indentation);
         }
 
         return $string;
@@ -137,7 +138,10 @@ class Node
 
 
 
-
+    /**
+     * @param $name
+     * @return bool
+     */
     public function __get($name) {
         if (isset($this->$name)) {
             return $this->$name;
@@ -145,6 +149,11 @@ class Node
         return false;
     }
 
+    /**
+     * @param $name
+     * @param $value
+     * @return bool
+     */
     public function __set($name, $value) {
         if (isset($this->$name)) {
             $this->$name = $value;
