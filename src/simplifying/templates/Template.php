@@ -570,12 +570,12 @@ class Template
      * @throws TemplateSyntaxException
      */
     private function parseTNodeLoop(TNode $TNodeLoop) : string {
-        $set = $this->parseNameSet($TNodeLoop->set);
+        $set = $this->getVal($TNodeLoop->set);
         $element = $TNodeLoop->element;
 
         $parsingContent = "";
-        foreach($$set as $key => $$element) {
-            $this->vars[$element] = $$element;
+        foreach($set as $key => $value) {
+            $this->vars[$element] = $value;
             $parsingContent .=  $this->parseChildrenTNode($TNodeLoop);
         }
 
@@ -597,7 +597,7 @@ class Template
 
 
     /**
-     * @param string $nameSet
+     * @param string $nameVal
      * @return string
      * @throws TemplateSyntaxException
      */
