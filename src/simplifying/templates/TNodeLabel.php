@@ -68,4 +68,31 @@ class TNodeLabel
     private static function TNodeLabelBelongsTo(string $TNodeLabel, array $TNodeLabels) : bool {
         return array_search($TNodeLabel, $TNodeLabels) !== false;
     }
+
+
+
+    /**
+     * @param string $label
+     * @return bool
+     */
+    public static function isTNodeLabel(string $label) : bool {
+        switch ($label) {
+            case TNodeLabel::VALUE :
+            case TNodeLabel::ROUTE :
+            case TNodeLabel::PARENT :
+            case TNodeLabel::ABSTRACT_BLOCK :
+            case TNodeLabel::BLOCK :
+            case TNodeLabel::END_BLOCK :
+            case TNodeLabel::CONDITION :
+            case TNodeLabel::CONDITION_ELSE :
+            case TNodeLabel::END_CONDITION :
+            case TNodeLabel::LOOP :
+            case TNodeLabel::END_LOOP :
+            case TNodeLabel::IGNORED :
+            case TNodeLabel::ROOT :
+                return true;
+            default:
+                return false;
+        }
+    }
 }

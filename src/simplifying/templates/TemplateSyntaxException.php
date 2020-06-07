@@ -9,7 +9,7 @@ use Throwable;
  *
  * @author CHEVRIER Jean-Christophe.
  */
-class SyntaxException extends \Exception
+class TemplateSyntaxException extends \Exception
 {
     public function __construct($message = "", $code = 0, Throwable $previous = null)
     {
