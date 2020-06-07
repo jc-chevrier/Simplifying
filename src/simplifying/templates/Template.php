@@ -585,6 +585,7 @@ class Template
     /**
      * @param TNode $TNode
      * @return string
+     * @throws TemplateSyntaxException
      */
     private function parseChildrenTNode(TNode $TNode) : string {
         $parsingContent = "";
