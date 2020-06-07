@@ -151,6 +151,43 @@ class TNode
     }
 
 
+
+    /**
+     * @return bool
+     */
+    public function hasChildren() : bool
+    {
+        return  $this->nbChildren != 0;
+    }
+
+
+
+    /**
+     * @param $keyProperty
+     * @param $valueProperty
+     * @return bool
+     */
+    public function propertyIs($keyProperty, $valueProperty) : bool {
+        return $this->$keyProperty = $valueProperty;
+    }
+
+    /**
+     * @param $label
+     * @return bool
+     */
+    public function labelIs($label) : bool {
+        return $this->propertyIs('label', $label);
+    }
+
+    /**
+     * @param $label
+     * @return bool
+     */
+    public function is($label) : bool {
+        return $this->labelIs($label);
+    }
+
+
     /**
      * @param string $property
      * @param TNode $aTNode

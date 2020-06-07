@@ -452,7 +452,7 @@ class Template
         foreach($TNodes as $key => $TNode) {
             switch ($TNode->label) {
                 case TNodeLabel::PARENT :
-                    if(!($parentTNode->label == TNodeLabel::ROOT && $parentTNode->nbChildren == 0)) {
+                    if(!($parentTNode->is(TNodeLabel::ROOT) && !$parentTNode->hasChildren())) {
                         throw new SyntaxException(
                             "Template->parseInTree() : un noeud <<parent ...> doit toujours être déclaré en premier noeud d'un template !
                              Voici le neoud à l'origine de l'erreur : " . $TNode->TNode . " !");
