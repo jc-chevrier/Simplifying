@@ -55,6 +55,7 @@ class TNodeLabel
         return TNodeLabel::_TNodeLabelsAreComplementary($TNodeLabel1, $TNodeLabel2, TNodeLabel::FOR_LABELS) ||
                TNodeLabel::_TNodeLabelsAreComplementary($TNodeLabel1, $TNodeLabel2, TNodeLabel::IF_LABELS_1) ||
                TNodeLabel::_TNodeLabelsAreComplementary($TNodeLabel1, $TNodeLabel2, TNodeLabel::IF_LABELS_2) ||
+               TNodeLabel::_TNodeLabelsAreComplementary($TNodeLabel1, $TNodeLabel2, TNodeLabel::IF_NOT_LABELS) ||
                TNodeLabel::_TNodeLabelsAreComplementary($TNodeLabel1, $TNodeLabel2, TNodeLabel::BLOCK_LABELS);
     }
 
@@ -97,6 +98,9 @@ class TNodeLabel
             case TNodeLabel::THEN :
             case TNodeLabel::ELSE :
             case TNodeLabel::END_IF :
+            case TNodeLabel::IF_NOT :
+            case TNodeLabel::END_IF_NOT :
+            case TNodeLabel::TERNARY_EXPRESSION :
             case TNodeLabel::FOR :
             case TNodeLabel::END_FOR :
             case TNodeLabel::IGNORED :

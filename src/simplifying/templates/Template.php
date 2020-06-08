@@ -180,24 +180,16 @@ class Template
                 //Structure du noeud -> Noeud de template.
                 switch ($TNodeStructure['label']) {
                     case TNodeLabel::VALUE :
+                    case TNodeLabel::PARENT :
+                    case TNodeLabel::ABSTRACT_BLOCK :
+                    case TNodeLabel::BLOCK :
                         $nextTNode = $this->getTNode2Contents($TNodeStructure);
                         break;
                     case TNodeLabel::ROUTE :
                         $nextTNode = $this->getTNode2Contents($TNodeStructure, 'route');
                         break;
-                    case TNodeLabel::PARENT :
-                        $nextTNode = $this->getTNode2Contents($TNodeStructure);
-                        break;
-                    case TNodeLabel::ABSTRACT_BLOCK :
-                        $nextTNode = $this->getTNode2Contents($TNodeStructure);
-                        break;
-                    case TNodeLabel::BLOCK :
-                        $nextTNode = $this->getTNode2Contents($TNodeStructure);
-                        break;
-                    case TNodeLabel::END_BLOCK :
-                        $nextTNode = $this->getTNode1Content($TNodeStructure);
-                        break;
                     case TNodeLabel::IF :
+                    case TNodeLabel::IF_NOT :
                         $nextTNode = $this->getTNode2Contents($TNodeStructure, 'condition');
                         break;
                     case TNodeLabel::ELSE :
@@ -206,11 +198,17 @@ class Template
                     case TNodeLabel::END_IF :
                         $nextTNode = $this->getTNode1Content($TNodeStructure);
                         break;
-                    case TNodeLabel::FOR :
-                        $nextTNode = $this->getTNodeFor($TNodeStructure);
+                    case TNodeLabel::END_IF_NOT :
+                        $nextTNode = $this->getTNode1Content($TNodeStructure);
+                        break;
+                    case TNodeLabel::END_BLOCK :
+                        $nextTNode = $this->getTNode1Content($TNodeStructure);
                         break;
                     case TNodeLabel::END_FOR :
                         $nextTNode = $this->getTNode1Content($TNodeStructure);
+                        break;
+                    case TNodeLabel::FOR :
+                        $nextTNode = $this->getTNodeFor($TNodeStructure);
                         break;
                 }
 
@@ -326,25 +324,12 @@ class Template
     private function parseInTree(string $content) : TNode {
         //Parsing du template en tableau de noeuds de template.
         $sequence = 0;
-        $id = 0;
         $TNodes = [];
         $nextTNode = $this->nextTNode($content);
         while($nextTNode != false) {
-            switch($nextTNode->label) {
-                case TNodeLabel::IF :
-                case TNodeLabel::FOR :
-                    $nextTNode->id = $sequence;
-                    $id = $sequence;
-                    $sequence++;
-                    break;
-                case TNodeLabel::ELSE :
-                    $nextTNode->id = $id;
-                    break;
-                //case TNodeLabel::END_IF :
-                //case TNodeLabel::END_FOR :
-                //    $nextTNode->id = $id;
-                //    $id--;
-                //    break;
+            if($nextTNode->is(TNodeLabel::FOR)) {
+                $nextTNode->id = $sequence;
+                $sequence++;
             }
 
             $pos = strpos($content, $nextTNode->TNode);
@@ -380,12 +365,13 @@ class Template
                     break;
                 case TNodeLabel::FOR :
                 case TNodeLabel::BLOCK :
+                case TNodeLabel::IF_NOT :
                     $parentTNode->addChild($TNode);
                     $previousParentsTNode[] = $parentTNode;
                     $parentTNode = $TNode;
                     break;
                 case TNodeLabel::IF :
-                    $TNodeThen = new TNode(['label' => TNodeLabel::THEN, 'id' => $TNode->id]);
+                    $TNodeThen = new TNode(['label' => TNodeLabel::THEN]);
                     $parentTNode->addChild($TNode);
                     $TNode->addChild($TNodeThen);
                     $previousParentsTNode[] = $parentTNode;
@@ -405,6 +391,7 @@ class Template
                 case TNodeLabel::END_BLOCK :
                 case TNodeLabel::END_FOR :
                 case TNodeLabel::END_IF :
+                case TNodeLabel::END_IF_NOT :
                     if(!$parentTNode->isComplementaryWith($TNode)) {
                         throw new TemplateSyntaxException(
                             "Template->parseInTree() : désordre dans les noeuds de template, noeud ouvrant : " .
@@ -414,7 +401,6 @@ class Template
                     if($parentTNode->is(TNodeLabel::IF)) {
                         $parentTNode = array_pop($previousParentsTNode);
                     }
-                    //$parentTNode->addChild($TNode);
                     break;
                 default :
                     $parentTNode->addChild($TNode);
@@ -470,6 +456,9 @@ class Template
                 break;
             case TNodeLabel::IF :
                 $parsingContent .= $this->parseTNodeIf($TNode);
+                break;
+            case TNodeLabel::IF_NOT :
+                $parsingContent .= $this->parseTNodeIfNot($TNode);
                 break;
             case TNodeLabel::FOR :
                 $parsingContent .= $this->parseTNodeFor($TNode);
@@ -544,6 +533,24 @@ class Template
             $childTNodeElse = $TNodeIf->searchChildTNodes(function($child){return $child->is(TNodeLabel::ELSE);})[0];
             $parsingContent = $this->parseChildrenTNode($childTNodeElse);
 
+        }
+        return $parsingContent;
+    }
+
+    /**
+     * @param TNode $TNodeIfNot
+     * @return string
+     * @throws TemplateSyntaxException
+     * @throws UnfindableTemplateVariableException
+     */
+    private function parseTNodeIfNot(TNode $TNodeIfNot) : string {
+        //Récupération de la valeur de la condition.
+        $condition = $this->parseTVar($TNodeIfNot->condition);
+        //Implémentation de la condition.
+        if($condition) {
+            $parsingContent = "";
+        } else {
+            $parsingContent = $this->parseChildrenTNode($TNodeIfNot);
         }
         return $parsingContent;
     }

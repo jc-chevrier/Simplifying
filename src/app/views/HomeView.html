@@ -12,7 +12,7 @@
         <<if ep.isConnectable>>
             Est connecté !
         <<else>>
-            N'est pas connecté
+            N'est pas connecté !
         <</if>>
         <a href='<<route test2:3:4>>'>
             Lien vers le test2 : 3 : 4.
@@ -20,5 +20,8 @@
         <a href='<<route test2:#cr.id:#ep.set.1.0>>'>
             Lien vers le test2 : <<val cr.id>> : <<val ep.set.1.0>>.
         </a>
+        <<ifnot ep.isConnectable>>
+            N'est pas connecté !
+        <</ifnot>>
     </div>
 <</block>>
