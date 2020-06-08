@@ -233,7 +233,7 @@ class TNode
         if(isset($this->$name)) {
             return $this->$name;
         } else {
-            if(isset($this->properties[$name])) {
+            if(array_key_exists($name, $this->properties)) {
                 return $this->properties[$name];
             }
         }
@@ -248,7 +248,7 @@ class TNode
         if(isset($this->$name)) {
             $this->$name = $value;
         } else {
-            if(isset($this->properties[$name])) {
+            if(array_key_exists($name, $this->properties)) {
                 $this->properties[$name] = $value;
             } else {
                 $this->addProperty($name, $value);

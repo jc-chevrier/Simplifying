@@ -544,7 +544,7 @@ class Template
                 $parsingContent .= $this->parseTNodeFor($TNode);
                 break;
             case TNodeLabel::IGNORED :
-                $parsingContent .= $TNode->TNode;
+                $parsingContent .= $this->parseTNodeIgnored($TNode);
                 break;
             case TNodeLabel::ROOT :
             case TNodeLabel::BLOCK :
@@ -572,37 +572,55 @@ class Template
     /**
      * @param TNode $TNodeRoute
      * @return string
-     * @throws TemplateSyntaxException
-     * @throws UnfindableTemplateVariableException
      */
     private function parseTNodeRoute(TNode $TNodeRoute) : string {
-        return $TNodeRoute->route . $this->parseChildrenTNode($TNodeRoute);
+        return $TNodeRoute->route;
     }
 
     /**
-     * @param TNode $TNodeCondition
+     * @param TNode $TNodeIgnored
      * @return string
      */
-    private function parseTNodeIf(TNode $TNodeCondition) : string {
-        return "TODO Condition";
+    private function parseTNodeIgnored(TNode $TNodeIgnored) : string {
+        return $TNodeIgnored->TNode;
     }
 
     /**
-     * @param TNode $TNodeLoop
+     * @param TNode $TNodeIf
+     * @return string
+     * @throws UnfindableTemplateVariableException
+     * @throws TemplateSyntaxException
+     */
+    private function parseTNodeIf(TNode $TNodeIf) : string {
+        //Récupération de la valeur de la condition.
+        $condition = $this->parseTVar($TNodeIf->condition);
+        //Implémentation de la condition.
+        if($condition) {
+            $childTNodeThen = $TNodeIf->searchChildTNodes(function($child){return $child->is(TNodeLabel::THEN);})[0];
+            $parsingContent = $this->parseChildrenTNode($childTNodeThen);
+        } else {
+            $childTNodeElse = $TNodeIf->searchChildTNodes(function($child){return $child->is(TNodeLabel::ELSE);})[0];
+            $parsingContent = $this->parseChildrenTNode($childTNodeElse);
+
+        }
+        return $parsingContent;
+    }
+
+    /**
+     * @param TNode $TNodeFor
      * @return string
      * @throws TemplateSyntaxException
      * @throws UnfindableTemplateVariableException
      */
-    private function parseTNodeFor(TNode $TNodeLoop) : string {
+    private function parseTNodeFor(TNode $TNodeFor) : string {
         //Récupération de la valeur du set du for.
-        $set = $this->parseTVar($TNodeLoop->set);
-        $element = $TNodeLoop->element;
-
+        $set = $this->parseTVar($TNodeFor->set);
+        $element = $TNodeFor->element;
         //Implémentation du for.
         $parsingContent = "";
         foreach($set as $key => $value) {
             $this->vars[$element] = $value;
-            $parsingContent .=  $this->parseChildrenTNode($TNodeLoop);
+            $parsingContent .=  $this->parseChildrenTNode($TNodeFor);
         }
         //Destruction de la variable du for.
         unset($this->vars[$element]);
@@ -649,7 +667,7 @@ class Template
                 break;
             default:
                 if(isset($this->vars[$nameTVar])) {
-                    $TVar = 'this->vars["'. $nameTVar .'"]';
+                    $TVar = $this->vars[$nameTVar];
                 } else {
                     if(preg_match('/\.{1}/', $nameTVar)) {
                         $partsTVar = preg_split("/\.{1}/", $nameTVar, -1, PREG_SPLIT_NO_EMPTY);
@@ -689,12 +707,12 @@ class Template
 
     /**
      * @param string $nameTVar
-     * @param array $set
+     * @param $set
      * @param array $partsTVar
      * @return array|mixed
      * @throws UnfindableTemplateVariableException
      */
-    private function parseLongTVar(string $nameTVar, array $set, array $partsTVar) {
+    private function parseLongTVar(string $nameTVar, $set, array $partsTVar) {
         $nbPartsVal = count($partsTVar);
         if($nbPartsVal == 0) {
             throw new UnfindableTemplateVariableException(
@@ -703,10 +721,10 @@ class Template
 
         $TVar = $set;
         foreach($partsTVar as $key => $partTVar) {
-            if(isset($TVar[$partTVar])) {
+            if(is_array($TVar) && array_key_exists($partTVar, $TVar) !== false) {
                 $TVar = $TVar[$partTVar];
             } else {
-                if(isset($TVar->$partTVar)) {
+                if(is_object($TVar) && ($TVar->$partTVar !== false || isset($TVar->$partTVar))) {
                     $TVar = $TVar->$partTVar;
                 } else {
                     if($TVar == $this->vars) {

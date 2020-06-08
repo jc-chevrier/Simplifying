@@ -58,6 +58,7 @@ class Route
         $this->templateRoute = $templateRoute;
         $this->templateRouteNodes = $templateRouteNodes;
         $this->action = $action;
+        $this->parameters = [];
     }
 
 
@@ -152,7 +153,7 @@ class Route
         if (isset($this->$name)) {
             return $this->$name;
         } else {
-            if(isset($this->parameters[$name])) {
+            if(array_key_exists($name, $this->parameters)) {
                 return $this->parameters[$name];
             }
         }
