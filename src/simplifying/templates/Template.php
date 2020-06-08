@@ -2,6 +2,7 @@
 
 namespace simplifying\templates;
 
+use simplifying\PathManager;
 use simplifying\routes\Router;
 
 /**
@@ -52,51 +53,14 @@ class Template
      */
     private static function initialiseRootAbsolutePath() {
         if(Template::$rootAbsolutePath == null) {
-            if(Template::isRelativePath(Template::$rootRelativePath)) {
-                Template::$rootAbsolutePath = Template::parseInAbsolutePath(Template::$rootRelativePath);
+            if(PathManager::isRelativePath(Template::$rootRelativePath)) {
+                Template::$rootAbsolutePath = PathManager::parseInAbsolutePath(Template::$rootRelativePath, __DIR__);
             } else {
                 Template::$rootAbsolutePath = Template::$rootRelativePath;
             }
         }
     }
 
-    /**
-     * @param string $path
-     * @return bool
-     */
-    private static function isRelativePath(string $path) : bool {
-        $dirs = explode('\\', $path);
-        return array_search('.', $dirs) !== false || array_search('..', $dirs) !== false;
-    }
-
-    /**
-     * @param string $relativePath
-     * @return string
-     */
-    private static function parseInAbsolutePath(string $relativePath) : string {
-        $dirs = explode('\\', $relativePath);
-        $i = 0;
-        $dir = $dirs[$i];
-        if($dir == '.') {
-            unset($dirs[$i]);
-            $currentDir = explode('\\', __DIR__);
-            $dirs = array_merge($currentDir, $dirs);
-            $i += count($currentDir);
-        }
-        while($i < count($dirs)) {
-            $dir = $dirs[$i];
-            if($dir == '..') {
-                unset($dirs[$i]);
-                unset($dirs[$i - 1]);
-                $dirs = array_values($dirs);
-                $i--;
-            } else {
-                $i++;
-            }
-        }
-        $absolutePath = implode('\\', $dirs);
-        return $absolutePath;
-    }
 
 
     /**
