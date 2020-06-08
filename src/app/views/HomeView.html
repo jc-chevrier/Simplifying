@@ -1,6 +1,15 @@
 <<parent PageView>
+<<block css>
+    <style>
+        #maHomeView {
+            border: 2px solid blue;
+            margin: 5px;
+        }
+    </style>
+    <<ablock css>
+<</block>
 <<block body>
-    <div>
+    <div id="maHomeView">
         Vous êtes dans la HomeView.
         <<for ep.set : set2>
             <<for set2 : e>
@@ -29,5 +38,6 @@
         <a href='<<route test2:#cr.id:#ep.set.1.0>'>
             Lien vers le test2 : <<val cr.id> : <<val ep.set.1.0>.
         </a>
+        <<ternary ep.isConnected ? Est connecté! : N'est pas connecté!>
     </div>
 <</block>

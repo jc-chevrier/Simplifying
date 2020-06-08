@@ -1,7 +1,15 @@
 <<parent AbstractView>
+<<block css>
+    <style>
+        #maPageView {
+            border: 2px solid red;
+        }
+    </style>
+    <<ablock css>
+<</block>
 <<block body>
-    <div>
+    <div id="maPageView">
         Vous êtes dans la PageView.
+        <<ablock body>
     </div>
-    <<ablock body>
-<</block>>
+<</block>

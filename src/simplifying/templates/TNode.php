@@ -40,16 +40,22 @@ class TNode
      * @param $keyProperty
      * @param $valueProperty
      */
-    public function addProperty($keyProperty, $valueProperty) {
+    public function addProperty(string $keyProperty, string $valueProperty) : void{
         $this->properties[$keyProperty] = $valueProperty;
     }
 
+    /**
+     * @param string $keyProperty
+     */
+    public function removeProperty(string $keyProperty) : void {
+        unset($this->properties[$keyProperty]);
+    }
 
 
     /**
      * @param TNode $child
      */
-    public function addChild(TNode $child) {
+    public function addChild(TNode $child) : void {
         $child->parent = $this;
         $this->children[] = $child;
         $this->nbChildren++;
@@ -59,9 +65,11 @@ class TNode
      * @param TNode $child
      */
     public function removeChild(TNode $child) : void {
-        foreach($this->children as $key => $aChild) {
+        for($i = 0; $i < $this->nbChildren; $i++) {
+            $aChild = $this->children[$i];
             if($aChild === $child) {
-                unset($aChild);
+                unset($this->children[$i]);
+                $this->children = array_values($this->children);
                 $this->nbChildren--;
                 return;
             }
