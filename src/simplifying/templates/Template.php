@@ -447,7 +447,7 @@ class Template
                     if(!($parentTNode->is(TNodeLabel::ROOT) && !$parentTNode->hasChildren())) {
                         throw new TemplateSyntaxException(
                             "Template->parseInTree() : un noeud <<parent ...> doit toujours être déclaré en premier noeud d'un template !
-                             Voici le neoud à l'origine de l'erreur : " . $TNode->TNode . " !");
+                             Noeud concerné : " . $TNode->TNode . " !");
                     }
                     break;
                 case TNodeLabel::FOR :
@@ -469,8 +469,8 @@ class Template
                         throw new TemplateSyntaxException(
                             "Template->parseInTree() : désordre dans les noeuds de condition, noeud concerné : " . $TNode->TNode . " !");
                     }
-                    $TNodeCondition = $previousParentsTNode[count($previousParentsTNode) - 1];
-                    $TNodeCondition->addChild($TNode);
+                    $TNodeIf = $previousParentsTNode[count($previousParentsTNode) - 1];
+                    $TNodeIf->addChild($TNode);
                     $parentTNode = $TNode;
                     break;
                 case TNodeLabel::END_BLOCK :
@@ -479,11 +479,11 @@ class Template
                     if(!$parentTNode->isComplementaryWith($TNode)) {
                         throw new TemplateSyntaxException(
                             "Template->parseInTree() : désordre dans les noeuds de template, noeud ouvrant : " .
-                            $parentTNode->TNode .", noeud fermant : " . $TNode->TNode . " !");
+                             $parentTNode->TNode .", noeud fermant : " . $TNode->TNode . " !");
                     }
                     $parentTNode = array_pop($previousParentsTNode);
                     if($parentTNode->is(TNodeLabel::IF)) {
-                        //$parentTNode = array_pop($previousParentsTNode);
+                        $parentTNode = array_pop($previousParentsTNode);
                     }
                     $parentTNode->addChild($TNode);
                     break;
@@ -538,10 +538,10 @@ class Template
                 $parsingContent .= $this->parseTNodeRoute($TNode);
                 break;
             case TNodeLabel::IF :
-                $parsingContent .= $this->parseTNodeCondition($TNode);
+                $parsingContent .= $this->parseTNodeIf($TNode);
                 break;
             case TNodeLabel::FOR :
-                $parsingContent .= $this->parseTNodeLoop($TNode);
+                $parsingContent .= $this->parseTNodeFor($TNode);
                 break;
             case TNodeLabel::IGNORED :
                 $parsingContent .= $TNode->TNode;
@@ -583,7 +583,7 @@ class Template
      * @param TNode $TNodeCondition
      * @return string
      */
-    private function parseTNodeCondition(TNode $TNodeCondition) : string {
+    private function parseTNodeIf(TNode $TNodeCondition) : string {
         return "TODO Condition";
     }
 
@@ -593,7 +593,7 @@ class Template
      * @throws TemplateSyntaxException
      * @throws UnfindableTemplateVariableException
      */
-    private function parseTNodeLoop(TNode $TNodeLoop) : string {
+    private function parseTNodeFor(TNode $TNodeLoop) : string {
         //Récupération de la valeur du set du for.
         $set = $this->parseTVar($TNodeLoop->set);
         $element = $TNodeLoop->element;

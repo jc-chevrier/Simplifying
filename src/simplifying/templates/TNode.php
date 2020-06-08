@@ -168,7 +168,7 @@ class TNode
      * @return bool
      */
     public function propertyIs($keyProperty, $valueProperty) : bool {
-        return $this->$keyProperty = $valueProperty;
+        return $this->$keyProperty == $valueProperty;
     }
 
     /**
