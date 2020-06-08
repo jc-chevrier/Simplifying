@@ -683,9 +683,11 @@ class Template
      */
     private function parseLongTVar(string $nameTVar, array $set, array $partsTVar) {
         $nbPartsVal = count($partsTVar);
+        if($nbPartsVal == 0) {
+            throw new UnfindableTemplateVariableException("Template->parseLongTVar() : la variable $nameTVar est introuvable !");
+        }
 
         $TVar = $set;
-
         foreach($partsTVar as $key => $partTVar) {
             if(isset($TVar[$partTVar])) {
                 $TVar = $TVar[$partTVar];
