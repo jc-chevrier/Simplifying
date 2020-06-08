@@ -3,5 +3,20 @@
 <<block body>>
     <div>
         Vous êtes dans la HomeView.
+        <<for ep.set : set2>>
+            <<for set2 : e>>
+                <div>
+                    <<val e>>
+                </div>
+            <</for>>
+        <</for>>
+        <<if ep.isConnectable>>
+            Est connecté !
+        <<else>>
+            N'est pas connecté
+        <</if>>
+        <a href='<<route test2:3:4>>'>
+            Lien vers le test2 : 3 : 4.
+        </a>
     </div>
 <</block>>

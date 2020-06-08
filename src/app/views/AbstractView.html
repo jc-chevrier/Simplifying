@@ -1,30 +1,9 @@
 <html>
     <head>
-        <a href='<<ROUTE test2:2:2>>'>
-            Lien vers le test2 : 2 : 2.
-        </a>
         <<ablock css>>
         <<ablock js>>
     </head>
     <body>
-        Texte body 1.
         <<ablock body>>
-        Texte body 2.
-        <<for ep.set : set2>>
-            <<for set2 : e>>
-                <div>
-                    <<val e>>
-                </div>
-            <</for>>
-        <</for>>
-        <<if ep.isConnectable>>
-            Est connecté !
-        <<else>>
-            N'est pas connecté
-        <</if>>
-        Texte body 3.
-        <a href='<<route test2:3:4>>'>
-            Lien vers le test2 : 3 : 4.
-        </a>
     </body>
 </html>

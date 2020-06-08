@@ -361,7 +361,7 @@ class Template
         //Parsing en arbre n-aire du template this.
         $tree = $this->parseInTree($firstTContent);
         //Pour vérifier le contenu des arbres :
-        //echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; }); /
+        //echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
         ///echo $tree;
         foreach($TContents as $key => $TChildContent) {
             //Parsing des templates parents si existant.
@@ -369,6 +369,7 @@ class Template
             //Fusion des arbres.
             $tree = $this->mergeTrees($tree, $childTree);
         }
+        echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
         //Parsing arbre -> contenu.
         $parsedTContent = $this->parseInContent($tree);
         return $parsedTContent;
@@ -396,11 +397,11 @@ class Template
                 case TNodeLabel::ELSE :
                     $nextTNode->id = $id;
                     break;
-                case TNodeLabel::END_IF :
-                case TNodeLabel::END_FOR :
-                    $nextTNode->id = $id;
-                    $id--;
-                    break;
+                //case TNodeLabel::END_IF :
+                //case TNodeLabel::END_FOR :
+                //    $nextTNode->id = $id;
+                //    $id--;
+                //    break;
             }
 
             $pos = strpos($content, $nextTNode->TNode);
@@ -469,11 +470,14 @@ class Template
                     if($parentTNode->is(TNodeLabel::IF)) {
                         $parentTNode = array_pop($previousParentsTNode);
                     }
-                    $parentTNode->addChild($TNode);
+                    //$parentTNode->addChild($TNode);
                     break;
                 default :
                     $parentTNode->addChild($TNode);
             }
+        }
+        if(!$parentTNode->is(TNodeLabel::ROOT)) {
+            throw new TemplateSyntaxException("Template->parseInTree() : désordre dans les noeuds de template !");
         }
 
         return $rootTNode;
@@ -489,8 +493,8 @@ class Template
         $parentTreeClone = $parentTree->clone();
         $childTreeClone = $childTree->clone();
         //Recherche des neouds de type bloc abstrait et non abstrait.
-        $abstractBlocksInParentTree = $parentTreeClone->searchTNodes(function($child){return $child->label == TNodeLabel::ABSTRACT_BLOCK;});
-        $blocksInChildTree = $childTreeClone->searchTNodes(function($child){return $child->label == TNodeLabel::BLOCK;});
+        $abstractBlocksInParentTree = $parentTreeClone->searchTNodes(function($child){return $child->is(TNodeLabel::ABSTRACT_BLOCK);});
+        $blocksInChildTree = $childTreeClone->searchTNodes(function($child){return $child->is(TNodeLabel::BLOCK); });
         //Remplacement des neouds de type bloc asbtrait par les noeuds de type bloc non abstrait correspondant.
         foreach($blocksInChildTree as $key => $block) {
             foreach($abstractBlocksInParentTree as $key2 => $abstractBlock) {
