@@ -47,7 +47,6 @@ class Router
 
 
 
-
     private function __construct()
     {
         //Initialisation des attributs du router.
@@ -65,16 +64,8 @@ class Router
         $this->tree = new Node("root");
 
         //Route d'erreur par défaut.
-        $this->route('/error', '             
-             <html>
-                 <body>
-                        <div>
-                              Page inexistante sur le serveur.
-                        </div>   
-                 </body>
-             </html>');
+        $this->route('/error', '<html><body><div>Page inexistante sur le serveur.</div></body></html>');
     }
-
 
 
 
@@ -88,7 +79,6 @@ class Router
         }
         return Router::$router;
     }
-
 
 
 
@@ -169,8 +159,6 @@ class Router
 
 
 
-
-
     /**
      * Ajouter une route au serveur.
      *
@@ -227,9 +215,6 @@ class Router
     {
         return $this->route("/error", $serverResponseForError);
     }
-
-
-
 
 
 
@@ -363,8 +348,6 @@ class Router
 
 
 
-
-
     /**
      * Récupérer une route effective à partir d'un alias et de paramètres.
      *
@@ -414,9 +397,6 @@ class Router
 
         return $effectiveRoute;
     }
-
-
-
 
 
 
