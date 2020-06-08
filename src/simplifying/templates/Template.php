@@ -209,7 +209,6 @@ class Template
                         break;
                     case TNodeLabel::FOR :
                         $nextTNode = $this->getTNodeFor($TNodeStructure);
-                        break;
                 }
 
                 return $nextTNode;
@@ -381,7 +380,7 @@ class Template
                 case TNodeLabel::ELSE :
                     if(!$parentTNode->is(TNodeLabel::THEN)) {
                         throw new TemplateSyntaxException(
-                            "Template->parseInTree() : désordre dans les noeuds  de tamplate de condition, noeud 
+                            "Template->parseInTree() : désordre dans les noeuds de tamplate de condition, noeud 
                              concerné : " . $TNode->TNode . " !");
                     }
                     $TNodeIf = $previousParentsTNode[count($previousParentsTNode) - 1];
@@ -469,12 +468,6 @@ class Template
             case TNodeLabel::ROOT :
             case TNodeLabel::BLOCK :
                 $parsingContent .= $this->parseChildrenTNode($TNode);
-            //case TNodeLabel::PARENT :
-            //case TNodeLabel::ABSTRACT_BLOCK :
-            //case TNodeLabel::END_FOR :
-            //case TNodeLabel::END_IF :
-            //case TNodeLabel::END_BLOCK :
-            //case TNodeLabel::ELSE :
         }
         return $parsingContent;
     }
