@@ -431,8 +431,8 @@ class Template
                 case TNodeLabel::PARENT :
                     if(!($parentTNode->is(TNodeLabel::ROOT) && !$parentTNode->hasChildren())) {
                         throw new TemplateSyntaxException(
-                            "Template->parseInTree() : un noeud <<parent ...> doit toujours être déclaré en premier noeud d'un template !
-                             Noeud concerné : " . $TNode->TNode . " !");
+                            "Template->parseInTree() : un noeud <<parent ...> doit toujours être déclaré en premier 
+                             noeud d'un template ! Noeud concerné : " . $TNode->TNode . " !");
                     }
                     break;
                 case TNodeLabel::FOR :
@@ -452,7 +452,8 @@ class Template
                 case TNodeLabel::ELSE :
                     if(!$parentTNode->is(TNodeLabel::THEN)) {
                         throw new TemplateSyntaxException(
-                            "Template->parseInTree() : désordre dans les noeuds de condition, noeud concerné : " . $TNode->TNode . " !");
+                            "Template->parseInTree() : désordre dans les noeuds  de tamplate de condition, noeud 
+                             concerné : " . $TNode->TNode . " !");
                     }
                     $TNodeIf = $previousParentsTNode[count($previousParentsTNode) - 1];
                     $TNodeIf->addChild($TNode);
