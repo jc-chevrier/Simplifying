@@ -1,5 +1,4 @@
 <<parent PageView>>
-
 <<block body>>
     <div>
         Vous êtes dans la HomeView.
@@ -17,6 +16,9 @@
         <</if>>
         <a href='<<route test2:3:4>>'>
             Lien vers le test2 : 3 : 4.
+        </a>
+        <a href='<<route test2:#cr.id:#ep.set.1.0>>'>
+            Lien vers le test2 : <<val cr.id>> : <<val ep.set.1.0>>.
         </a>
     </div>
 <</block>>

@@ -15,7 +15,7 @@ use simplifying\routes\Router;
  */
 class Template
 {
-    const regExpTNode = "<{2} *\/{0,1}[a-zA-Z]+ *[a-zA-Z0-9-_ \.:]+ *>{2}";
+    const regExpTNode = "<{2} *\/{0,1}[a-zA-Z]+ *[a-zA-Z0-9-_ \.:#]+ *>{2}";
 
     private static $rootRelativePath = ".\\..\\..\\app\\views\\";
     private static $rootAbsolutePath;
@@ -219,7 +219,7 @@ class Template
                         $nextTNode = $this->getTNode2Contents($TNodeStructure);
                         break;
                     case TNodeLabel::ROUTE :
-                        $nextTNode = $this->getTNodeRoute($TNodeStructure);
+                        $nextTNode = $this->getTNode2Contents($TNodeStructure, 'route');
                         break;
                     case TNodeLabel::PARENT :
                         $nextTNode = $this->getTNode2Contents($TNodeStructure);
@@ -295,27 +295,6 @@ class Template
                 'Template->getTNode2Contents() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
         } else {
             $TNodeStructure[$keyProperty] = $TNodeStructure['otherContents'][0];
-            unset($TNodeStructure['otherContents']);
-            $TNode = new TNode($TNodeStructure);
-            return $TNode;
-        }
-    }
-
-    /**
-     * @param array $TNodeStructure
-     * @return TNode
-     * @throws TemplateSyntaxException
-     */
-    public function getTNodeRoute(array $TNodeStructure) : TNode {
-        $nbOtherContents = count($TNodeStructure['otherContents']);
-        if($nbOtherContents != 1) {
-            throw new TemplateSyntaxException(
-                'Template->getTNodeRoute() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
-        } else {
-            $routeContents = preg_split('/:/', $TNodeStructure['otherContents'][0], -1, PREG_SPLIT_NO_EMPTY);
-            $routeAlias = $routeContents[0];
-            $routeParameters = array_slice($routeContents, 1);
-            $TNodeStructure['route'] = $this->router->getRoute($routeAlias, $routeParameters);
             unset($TNodeStructure['otherContents']);
             $TNode = new TNode($TNodeStructure);
             return $TNode;
@@ -431,7 +410,7 @@ class Template
                 case TNodeLabel::PARENT :
                     if(!($parentTNode->is(TNodeLabel::ROOT) && !$parentTNode->hasChildren())) {
                         throw new TemplateSyntaxException(
-                            "Template->parseInTree() : un noeud <<parent ...> doit toujours être déclaré en premier 
+                            "Template->parseInTree() : un noeud <<parent ...>> doit toujours être déclaré en premier 
                              noeud d'un template ! Noeud concerné : " . $TNode->TNode . " !");
                     }
                     break;
@@ -561,9 +540,20 @@ class Template
     /**
      * @param TNode $TNodeRoute
      * @return string
+     * @throws UnfindableTemplateVariableException
      */
     private function parseTNodeRoute(TNode $TNodeRoute) : string {
-        return $TNodeRoute->route;
+        $routeContents = preg_split('/:/', $TNodeRoute->route, -1, PREG_SPLIT_NO_EMPTY);
+        $routeAlias = array_shift($routeContents);
+        $nbParameters = count($routeContents);
+        for($i = 0; $i < $nbParameters; $i++) {
+            $routeParameter = $routeContents[$i];
+            if(strpos($routeParameter, "#") === 0) {
+                $routeParameter = $this->parseTVar(substr($routeParameter, 1));
+            }
+            $routeContents[$i] = $routeParameter;
+        }
+        return $this->router->getRoute($routeAlias, $routeContents);
     }
 
     /**
