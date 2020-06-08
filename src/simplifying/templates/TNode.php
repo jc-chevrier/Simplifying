@@ -65,11 +65,9 @@ class TNode
      * @param TNode $child
      */
     public function removeChild(TNode $child) : void {
-        for($i = 0; $i < $this->nbChildren; $i++) {
-            $aChild = $this->children[$i];
+        foreach($this->children as $key => $aChild) {
             if($aChild === $child) {
-                unset($this->children[$i]);
-                $this->children = array_values($this->children);
+                unset($aChild);
                 $this->nbChildren--;
                 return;
             }
