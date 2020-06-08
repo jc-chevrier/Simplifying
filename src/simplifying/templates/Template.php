@@ -2,6 +2,8 @@
 
 namespace simplifying\templates;
 
+use simplifying\routes\Router;
+
 /**
  * Classe Template.
  *
@@ -22,6 +24,7 @@ class Template
 
     private $externalParameters;
     private $internalValues;
+    private $router;
 
     private $vars;
 
@@ -38,6 +41,7 @@ class Template
 
         $this->externalParameters = $externalParameters;
         $this->internalValues = [];
+        $this->router = Router::getInstance();
         $this->vars = [];
 
         Template::initialiseRootAbsolutePath();
@@ -309,7 +313,7 @@ class Template
             $routeContents = preg_split('/:/', $TNodeStructure['otherContents'][0], -1, PREG_SPLIT_NO_EMPTY);
             $routeAlias = $routeContents[0];
             $routeParameters = array_slice($routeContents, 1);
-            $TNodeStructure['route'] = \simplifying\routes\Router::getInstance()->getRoute($routeAlias, $routeParameters);
+            $TNodeStructure['route'] = $this->router->getRoute($routeAlias, $routeParameters);
             unset($TNodeStructure['otherContents']);
             $TNode = new TNode($TNodeStructure);
             return $TNode;
@@ -543,14 +547,16 @@ class Template
     /**
      * @param TNode $TNode
      * @return string
+     * @throws UnfindableTemplateVariableException
      */
     private function parseTNodeVal(TNode $TNode) : string {
-        return "TODO Val";
+        return $this->parseTVar($TNode->name);
     }
 
     /**
      * @param TNode $TNodeRoute
      * @return string
+     * @throws TemplateSyntaxException
      */
     private function parseTNodeRoute(TNode $TNodeRoute) : string {
         return $TNodeRoute->route . $this->parseChildrenTNode($TNodeRoute);
@@ -568,16 +574,21 @@ class Template
      * @param TNode $TNodeLoop
      * @return string
      * @throws TemplateSyntaxException
+     * @throws UnfindableTemplateVariableException
      */
     private function parseTNodeLoop(TNode $TNodeLoop) : string {
-        $set = $this->getVal($TNodeLoop->set);
+        //Récupération de la valeur du set du for.
+        $set = $this->parseTVar($TNodeLoop->set);
         $element = $TNodeLoop->element;
 
+        //Implémentation du for.
         $parsingContent = "";
         foreach($set as $key => $value) {
             $this->vars[$element] = $value;
             $parsingContent .=  $this->parseChildrenTNode($TNodeLoop);
         }
+        //Destruction de la variable du for.
+        unset($this->vars[$element]);
 
         return $parsingContent;
     }
@@ -598,66 +609,100 @@ class Template
 
 
     /**
-     * @param string $nameVal
-     * @return string
-     * @throws TemplateSyntaxException
+     * @param string $nameTVar
+     * @return array|mixed
+     * @throws UnfindableTemplateVariableException
      */
-    private function getVal(string $nameVal) : string {
-        $val = "";
-        switch($nameVal) {
+    private function parseTVar(string $nameTVar) {
+        switch($nameTVar) {
             case TVarLabel::INTERNAL_VALUES:
-                $val = $this->internalValues;
+                $TVar = $this->internalValues;
                 break;
             case TVarLabel::EXTERNAL_PARAMETERS:
-                $val = $this->externalParameters;
+                $TVar = $this->externalParameters;
                 break;
             case TVarLabel::GET:
-                $val = $_GET;
+                $TVar = $_GET;
                 break;
             case TVarLabel::POST:
-                $val = $_POST;
+                $TVar = $_POST;
                 break;
             case TVarLabel::SESSION:
-                $val = $_SESSION;
+                $TVar = $_SESSION;
                 break;
             default:
-                if(isset($this->vars[$nameVal])) {
-                    $val = 'this->vars["'. $nameVal .'"]';
+                if(isset($this->vars[$nameTVar])) {
+                    $TVar = 'this->vars["'. $nameTVar .'"]';
                 } else {
-                    if(preg_match('.{1}', $nameVal)) {
-                        $partsVal = preg_split("/.{1}/", $nameVal, -1, PREG_SPLIT_NO_EMPTY);
-                        $set = $partsVal[0];
+                    if(preg_match('/\.{1}/', $nameTVar)) {
+                        $partsTVar = preg_split("/\.{1}/", $nameTVar, -1, PREG_SPLIT_NO_EMPTY);
+                        $set = array_shift($partsTVar);
                         switch($set) {
                             case TVarLabel::CURRENT_ROUTE:
-                                $routeParameter = $partsVal[1];
-                                $val = '\simplifying\routes\Router::getInstance()->currentRoute->' . $routeParameter;
+                                if(count($partsTVar) != 1) {
+                                    throw new UnfindableTemplateVariableException(
+                                        "Template->parseTVar() : mauvaise utilisation des paramètres de route : $nameTVar !");
+                                }
+                                $routeParameter = array_shift($partsTVar);
+                                $TVar = $this->router->currentRoute->$routeParameter;
                                 break;
                             case TVarLabel::INTERNAL_VALUES:
-                                $key = $partsVal[1];
-                                $val = $this->internalValues[$key];
+                                $TVar = $this->parseLongTVar($nameTVar, $this->internalValues, $partsTVar);
                                 break;
                             case TVarLabel::EXTERNAL_PARAMETERS:
-                                $key = $partsVal[1];
-                                $val = $this->externalParameters[$key];
+                                $TVar = $this->parseLongTVar($nameTVar, $this->externalParameters, $partsTVar);
                                 break;
                             case TVarLabel::GET:
-                                $key = $partsVal[1];
-                                $val = $_GET[$key];
+                                $TVar = $this->parseLongTVar($nameTVar, $_GET, $partsTVar);
                                 break;
                             case TVarLabel::POST:
-                                $key = $partsVal[1];
-                                $val = $_POST[$key];
+                                $TVar = $this->parseLongTVar($nameTVar, $_POST, $partsTVar);
                                 break;
                             case TVarLabel::SESSION:
-                                $key = $partsVal[1];
-                                $val = $_SESSION[$key];
+                                $TVar = $this->parseLongTVar($nameTVar, $_SESSION, $partsTVar);
+                                break;
+                            default:
+                                array_unshift($partsTVar, $set);
+                                $TVar = $this->parseLongTVar($nameTVar, $this->vars, $partsTVar);
                                 break;
                         }
                     } else {
-                        throw new TemplateSyntaxException("Template->parseNameVal() : ensemble introuvable : $nameVal !");
+                        throw new UnfindableTemplateVariableException("Template->parseTVar() : la variable $nameTVar est introuvable !");
                     }
                 }
         }
-        return $val;
+        return $TVar;
+    }
+
+    /**
+     * @param string $nameTVar
+     * @param array $set
+     * @param array $partsTVar
+     * @return array|mixed
+     * @throws UnfindableTemplateVariableException
+     */
+    private function parseLongTVar(string $nameTVar, array $set, array $partsTVar) {
+        $nbPartsVal = count($partsTVar);
+
+        $TVar = $set;
+
+        for($i = 0; $i < $nbPartsVal; $i++) {
+            $partVal = $partsTVar[$i];
+            if(isset($TVar[$partVal])) {
+                $TVar = $TVar[$partVal];
+            } else {
+                if(isset($TVar->$partVal)) {
+                    $TVar = $TVar->$partVal;
+                } else {
+                    if($set == $this->vars) {
+                        throw new UnfindableTemplateVariableException("Template->parseLongTVar() : la variable $nameTVar est introuvable !");
+                    } else {
+                        throw new UnfindableTemplateVariableException("Template->parseLongTVar() : $partVal est introuvable dans $nameTVar !");
+                    }
+                }
+            }
+        }
+
+        return $TVar;
     }
 }
