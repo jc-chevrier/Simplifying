@@ -686,18 +686,17 @@ class Template
 
         $TVar = $set;
 
-        for($i = 0; $i < $nbPartsVal; $i++) {
-            $partVal = $partsTVar[$i];
-            if(isset($TVar[$partVal])) {
-                $TVar = $TVar[$partVal];
+        foreach($partsTVar as $key => $partTVar) {
+            if(isset($TVar[$partTVar])) {
+                $TVar = $TVar[$partTVar];
             } else {
-                if(isset($TVar->$partVal)) {
-                    $TVar = $TVar->$partVal;
+                if(isset($TVar->$partTVar)) {
+                    $TVar = $TVar->$partTVar;
                 } else {
                     if($set == $this->vars) {
                         throw new UnfindableTemplateVariableException("Template->parseLongTVar() : la variable $nameTVar est introuvable !");
                     } else {
-                        throw new UnfindableTemplateVariableException("Template->parseLongTVar() : $partVal est introuvable dans $nameTVar !");
+                        throw new UnfindableTemplateVariableException("Template->parseLongTVar() : $partTVar est introuvable dans $nameTVar !");
                     }
                 }
             }
