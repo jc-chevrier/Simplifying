@@ -1,27 +1,33 @@
-<<parent PageView>>
-<<block body>>
+<<parent PageView>
+<<block body>
     <div>
         Vous êtes dans la HomeView.
-        <<for ep.set : set2>>
-            <<for set2 : e>>
+        <<for ep.set : set2>
+            <<for set2 : e>
                 <div>
-                    <<val e>>
+                    <<val e>
                 </div>
-            <</for>>
-        <</for>>
-        <<if ep.isConnected>>
+            <</for>
+        <</for>
+        <<if ep.isConnected>
             Est connecté !
-        <<else>>
+        <<else>
             N'est pas connecté !
-        <</if>>
-        <<ifnot ep.isConnected>>
+        <</if>
+        <<if ep.isConnected>
+
+        <</if>
+        <<if ep.isConnected>
+            Est connecté !
+        <</if>
+        <<ifnot ep.isConnected>
             N'est pas connecté !
-        <</ifnot>>
-        <a href='<<route test2:3:4>>'>
+        <</ifnot>
+        <a href='<<route test2:3:4>'>
             Lien vers le test2 : 3 : 4.
         </a>
-        <a href='<<route test2:#cr.id:#ep.set.1.0>>'>
-            Lien vers le test2 : <<val cr.id>> : <<val ep.set.1.0>>.
+        <a href='<<route test2:#cr.id:#ep.set.1.0>'>
+            Lien vers le test2 : <<val cr.id> : <<val ep.set.1.0>.
         </a>
     </div>
-<</block>>
+<</block>

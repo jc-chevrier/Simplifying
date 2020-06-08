@@ -16,7 +16,7 @@ use simplifying\routes\Router;
  */
 class Template
 {
-    const regExpTNode = "<{2} *\/{0,1}[a-zA-Z]+ *[a-zA-Z0-9-_ \.:#]+ *>{2}";
+    const regExpTNode = "<{2} *\/{0,1}[a-zA-Z]+ *[a-zA-Z0-9-_ \.:#]+ *>{1}";
 
     private static $rootRelativePath = ".\\..\\..\\app\\views\\";
     private static $rootAbsolutePath;
@@ -221,7 +221,7 @@ class Template
      * @return bool|string
      */
     private function getSimpleTNodeContents(string $TNode) : string {
-        return substr($TNode, 2, -2);
+        return substr($TNode, 2, -1);
     }
 
 
@@ -523,9 +523,13 @@ class Template
             $childTNodeThen = $TNodeIf->searchChildTNodes(function($child){return $child->is(TNodeLabel::THEN);})[0];
             $parsingContent = $this->parseChildrenTNode($childTNodeThen);
         } else {
-            $childTNodeElse = $TNodeIf->searchChildTNodes(function($child){return $child->is(TNodeLabel::ELSE);})[0];
-            $parsingContent = $this->parseChildrenTNode($childTNodeElse);
-
+            $searched = $TNodeIf->searchChildTNodes(function($child){return $child->is(TNodeLabel::ELSE);});
+            if(count($searched) != 0) {
+                $childTNodeElse = $searched[0];
+                $parsingContent = $this->parseChildrenTNode($childTNodeElse);
+            } else {
+                $parsingContent = "";
+            }
         }
         return $parsingContent;
     }
