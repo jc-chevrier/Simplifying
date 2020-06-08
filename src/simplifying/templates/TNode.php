@@ -66,7 +66,7 @@ class TNode
      */
     public function removeChild(TNode $child) : void {
         foreach($this->children as $key => $aChild) {
-            if($aChild === $child) {
+            if($aChild->TNode === $child->TNode) {
                 unset($aChild);
                 $this->nbChildren--;
                 return;
