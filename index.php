@@ -16,8 +16,8 @@ $router->route('/test/{id}', function() {
     $set[] = $set2_1;
     $set[] = $set2_2;
     $set[] = $set2_3;
-    $isConnectable = false;
-    Template::render('HomeView', [ "set" => $set, "isConnectable" => $isConnectable ]);
+    $isConnected = false;
+    Template::render('HomeView', [ "set" => $set, "isConnected" => $isConnected ]);
 });
 
 $router->route('/test2/{id}/{id2}', function($id, $id2) {

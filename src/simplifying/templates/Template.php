@@ -423,7 +423,7 @@ class Template
         $childTreeClone = $childTree->clone();
         //Recherche des neouds de type bloc abstrait et non abstrait.
         $abstractBlocksInParentTree = $parentTreeClone->searchTNodes(function($child){return $child->is(TNodeLabel::ABSTRACT_BLOCK);});
-        $blocksInChildTree = $childTreeClone->searchTNodes(function($child){return $child->is(TNodeLabel::BLOCK); });
+        $blocksInChildTree = $childTreeClone->searchTNodes(function($child){return $child->is(TNodeLabel::BLOCK);});
         //Remplacement des neouds de type bloc asbtrait par les noeuds de type bloc non abstrait correspondant.
         foreach($blocksInChildTree as $key => $block) {
             foreach($abstractBlocksInParentTree as $key2 => $abstractBlock) {
