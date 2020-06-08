@@ -524,11 +524,11 @@ class Template
             $parsingContent = $this->parseChildrenTNode($childTNodeThen);
         } else {
             $searched = $TNodeIf->searchChildTNodes(function($child){return $child->is(TNodeLabel::ELSE);});
-            if(count($searched) != 0) {
+            if(count($searched) == 0) {
+                $parsingContent = "";
+            } else {
                 $childTNodeElse = $searched[0];
                 $parsingContent = $this->parseChildrenTNode($childTNodeElse);
-            } else {
-                $parsingContent = "";
             }
         }
         return $parsingContent;
