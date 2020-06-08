@@ -232,19 +232,19 @@ class Template
                     case TNodeLabel::END_BLOCK :
                         $nextTNode = $this->getTNode1Content($TNodeStructure);
                         break;
-                    case TNodeLabel::CONDITION :
-                        $nextTNode = $this->getTNodeCondition($TNodeStructure);
+                    case TNodeLabel::IF :
+                        $nextTNode = $this->getTNodeIf($TNodeStructure);
                         break;
-                    case TNodeLabel::CONDITION_ELSE :
+                    case TNodeLabel::ELSE :
                         $nextTNode = $this->getTNode1Content($TNodeStructure);
                         break;
-                    case TNodeLabel::END_CONDITION :
+                    case TNodeLabel::END_IF :
                         $nextTNode = $this->getTNode1Content($TNodeStructure);
                         break;
-                    case TNodeLabel::LOOP :
-                        $nextTNode = $this->getTNodeLoop($TNodeStructure);
+                    case TNodeLabel::FOR :
+                        $nextTNode = $this->getTNodeFor($TNodeStructure);
                         break;
-                    case TNodeLabel::END_LOOP :
+                    case TNodeLabel::END_FOR :
                         $nextTNode = $this->getTNode1Content($TNodeStructure);
                         break;
                 }
@@ -325,16 +325,16 @@ class Template
      * @return TNode
      * @throws TemplateSyntaxException
      */
-    public function getTNodeLoop(array $TNodeStructure) : TNode {
+    public function getTNodeFor(array $TNodeStructure) : TNode {
         $nbOtherContents = count($TNodeStructure['otherContents']);
         if($nbOtherContents != 3) {
             throw new TemplateSyntaxException(
-                'Template->getTNodeLoop() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
+                'Template->getTNodeFor() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
         } else {
             $TNodeStructure['set'] = $TNodeStructure['otherContents'][0];
             if($TNodeStructure['otherContents'][1] != ':') {
                 throw new TemplateSyntaxException(
-                    'Template->getTNodeLoop() : syntaxe incorrecte dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
+                    'Template->getTNodeFor() : syntaxe incorrecte dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
             }
             $TNodeStructure['element'] = $TNodeStructure['otherContents'][2];
             unset($TNodeStructure['otherContents']);
@@ -348,11 +348,11 @@ class Template
      * @return TNode
      * @throws TemplateSyntaxException
      */
-    public function getTNodeCondition(array $TNodeStructure) : TNode {
+    public function getTNodeIf(array $TNodeStructure) : TNode {
         $nbOtherContents = count($TNodeStructure['otherContents']);
         if($nbOtherContents != 1) {
             throw new TemplateSyntaxException(
-                'Template->getTNodeCondition() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
+                'Template->getTNodeIf() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
         } else {
             $TNodeStructure['condition'] = $TNodeStructure['otherContents'][0];
             unset($TNodeStructure['otherContents']);
@@ -362,10 +362,10 @@ class Template
     }
 
 
-
     /**
      * @return string
      * @throws TemplateSyntaxException
+     * @throws UnfindableTemplateVariableException
      */
     private function parse() : string {
         //Chargement de la hiérarchie de templates.
@@ -403,17 +403,17 @@ class Template
         $nextTNode = $this->nextTNode($content);
         while($nextTNode != false) {
             switch($nextTNode->label) {
-                case TNodeLabel::CONDITION :
-                case TNodeLabel::LOOP :
+                case TNodeLabel::IF :
+                case TNodeLabel::FOR :
                     $nextTNode->id = $sequence;
                     $id = $sequence;
                     $sequence++;
                     break;
-                case TNodeLabel::CONDITION_ELSE :
+                case TNodeLabel::ELSE :
                     $nextTNode->id = $id;
                     break;
-                case TNodeLabel::END_CONDITION :
-                case TNodeLabel::END_LOOP :
+                case TNodeLabel::END_IF :
+                case TNodeLabel::END_FOR :
                     $nextTNode->id = $id;
                     $id--;
                     break;
@@ -450,26 +450,41 @@ class Template
                              Voici le neoud à l'origine de l'erreur : " . $TNode->TNode . " !");
                     }
                     break;
-                case TNodeLabel::LOOP :
+                case TNodeLabel::FOR :
                 case TNodeLabel::BLOCK :
-                case TNodeLabel::CONDITION :
-                    $previousParentsTNode[] = $parentTNode;
                     $parentTNode->addChild($TNode);
+                    $previousParentsTNode[] = $parentTNode;
                     $parentTNode = $TNode;
                     break;
-                case TNodeLabel::CONDITION_ELSE :
-                    $previousParentsTNode[count($previousParentsTNode) - 1]->addChild($TNode);
+                case TNodeLabel::IF :
+                    $TNodeThen = new TNode(['label' => TNodeLabel::THEN, 'id' => $TNode->id]);
+                    $parentTNode->addChild($TNode);
+                    $TNode->addChild($TNodeThen);
+                    $previousParentsTNode[] = $parentTNode;
+                    $previousParentsTNode[] = $TNode;
+                    $parentTNode = $TNodeThen;
+                    break;
+                case TNodeLabel::ELSE :
+                    if(!$parentTNode->is(TNodeLabel::THEN)) {
+                        throw new TemplateSyntaxException(
+                            "Template->parseInTree() : désordre dans les noeuds de condition, noeud concerné : " . $TNode->TNode . " !");
+                    }
+                    $TNodeCondition = $previousParentsTNode[count($previousParentsTNode) - 1];
+                    $TNodeCondition->addChild($TNode);
                     $parentTNode = $TNode;
                     break;
                 case TNodeLabel::END_BLOCK :
-                case TNodeLabel::END_LOOP :
-                case TNodeLabel::END_CONDITION :
-                    if(!$parentTNode->isComplementaryWith($TNode) || !$parentTNode->hasSameIdThat($TNode) ) {
+                case TNodeLabel::END_FOR :
+                case TNodeLabel::END_IF :
+                    if(!$parentTNode->isComplementaryWith($TNode)) {
                         throw new TemplateSyntaxException(
-                            "Template->parseInTree() : désordre dans les noeuds de template de fin, noeud ouvrant : " .
+                            "Template->parseInTree() : désordre dans les noeuds de template, noeud ouvrant : " .
                             $parentTNode->TNode .", noeud fermant : " . $TNode->TNode . " !");
                     }
                     $parentTNode = array_pop($previousParentsTNode);
+                    if($parentTNode->is(TNodeLabel::IF)) {
+                        //$parentTNode = array_pop($previousParentsTNode);
+                    }
                     $parentTNode->addChild($TNode);
                     break;
                 default :
@@ -509,6 +524,7 @@ class Template
      * @param TNode $TNode
      * @return string
      * @throws TemplateSyntaxException
+     * @throws UnfindableTemplateVariableException
      */
     private function parseInContent(TNode $TNode) : string {
         $parsingContent = "";
@@ -521,10 +537,10 @@ class Template
             case TNodeLabel::ROUTE :
                 $parsingContent .= $this->parseTNodeRoute($TNode);
                 break;
-            case TNodeLabel::CONDITION :
+            case TNodeLabel::IF :
                 $parsingContent .= $this->parseTNodeCondition($TNode);
                 break;
-            case TNodeLabel::LOOP :
+            case TNodeLabel::FOR :
                 $parsingContent .= $this->parseTNodeLoop($TNode);
                 break;
             case TNodeLabel::IGNORED :
@@ -535,10 +551,10 @@ class Template
                 $parsingContent .= $this->parseChildrenTNode($TNode);
             //case TNodeLabel::PARENT :
             //case TNodeLabel::ABSTRACT_BLOCK :
-            //case TNodeLabel::END_LOOP :
-            //case TNodeLabel::END_CONDITION :
+            //case TNodeLabel::END_FOR :
+            //case TNodeLabel::END_IF :
             //case TNodeLabel::END_BLOCK :
-            //case TNodeLabel::CONDITION_ELSE :
+            //case TNodeLabel::ELSE :
         }
 
         return $parsingContent;
@@ -557,6 +573,7 @@ class Template
      * @param TNode $TNodeRoute
      * @return string
      * @throws TemplateSyntaxException
+     * @throws UnfindableTemplateVariableException
      */
     private function parseTNodeRoute(TNode $TNodeRoute) : string {
         return $TNodeRoute->route . $this->parseChildrenTNode($TNodeRoute);
@@ -597,6 +614,7 @@ class Template
      * @param TNode $TNode
      * @return string
      * @throws TemplateSyntaxException
+     * @throws UnfindableTemplateVariableException
      */
     private function parseChildrenTNode(TNode $TNode) : string {
         $parsingContent = "";
@@ -607,7 +625,6 @@ class Template
         return $parsingContent;
     }
 
-
     /**
      * @param string $nameTVar
      * @return array|mixed
@@ -615,19 +632,19 @@ class Template
      */
     private function parseTVar(string $nameTVar) {
         switch($nameTVar) {
-            case TVarLabel::INTERNAL_VALUES:
+            case TVarLabel::INTERNAL_VALUES :
                 $TVar = $this->internalValues;
                 break;
-            case TVarLabel::EXTERNAL_PARAMETERS:
+            case TVarLabel::EXTERNAL_PARAMETERS :
                 $TVar = $this->externalParameters;
                 break;
-            case TVarLabel::GET:
+            case TVarLabel::GET :
                 $TVar = $_GET;
                 break;
-            case TVarLabel::POST:
+            case TVarLabel::POST :
                 $TVar = $_POST;
                 break;
-            case TVarLabel::SESSION:
+            case TVarLabel::SESSION :
                 $TVar = $_SESSION;
                 break;
             default:
@@ -638,22 +655,22 @@ class Template
                         $partsTVar = preg_split("/\.{1}/", $nameTVar, -1, PREG_SPLIT_NO_EMPTY);
                         $set = array_shift($partsTVar);
                         switch($set) {
-                            case TVarLabel::CURRENT_ROUTE:
+                            case TVarLabel::CURRENT_ROUTE :
                                 $TVar = $this->parseLongTVar($nameTVar, $this->router->currentRoute, $partsTVar);
                                 break;
-                            case TVarLabel::INTERNAL_VALUES:
+                            case TVarLabel::INTERNAL_VALUES :
                                 $TVar = $this->parseLongTVar($nameTVar, $this->internalValues, $partsTVar);
                                 break;
-                            case TVarLabel::EXTERNAL_PARAMETERS:
+                            case TVarLabel::EXTERNAL_PARAMETERS :
                                 $TVar = $this->parseLongTVar($nameTVar, $this->externalParameters, $partsTVar);
                                 break;
-                            case TVarLabel::GET:
+                            case TVarLabel::GET :
                                 $TVar = $this->parseLongTVar($nameTVar, $_GET, $partsTVar);
                                 break;
-                            case TVarLabel::POST:
+                            case TVarLabel::POST :
                                 $TVar = $this->parseLongTVar($nameTVar, $_POST, $partsTVar);
                                 break;
-                            case TVarLabel::SESSION:
+                            case TVarLabel::SESSION :
                                 $TVar = $this->parseLongTVar($nameTVar, $_SESSION, $partsTVar);
                                 break;
                             default:

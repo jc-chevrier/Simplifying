@@ -18,14 +18,17 @@ class TNodeLabel
     const END_BLOCK = '/block';
     const BLOCK_LABELS = [ TNodeLabel::BLOCK, TNodeLabel::END_BLOCK ];
 
-    const LOOP = 'for';
-    const END_LOOP = '/for';
-    const LOOP_LABELS = [ TNodeLabel::LOOP, TNodeLabel::END_LOOP ];
+    const FOR = 'for';
+    const END_FOR = '/for';
+    const FOR_LABELS = [ TNodeLabel::FOR, TNodeLabel::END_FOR ];
 
-    const CONDITION = 'if';
-    const CONDITION_ELSE = 'else';
-    const END_CONDITION = '/if';
-    const CONDITION_LABELS = [ TNodeLabel::CONDITION, TNodeLabel::CONDITION_ELSE, TNodeLabel::END_CONDITION ];
+    const IF = 'if';
+    const THEN = 'then';
+    const ELSE = 'else';
+    const END_IF = '/if';
+    const IF_LABELS = [ TNodeLabel::IF,  TNodeLabel::THEN, TNodeLabel::ELSE, TNodeLabel::END_IF ];
+    private const IF_LABELS_1 = [ TNodeLabel::THEN, TNodeLabel::END_IF ];
+    private const IF_LABELS_2 = [ TNodeLabel::ELSE, TNodeLabel::END_IF ];
 
     const VALUE = 'val';
 
@@ -43,8 +46,9 @@ class TNodeLabel
      * @return bool
      */
     public static function TNodeLabelsAreComplementary(string $TNodeLabel1, string $TNodeLabel2) : bool {
-        return TNodeLabel::_TNodeLabelsAreComplementary($TNodeLabel1, $TNodeLabel2, TNodeLabel::LOOP_LABELS) ||
-               TNodeLabel::_TNodeLabelsAreComplementary($TNodeLabel1, $TNodeLabel2, TNodeLabel::CONDITION_LABELS) ||
+        return TNodeLabel::_TNodeLabelsAreComplementary($TNodeLabel1, $TNodeLabel2, TNodeLabel::FOR_LABELS) ||
+               TNodeLabel::_TNodeLabelsAreComplementary($TNodeLabel1, $TNodeLabel2, TNodeLabel::IF_LABELS_1) ||
+               TNodeLabel::_TNodeLabelsAreComplementary($TNodeLabel1, $TNodeLabel2, TNodeLabel::IF_LABELS_2) ||
                TNodeLabel::_TNodeLabelsAreComplementary($TNodeLabel1, $TNodeLabel2, TNodeLabel::BLOCK_LABELS);
     }
 
@@ -83,11 +87,12 @@ class TNodeLabel
             case TNodeLabel::ABSTRACT_BLOCK :
             case TNodeLabel::BLOCK :
             case TNodeLabel::END_BLOCK :
-            case TNodeLabel::CONDITION :
-            case TNodeLabel::CONDITION_ELSE :
-            case TNodeLabel::END_CONDITION :
-            case TNodeLabel::LOOP :
-            case TNodeLabel::END_LOOP :
+            case TNodeLabel::IF :
+            case TNodeLabel::THEN :
+            case TNodeLabel::ELSE :
+            case TNodeLabel::END_IF :
+            case TNodeLabel::FOR :
+            case TNodeLabel::END_FOR :
             case TNodeLabel::IGNORED :
             case TNodeLabel::ROOT :
                 return true;
