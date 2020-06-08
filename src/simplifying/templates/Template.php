@@ -234,7 +234,7 @@ class Template
                         $nextTNode = $this->getTNode1Content($TNodeStructure);
                         break;
                     case TNodeLabel::IF :
-                        $nextTNode = $this->getTNodeIf($TNodeStructure);
+                        $nextTNode = $this->getTNode2Contents($TNodeStructure, 'condition');
                         break;
                     case TNodeLabel::ELSE :
                         $nextTNode = $this->getTNode1Content($TNodeStructure);
@@ -284,16 +284,17 @@ class Template
 
     /**
      * @param array $TNodeStructure
+     * @param string $keyProperty
      * @return TNode
      * @throws TemplateSyntaxException
      */
-    public function getTNode2Contents(array $TNodeStructure) : TNode {
+    public function getTNode2Contents(array $TNodeStructure, string $keyProperty = 'name') : TNode {
         $nbOtherContents = count($TNodeStructure['otherContents']);
         if($nbOtherContents != 1) {
             throw new TemplateSyntaxException(
                 'Template->getTNode2Contents() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
         } else {
-            $TNodeStructure['name'] = $TNodeStructure['otherContents'][0];
+            $TNodeStructure[$keyProperty] = $TNodeStructure['otherContents'][0];
             unset($TNodeStructure['otherContents']);
             $TNode = new TNode($TNodeStructure);
             return $TNode;
@@ -344,23 +345,6 @@ class Template
         }
     }
 
-    /**
-     * @param array $TNodeStructure
-     * @return TNode
-     * @throws TemplateSyntaxException
-     */
-    public function getTNodeIf(array $TNodeStructure) : TNode {
-        $nbOtherContents = count($TNodeStructure['otherContents']);
-        if($nbOtherContents != 1) {
-            throw new TemplateSyntaxException(
-                'Template->getTNodeIf() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
-        } else {
-            $TNodeStructure['condition'] = $TNodeStructure['otherContents'][0];
-            unset($TNodeStructure['otherContents']);
-            $TNode = new TNode($TNodeStructure);
-            return $TNode;
-        }
-    }
 
 
     /**
