@@ -496,7 +496,6 @@ class Template
      */
     private function parseInContent(TNode $TNode) : string {
         $parsingContent = "";
-
         //Parsing du noeud de template en contenu.
         switch ($TNode->label) {
             case TNodeLabel::VALUE :
@@ -524,7 +523,6 @@ class Template
             //case TNodeLabel::END_BLOCK :
             //case TNodeLabel::ELSE :
         }
-
         return $parsingContent;
     }
 
@@ -549,7 +547,8 @@ class Template
         for($i = 0; $i < $nbParameters; $i++) {
             $routeParameter = $routeContents[$i];
             if(strpos($routeParameter, "#") === 0) {
-                $routeParameter = $this->parseTVar(substr($routeParameter, 1));
+                $nameTVar = substr($routeParameter, 1);
+                $routeParameter = $this->parseTVar($nameTVar);
             }
             $routeContents[$i] = $routeParameter;
         }
@@ -603,7 +602,6 @@ class Template
         }
         //Destruction de la variable du for.
         unset($this->vars[$element]);
-
         return $parsingContent;
     }
 
