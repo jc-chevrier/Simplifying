@@ -25,7 +25,6 @@ class Template
     private $externalParameters;
     private $internalValues;
     private $router;
-
     private $vars;
 
 
