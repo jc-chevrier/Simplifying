@@ -104,6 +104,7 @@ class Template
      * @param string $path
      * @param array $params
      * @throws TemplateSyntaxException
+     * @throws UnfindableTemplateVariableException
      */
     public static function render($path, $params = []) : void {
         $template = new Template($path, $params);
@@ -112,6 +113,7 @@ class Template
 
     /**
      * @throws TemplateSyntaxException
+     * @throws UnfindableTemplateVariableException
      */
     public function _render() : void {
         $parsedContent = $this->parse();
@@ -376,15 +378,14 @@ class Template
         //Parsing en arbre n-aire du template this.
         $tree = $this->parseInTree($firstTContent);
         //Pour vérifier le contenu des arbres :
-        //echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
-        //echo $tree;
+        //echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; }); /
+        ///echo $tree;
         foreach($TContents as $key => $TChildContent) {
             //Parsing des templates parents si existant.
             $childTree = $this->parseInTree($TChildContent);
             //Fusion des arbres.
             $tree = $this->mergeTrees($tree, $childTree);
         }
-        echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
         //Parsing arbre -> contenu.
         $parsedTContent = $this->parseInContent($tree);
         return $parsedTContent;
