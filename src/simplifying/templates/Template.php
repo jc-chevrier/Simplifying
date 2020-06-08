@@ -639,12 +639,7 @@ class Template
                         $set = array_shift($partsTVar);
                         switch($set) {
                             case TVarLabel::CURRENT_ROUTE:
-                                if(count($partsTVar) != 1) {
-                                    throw new UnfindableTemplateVariableException(
-                                        "Template->parseTVar() : mauvaise utilisation des paramètres de route : $nameTVar !");
-                                }
-                                $routeParameter = array_shift($partsTVar);
-                                $TVar = $this->router->currentRoute->$routeParameter;
+                                $TVar = $this->parseLongTVar($nameTVar, $this->router->currentRoute, $partsTVar);
                                 break;
                             case TVarLabel::INTERNAL_VALUES:
                                 $TVar = $this->parseLongTVar($nameTVar, $this->internalValues, $partsTVar);
@@ -667,7 +662,8 @@ class Template
                                 break;
                         }
                     } else {
-                        throw new UnfindableTemplateVariableException("Template->parseTVar() : la variable $nameTVar est introuvable !");
+                        throw new UnfindableTemplateVariableException(
+                            "Template->parseTVar() : la variable $nameTVar est introuvable !");
                     }
                 }
         }
@@ -684,7 +680,8 @@ class Template
     private function parseLongTVar(string $nameTVar, array $set, array $partsTVar) {
         $nbPartsVal = count($partsTVar);
         if($nbPartsVal == 0) {
-            throw new UnfindableTemplateVariableException("Template->parseLongTVar() : la variable $nameTVar est introuvable !");
+            throw new UnfindableTemplateVariableException(
+                "Template->parseLongTVar() : la variable $nameTVar est introuvable !");
         }
 
         $TVar = $set;
@@ -696,9 +693,11 @@ class Template
                     $TVar = $TVar->$partTVar;
                 } else {
                     if($set == $this->vars) {
-                        throw new UnfindableTemplateVariableException("Template->parseLongTVar() : la variable $nameTVar est introuvable !");
+                        throw new UnfindableTemplateVariableException(
+                            "Template->parseLongTVar() : la variable $nameTVar est introuvable !");
                     } else {
-                        throw new UnfindableTemplateVariableException("Template->parseLongTVar() : $partTVar est introuvable dans $nameTVar !");
+                        throw new UnfindableTemplateVariableException(
+                            "Template->parseLongTVar() : $partTVar est introuvable dans $nameTVar !");
                     }
                 }
             }
