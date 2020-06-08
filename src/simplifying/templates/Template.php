@@ -100,12 +100,12 @@ class Template
 
 
     /**
-     * @param string $path
-     * @param array $params
+     * @param string $name
+     * @param array $externalParameters
      * @throws TemplateSyntaxException
      * @throws UnfindableTemplateVariableException
      */
-    public static function render($name, $externalParameters = []) : void {
+    public static function render(string $name, array $externalParameters = []) : void {
         $template = new Template($name, $externalParameters);
         $template->_render();
     }
