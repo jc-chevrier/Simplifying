@@ -60,7 +60,7 @@ class TNode
      */
     public function removeChild(TNode $child) : void {
         foreach($this->children as $key => $aChild) {
-            if($aChild == $child) {
+            if($aChild === $child) {
                 unset($aChild);
                 $this->nbChildren--;
                 return;
@@ -266,12 +266,12 @@ class TNode
     }
 
     /**
-     * @param callable|null $filterProperties
+     * @param callable|null $predicateForSelection
      * @param int $tabulationPx
      * @param int $indentation
      * @return string
      */
-    public function toString(callable $filterProperties = null, int $tabulationPx = 40, int $indentation = 0) : string {
+    public function toString(callable $predicateForSelection = null, int $tabulationPx = 40, int $indentation = 0) : string {
         $string = "";
         if($indentation == 0) {
             $string .= "
@@ -289,13 +289,13 @@ class TNode
         if(count($this->properties) != 0) {
             $keysProperties = array_keys($this->properties);
             foreach($keysProperties as $key => $keyProperty) {
-                if($filterProperties == null || $filterProperties($keyProperty)) {
+                if($predicateForSelection == null || $predicateForSelection($keyProperty)) {
                     $property = $this->properties[$keyProperty];
                     $string .= "<span class='keyProperty'>$keyProperty</span>=<span class='valueProperty'>$property</span> | ";
                 }
             }
         }
-        if($filterProperties == null || $filterProperties("nbChildren")) {
+        if($predicateForSelection == null || $predicateForSelection("nbChildren")) {
             $string .= " <span class='keyProperty'>nbChildren</span>=<span class='valueProperty'>$this->nbChildren</span>";
         }
         $string .= " ]</div>";
@@ -305,7 +305,7 @@ class TNode
             $string .= "<style> .TNode$indentation{margin-left: " . ($tabulationPx * $indentation) ."px;} </style>";
         }
         foreach($this->children as $index => $child) {
-            $string .= $child->toString($filterProperties, $tabulationPx, $indentation);
+            $string .= $child->toString($predicateForSelection, $tabulationPx, $indentation);
         }
 
         return $string;
