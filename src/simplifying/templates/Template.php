@@ -692,7 +692,7 @@ class Template
                 if(isset($TVar->$partTVar)) {
                     $TVar = $TVar->$partTVar;
                 } else {
-                    if($set == $this->vars) {
+                    if($TVar == $this->vars) {
                         throw new UnfindableTemplateVariableException(
                             "Template->parseLongTVar() : la variable $nameTVar est introuvable !");
                     } else {
