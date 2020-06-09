@@ -169,6 +169,16 @@ class TNode
 
 
     /**
+     * @param string $keyProperty
+     * @return bool
+     */
+    public function propertyExists(string $keyProperty) : bool {
+        return array_key_exists($keyProperty, $this->properties);
+    }
+
+
+
+    /**
      * @param $keyProperty
      * @param $valueProperty
      * @return bool

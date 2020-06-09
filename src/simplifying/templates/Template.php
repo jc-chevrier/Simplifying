@@ -186,7 +186,7 @@ class Template
                         $nextTNode = $this->getTNode2Contents($TNodeStructure);
                         break;
                     case TNodeLabel::ROUTE :
-                        $nextTNode = $this->getTNode2Contents($TNodeStructure, 'route');
+                        $nextTNode = $this->getTNodeRoute($TNodeStructure);
                         break;
                     case TNodeLabel::IF :
                     case TNodeLabel::IF_NOT :
@@ -270,9 +270,31 @@ class Template
      * @return TNode
      * @throws TemplateSyntaxException
      */
+    private function getTNodeRoute(array $TNodeStructure) : TNode {
+        $nbOtherContents = count($TNodeStructure['otherContents']);
+        if($nbOtherContents != 1) {
+            throw new TemplateSyntaxException(
+                'Template->getTNode2Contents() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
+        } else {
+            $contents = $this->getSimpleTNodeContents($TNodeStructure['TNode']);
+            $contents = preg_split('/ *'. TNodeLabel::ROUTE .' */', $contents, -1, PREG_SPLIT_NO_EMPTY);
+            $contents = preg_split('/ *:{1} */', $contents, -1, PREG_SPLIT_NO_EMPTY);
+            $TNodeStructure['routeAlias'] = array_shift($contents);
+            $TNodeStructure['routeParameters'] = $contents;
+            unset($TNodeStructure['otherContents']);
+            $TNode = new TNode($TNodeStructure);
+            return $TNode;
+        }
+    }
+
+    /**
+     * @param array $TNodeStructure
+     * @return TNode
+     * @throws TemplateSyntaxException
+     */
     private function getTNodeFor(array $TNodeStructure) : TNode {
         $nbOtherContents = count($TNodeStructure['otherContents']);
-        if($nbOtherContents != 3) {
+        if($nbOtherContents == 0) {
             throw new TemplateSyntaxException(
                 'Template->getTNodeFor() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
         } else {
@@ -404,19 +426,6 @@ class Template
                     $previousParentsTNode[] = $TNode;
                     $parentTNode = $TNodeThen;
                     break;
-                case TNodeLabel::TERNARY_EXPRESSION:
-                    $TNodeThen = new TNode(['label' => TNodeLabel::THEN]);
-                    $childTNodeThen = new TNode(['label' => TNodeLabel::IGNORED, 'TNode' => $TNode->then]);
-                    $TNode->addChild($TNodeThen);
-                    $TNodeThen->addChild($childTNodeThen);
-                    $TNode->removeProperty('then');
-                    $TNodeElse = new TNode(['label' => TNodeLabel::ELSE]);
-                    $childTNodeElse = new TNode(['label' => TNodeLabel::IGNORED, 'TNode' => $TNode->else]);
-                    $TNode->addChild($TNodeElse);
-                    $TNodeElse->addChild($childTNodeElse);
-                    $TNode->removeProperty('else');
-                    $parentTNode->addChild($TNode);
-                    break;
                 case TNodeLabel::ELSE :
                     if(!$parentTNode->is(TNodeLabel::THEN)) {
                         throw new TemplateSyntaxException(
@@ -494,8 +503,10 @@ class Template
                 $parsingContent .= $this->parseTNodeRoute($TNode);
                 break;
             case TNodeLabel::IF :
-            case TNodeLabel::TERNARY_EXPRESSION :
                 $parsingContent .= $this->parseTNodeIf($TNode);
+                break;
+            case TNodeLabel::TERNARY_EXPRESSION :
+                $parsingContent .= $this->parseTNodeTernary($TNode);
                 break;
             case TNodeLabel::IF_NOT :
                 $parsingContent .= $this->parseTNodeIfNot($TNode);
@@ -528,7 +539,7 @@ class Template
      * @throws UnfindableTemplateVariableException
      */
     private function parseTNodeRoute(TNode $TNodeRoute) : string {
-        $routeContents = preg_split('/:{1}/', $TNodeRoute->route, -1, PREG_SPLIT_NO_EMPTY);
+        $routeContents = $TNodeRoute->routeContents;
         $routeAlias = array_shift($routeContents);
         $nbParameters = count($routeContents);
         for($i = 0; $i < $nbParameters; $i++) {
@@ -570,6 +581,27 @@ class Template
             } else {
                 $childTNodeElse = $searched[0];
                 $parsingContent = $this->parseChildrenTNode($childTNodeElse);
+            }
+        }
+        return $parsingContent;
+    }
+
+    /**
+     * @param TNode $TNodeTernary
+     * @return string
+     * @throws UnfindableTemplateVariableException
+     */
+    private function parseTNodeTernary(TNode $TNodeTernary) : string {
+        //Récupération de la valeur de la condition.
+        $condition = $this->parseTVar($TNodeTernary->condition);
+        //Implémentation de la condition.
+        if($condition) {
+            $parsingContent = $TNodeTernary->then;
+        } else {
+            if($TNodeTernary->propertyExists('else')) {
+                $parsingContent = $TNodeTernary->else;
+            } else {
+                $parsingContent = "";
             }
         }
         return $parsingContent;

@@ -26,15 +26,16 @@ class TNodeLabel
     const THEN = 'then';
     const ELSE = 'else';
     const END_IF = '/if';
-    const IF_LABELS = [ TNodeLabel::IF,  TNodeLabel::THEN, TNodeLabel::ELSE, TNodeLabel::END_IF ];
+    const IF_LABELS = [ TNodeLabel::IF, TNodeLabel::THEN, TNodeLabel::ELSE, TNodeLabel::END_IF ];
     private const IF_LABELS_1 = [ TNodeLabel::THEN, TNodeLabel::END_IF ];
     private const IF_LABELS_2 = [ TNodeLabel::ELSE, TNodeLabel::END_IF ];
 
     const IF_NOT = 'ifnot';
     const END_IF_NOT = '/ifnot';
-    const IF_NOT_LABELS = [ TNodeLabel::IF_NOT,  TNodeLabel::END_IF_NOT ];
+    const IF_NOT_LABELS = [ TNodeLabel::IF_NOT,  TNodeLabel::END_IF_NOT, TNodeLabel::THEN ];
 
     const TERNARY_EXPRESSION = 'ternary';
+    const TERNARY_EXPRESSION_LABELS = [ TNodeLabel::TERNARY_EXPRESSION, TNodeLabel::THEN, TNodeLabel::ELSE ];
 
     const VALUE = 'val';
 
