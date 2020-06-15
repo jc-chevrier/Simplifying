@@ -15,7 +15,6 @@ class TVarLabel
     const CURRENT_ROUTE = 'cr';
 
     const EXTERNAL_PARAMETERS = 'ep';
-    const INTERNAL_VALUES = 'iv';
 
     const GET = 'g';
     const POST = 'p';

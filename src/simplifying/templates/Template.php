@@ -714,9 +714,6 @@ class Template
      */
     private function parseTVar(string $nameTVar) {
         switch($nameTVar) {
-            case TVarLabel::INTERNAL_VALUES :
-                $TVar = $this->internalValues;
-                break;
             case TVarLabel::EXTERNAL_PARAMETERS :
                 $TVar = $this->externalParameters;
                 break;
@@ -739,9 +736,6 @@ class Template
                         switch($set) {
                             case TVarLabel::CURRENT_ROUTE :
                                 $TVar = $this->parseLongTVar($nameTVar, $this->router->currentRoute, $partsTVar);
-                                break;
-                            case TVarLabel::INTERNAL_VALUES :
-                                $TVar = $this->parseLongTVar($nameTVar, $this->internalValues, $partsTVar);
                                 break;
                             case TVarLabel::EXTERNAL_PARAMETERS :
                                 $TVar = $this->parseLongTVar($nameTVar, $this->externalParameters, $partsTVar);
