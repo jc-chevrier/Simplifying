@@ -145,9 +145,8 @@ class TNode
 
     /**
      * @param TNode $cloneOfThis
-     * @return TNode
      */
-    private function cloneChildren(TNode $cloneOfThis) {
+    private function cloneChildren(TNode $cloneOfThis) : void {
         foreach($this->children as $key => $child) {
             $childClone = $child->cloneProperties();
             $childClone->parent = $cloneOfThis;
@@ -161,8 +160,7 @@ class TNode
     /**
      * @return bool
      */
-    public function hasChildren() : bool
-    {
+    public function hasChildren() : bool {
         return  $this->nbChildren != 0;
     }
 
@@ -307,7 +305,8 @@ class TNode
             foreach($keysProperties as $key => $keyProperty) {
                 if($predicateForSelection == null || $predicateForSelection($keyProperty)) {
                     $property = $this->properties[$keyProperty];
-                    $string .= "<span class='keyProperty'>$keyProperty</span>=<span class='valueProperty'>$property</span> | ";
+                    $string .= "<span class='keyProperty'>$keyProperty</span>=<span class='valueProperty'>" .
+                               (is_array($property) ? implode(" - ", $property) : $property) . "</span> | ";
                 }
             }
         }
