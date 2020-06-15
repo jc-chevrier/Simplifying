@@ -6,6 +6,7 @@ namespace simplifying;
 * Classe Util.
 *
 * @author CHEVRIER Jean-Christophe.
+ * @package simplifying
 */
 class Util
 {

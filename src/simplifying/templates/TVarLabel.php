@@ -7,7 +7,8 @@ namespace simplifying\templates;
  *
  * T <=> Template.
  *
- * @author CHEVRIER Jean-Christophe.
+ * @author CHEVRIER Jean-Christophe
+ * @package simplifying\templates
  */
 class TVarLabel
 {

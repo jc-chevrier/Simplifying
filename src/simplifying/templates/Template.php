@@ -12,7 +12,8 @@ use simplifying\routes\Router;
  * regExp <=> regular expression.
  * var <=> variable.
  *
- * @author CHEVRIER Jean-Christophe.
+ * @author CHEVRIER Jean-Christophe
+ * @package simplifying\templates
  */
 class Template
 {

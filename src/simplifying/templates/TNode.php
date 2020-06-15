@@ -2,6 +2,14 @@
 
 namespace simplifying\templates;
 
+/**
+ * Classe TNode.
+ *
+ * T <=> Template.
+ *
+ * @package simplifying\templates
+ * @author CHEVRIER Jean-Christophe.
+ */
 class TNode
 {
     private $parent;

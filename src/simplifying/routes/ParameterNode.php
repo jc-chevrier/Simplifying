@@ -5,7 +5,8 @@ namespace simplifying\routes;
 /**
  * Classe ParameterNode.
  *
- * @author CHEVRIER Jean-Christophe.
+ * @author CHEVRIER Jean-Christophe
+ * @package simplifying\routes
  */
 class ParameterNode extends Node {
     public function __construct($value) {

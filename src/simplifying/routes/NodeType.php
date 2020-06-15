@@ -5,7 +5,8 @@ namespace simplifying\routes;
 /**
  * Classe NodeType.
  *
- * @author CHEVRIER Jean-Christophe.
+ * @author CHEVRIER Jean-Christophe
+ * @package simplifying\routes
  */
 class NodeType
 {

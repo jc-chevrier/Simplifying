@@ -7,7 +7,8 @@ use Throwable;
 /**
  * Classe SyntaxException.
  *
- * @author CHEVRIER Jean-Christophe.
+ * @author CHEVRIER Jean-Christophe
+ * @package simplifying\templates
  */
 class UnfindableTemplateVariableException extends \Exception
 {

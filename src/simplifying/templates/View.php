@@ -5,7 +5,8 @@ namespace simplifying\templates;
 /**
  * Classe View.
  *
- * @author CHEVRIER Jean-Christophe.
+ * @author CHEVRIER Jean-Christophe
+ * @package simplifying\templates
  */
 class View
 {

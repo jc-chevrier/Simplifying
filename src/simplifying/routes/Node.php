@@ -7,7 +7,8 @@ namespace simplifying\routes;
  *
  * Noeud pour faire des arbres n-aires.
  *
- * @author CHEVRIER Jean-Christophe.
+ * @author CHEVRIER Jean-Christophe
+ * @package simplifying\routes
  */
 class Node
 {

@@ -2,6 +2,12 @@
 
 namespace simplifying;
 
+/**
+ * Classe PathManager.
+ *
+ * @author CHEVRIER Jena-Christophe
+ * @package simplifying
+ */
 class PathManager
 {
     /**

@@ -8,7 +8,8 @@ use simplifying\Util as Util;
 /**
  * Classe Router.
  *
- * @author CHEVRIER Jean-Christophe.
+ * @author CHEVRIER Jean-Christophe
+ * @package simplifying\routes
  */
 class Router
 {
