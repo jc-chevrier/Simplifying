@@ -24,4 +24,4 @@ $router->route('/test2/{id}/{id2}', function($id, $id2) {
     echo $id . "---" . $id2;
 })->alias('test2');
 
-$router->go();
+$router->run();

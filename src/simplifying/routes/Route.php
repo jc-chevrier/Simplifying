@@ -54,7 +54,12 @@ class Route
     private $action;
 
 
-
+    /**
+     * Route constructor.
+     * @param $templateRoute
+     * @param $templateRouteNodes
+     * @param $action
+     */
     public function __construct($templateRoute, $templateRouteNodes, $action) {
         $this->templateRoute = $templateRoute;
         $this->templateRouteNodes = $templateRouteNodes;
@@ -66,8 +71,10 @@ class Route
 
     /**
      * Declarer un alias pour une route.
+     * 
+     * @param string $alias
      */
-    public function alias($alias) {
+    public function alias(string $alias) {
         foreach(Router::getInstance()->routes as $templateRoute => $route) {
             //Si on a retrouvé la route à partir de l'alias.
             if($route != $this && $route->alias == $alias) {
@@ -82,10 +89,10 @@ class Route
     /**
      * Rendre une route effective.
      *
-     * @param $effectiveRoute       La route effective.
-     *                              /uripart1/nuripart2/01
+     * @param string $effectiveRoute       La route effective.
+     *                                     /uripart1/nuripart2/01
      */
-    public function beginEffective($effectiveRoute) {
+    public function beginEffective(string $effectiveRoute) : void {
         $this->effectiveRoute = $effectiveRoute;
         //Récupération des parties d'URI de la route effective.
         $values = Route::toUriParts($effectiveRoute);
@@ -102,7 +109,7 @@ class Route
     /**
      * Effectuer l'action de la route.
      */
-    public function go() {
+    public function run() : void {
         call_user_func_array($this->action, $this->parameters);
     }
 
@@ -114,19 +121,22 @@ class Route
      *
      * {id} -> id
      *
-     * @param $parameter    {id}
+     * @param string $parameter    {id}
      *
-     * @return string        id
+     * @return string               id
      */
-    public static function getParamaterName($parameter) {
+    public static function getParameterName(string $parameter) : string {
         return substr($parameter, 1, -1);
     }
 
 
     /**
      * Savoir si un string contient un paramètre.
+     *
+     * @param string $string
+     * @return bool
      */
-    public static function containsParameter($string) {
+    public static function containsParameter(string $string) : bool {
         $matchesFound = preg_match('/' . Route::markupParameter . '/', $string);
         if($matchesFound) {
             return true;
@@ -139,17 +149,23 @@ class Route
 
 
     /**
-     * Récuperer un tableau des parties de l'URI.
+     * Récupérer un tableau des parties de l'URI.
+     *
+     * @param string $route
+     * @return array
      */
-    public static function toUriParts($route) {
+    public static function toUriParts(string $route) : array {
         $uriParts = preg_split('/\//', $route, -1, PREG_SPLIT_NO_EMPTY);
         return $uriParts;
     }
 
 
 
-
-    public function __get($name)
+    /**
+     * @param string $name
+     * @return bool|mixed
+     */
+    public function __get(string $name)
     {
         if (isset($this->$name)) {
             return $this->$name;

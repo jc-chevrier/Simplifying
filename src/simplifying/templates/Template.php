@@ -9,7 +9,7 @@ use simplifying\routes\Router;
  * Classe Template.
  *
  * T <=> Template.
- * regExp <=> regular expression.
+ * reg exp <=> regular expression.
  * var <=> variable.
  *
  * @author CHEVRIER Jean-Christophe
@@ -17,17 +17,16 @@ use simplifying\routes\Router;
  */
 class Template
 {
-    const regExpTNode = "<{2} *\/{0,1}[a-zA-Z]+ *[^<>]* *>{1}";
+    const EXTENSION_T_FILE = ".html";
+    
+    const REG_EXP_T_NODE = "<{2} *\/{0,1}[a-zA-Z]+ *[^<>]* *>{1}";
 
-    private static $rootRelativePath = ".\\..\\..\\app\\views\\";
-    private static $rootAbsolutePath;
-
-    private static $extensionTFile = ".html";
+    private static $ROOT_T_RELATIVE_PATH = ".\\..\\..\\app\\views\\";
+    private static $ROOT_T_ABSOLUTE_PATH;
 
     private $name;
 
     private $externalParameters;
-    private $internalValues;
     private $router;
     private $vars;
 
@@ -41,24 +40,21 @@ class Template
     public function __construct(string $name, array $externalParameters = [])
     {
         $this->name = $name;
-
         $this->externalParameters = $externalParameters;
-        $this->internalValues = [];
         $this->router = Router::getInstance();
         $this->vars = [];
-
-        Template::initialiseRootAbsolutePath();
+        Template::initialiseRootTAbsolutePath();
     }
 
     /**
      *
      */
-    private static function initialiseRootAbsolutePath() {
-        if(Template::$rootAbsolutePath == null) {
-            if(PathManager::isRelativePath(Template::$rootRelativePath)) {
-                Template::$rootAbsolutePath = PathManager::parseInAbsolutePath(Template::$rootRelativePath, __DIR__);
+    private static function initialiseRootTAbsolutePath() {
+        if(Template::$ROOT_T_ABSOLUTE_PATH == null) {
+            if(PathManager::isRelativePath(Template::$ROOT_T_RELATIVE_PATH)) {
+                Template::$ROOT_T_ABSOLUTE_PATH = PathManager::parseInAbsolutePath(Template::$ROOT_T_RELATIVE_PATH, __DIR__);
             } else {
-                Template::$rootAbsolutePath = Template::$rootRelativePath;
+                Template::$ROOT_T_ABSOLUTE_PATH = Template::$ROOT_T_RELATIVE_PATH;
             }
         }
     }
@@ -89,11 +85,11 @@ class Template
     /**
      * Obtenir le chemin absolu d'un template.
      *
-     * @param string $TName
+     * @param string $Tname
      * @return string
      */
-    private function getTAbsolutePath(string $TName) : string {
-        return Template::$rootAbsolutePath . $TName . Template::$extensionTFile;
+    private function getTAbsolutePath(string $Tname) : string {
+        return Template::$ROOT_T_ABSOLUTE_PATH . $Tname . Template::EXTENSION_T_FILE;
     }
 
 
@@ -119,7 +115,7 @@ class Template
      * @throws TemplateSyntaxException
      */
     private function getTHierarchy() : array {
-        $TNames = [ $this->name ];
+        $Tnames = [ $this->name ];
         $TPath = $this->getTAbsolutePath($this->name);
         $TPaths = [ $TPath ];
         $TContent = $this->getTContent($TPath);
@@ -130,14 +126,14 @@ class Template
             $pathOfTParent = $this->getTAbsolutePath($TNodeParent->name);
             $contentOfTParent = $this->getTContent($pathOfTParent);
 
-            array_unshift($TNames, $TNodeParent->name);
+            array_unshift($Tnames, $TNodeParent->name);
             array_unshift($TPaths, $pathOfTParent);
             array_unshift($TContents, $contentOfTParent);
 
             $TNodeParent = $this->getNextTNode($contentOfTParent);
         }
 
-        return [ 'TNames' => $TNames,
+        return [ 'Tnames' => $Tnames,
                  'TPaths' => $TPaths,
                  'TContents' => $TContents ];
     }
@@ -158,7 +154,7 @@ class Template
      */
     private function getNextTNodeContents(string $content) {
         $matches = [];
-        $matchesFound = preg_match('/' . Template::regExpTNode . '/', $content, $matches);
+        $matchesFound = preg_match('/' . Template::REG_EXP_T_NODE . '/', $content, $matches);
         if($matchesFound) {
             return $matches[0];
         } else {
@@ -387,7 +383,6 @@ class Template
             //Fusion des arbres.
             $tree = $this->mergeTrees($tree, $childTree);
         }
-        echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
         //Parsing arbre -> contenu.
         $parsedTContent = $this->parseTreeInHtml($tree);
         return $parsedTContent;

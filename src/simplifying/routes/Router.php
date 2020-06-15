@@ -2,7 +2,6 @@
 
 namespace simplifying\routes;
 
-use simplifying\views\View as View;
 use simplifying\Util as Util;
 
 /**
@@ -48,33 +47,33 @@ class Router
 
 
 
-    private function __construct()
-    {
+    /**
+     * Router constructor.
+     */
+    private function __construct() {
         //Initialisation des attributs du router.
         //Route courante nulle.
         $this->currentRoute = null;
-
         //Racine des routes du serveur.
         $root = explode('/', $_SERVER['SCRIPT_NAME']);
         //Fichier à la racine des routes.
         $this->ROOT_FILE = '/' . $root[count($root) - 1];
         //Repertoire(s) à la racine des routes.
         $this->ROOT_DIRECTORY = Util::removeOccurrences($this->ROOT_FILE, $_SERVER['SCRIPT_NAME']);
-
         //Noeud racine de l'arbre du serveur.
         $this->tree = new Node("root");
-
         //Route d'erreur par défaut.
-        $this->route('/error', '<html><body><div>Page inexistante sur le serveur.</div></body></html>');
+        $this->route('/error', function(){return'<html><body><div>Page inexistante sur le serveur.</div></body></html>';});
     }
 
 
 
     /**
      * Obtenir le singleton router de l'extérieur.
+     *
+     * @return Router
      */
-    public static function getInstance()
-    {
+    public static function getInstance() : Router {
         if (Router::$router == null) {
             Router::$router = new Router();
         }
@@ -86,8 +85,7 @@ class Router
     /**
      * Effectuer l'action correspondante à la route courante.
      */
-    public function go()
-    {
+    public function run() : void {
         //Mise à jour du la route courante du serveur.
         $this->update();
         //Si null, alors la route indquée n'existe pas.
@@ -96,14 +94,13 @@ class Router
             $this->currentRoute->beginEffective($this->currentRoute->templateRoute);
         }
         //Rendre la mise à jour de la route courante effective.
-        $this->currentRoute->go();
+        $this->currentRoute->run();
     }
 
     /**
      * Mettre à jour la route courante.
      */
-    private function update()
-    {
+    private function update() : void {
         //On retire ce qui ne nous intéresse pas.
         $requestUriParts = $_SERVER['REQUEST_URI'];
 
@@ -144,9 +141,12 @@ class Router
 
     /**
      * Rediriger vers une autre route.
+     *
+     * @param string $routeAlias
+     * @param array $routeParameters
+     * @param int $statusCode
      */
-    public function redirect($routeAlias, $routeParameters = [], $statusCode = 302)
-    {
+    public function redirect(string $routeAlias, array $routeParameters = [], int $statusCode = 302) : void {
         foreach($this->routes as $templateRoute => $route) {
             //Si on a retrouvé la route à partir de l'alias.
             if($route->alias == $routeAlias) {
@@ -163,57 +163,29 @@ class Router
     /**
      * Ajouter une route au serveur.
      *
-     * @param $templateRoute        -> route modèle
-     *
-     * @param $serverResponse       -> réponse liée à la route
-     *        Peut valoir :
-     *        -> classe de type template
-     *        -> [classe, méthode]
-     *        -> code html
-     *        -> callback
-     *
-     * @return La route créée.
+     * @param string $templateRoute        -> route modèle
+     * @param callable $serverResponse     -> réponse liée à la route
+     * @return Route
      */
-    public function route($templateRoute, $serverResponse)
-    {
-        //On transforme la réponse en callBack si nécessaire.
-        if(!is_callable($serverResponse)) {
-            //Si l'action associée à la route est un template.
-            if (class_exists($serverResponse) && is_subclass_of($serverResponse, \simplifying\views\Template::class)) {
-                $serverResponse = function () use ($serverResponse) {
-                    (new \ReflectionClass($serverResponse))->newInstance();
-                };
-            } else {
-                //Si l'action associée à la route est du code html.
-                if(!class_exists($serverResponse) && is_string($serverResponse)) {
-                    $serverResponse = function () use ($serverResponse) {
-                        View::render($serverResponse);
-                    };
-                } else {
-                    //Type de réponse pas acceptée.
-                    return false;
-                }
-            }
-        }
-
+    public function route(string $templateRoute, callable $serverResponse) : Route {
         //La route / est enregistrée en tant que "slash".
         if($templateRoute == "/") {
             $templateRoute = "/slash";
         }
-
         //Ajout dans l'arbre.
         list($templateRoute, $templateRouteNodes) = $this->addRouteInTree($templateRoute);
         //Ajout dans les routes.
         $this->routes[$templateRoute] = new Route($templateRoute, $templateRouteNodes, $serverResponse);
-
         return $this->routes[$templateRoute];
     }
 
     /**
      * Changer la route d'érreur du serveur.
+     *
+     * @param string $serverResponseForError
+     * @return Route
      */
-    public function routeError($serverResponseForError)
-    {
+    public function routeError(string $serverResponseForError) : Route {
         return $this->route("/error", $serverResponseForError);
     }
 
@@ -223,11 +195,10 @@ class Router
      *  Ajouter une route modèle dans l'arbre du serveur, et récupérer
      *  la route modèle normalisée, et la route modèle en noeuds.
      *
-     * @param $templateRoute    -> route modèle non normalisée
-     *
-     * @return array            ->  [ route modèle normalisée, route modèle en noeuds ]
+     * @param string $templateRoute    -> route modèle non normalisée
+     * @return array                   ->  [ route modèle normalisée, route modèle en noeuds ]
      */
-    private function addRouteInTree($templateRoute) {
+    private function addRouteInTree(string $templateRoute) : array {
         //On découpe la route en parties d'URI.
         $uriParts = Route::toUriParts($templateRoute);
 
@@ -240,7 +211,7 @@ class Router
             $isParameter = false;
             //Si la partie de l'URI étudiée est un paramètre de route.
             if(Route::containsParameter($uriPart)) {
-                $uriPart = Route::getParamaterName($uriPart);
+                $uriPart = Route::getParameterName($uriPart);
                 $isParameter = true;
             }
 
@@ -270,8 +241,10 @@ class Router
     /**
      * Chercher la route modèle correspondant à une route effective
      * via l'arbre du serveur, et initialiser la route.
+     *
+     * @param string $effectiveRoute
      */
-    private function searchModelRouteInTree($effectiveRoute) {
+    private function searchModelRouteInTree(string $effectiveRoute) : void {
         //On découpe la route effective en parties.
         $uriParts = Route::toUriParts($effectiveRoute);
         //On récupère l'arborescence de neoud correpondant à la route modèle.
@@ -303,8 +276,13 @@ class Router
 
     /**
      * Chercher une route modèle via l'arbre du serveur.
+     *
+     * @param array $uriParts
+     * @param Node $parentNode
+     * @param array $crossedNodes
+     * @return array|null
      */
-    private function searchModelRouteInTreeHelper($uriParts, $parentNode, $crossedNodes = []) {
+    private function searchModelRouteInTreeHelper(array $uriParts, Node $parentNode, array $crossedNodes = []) : array {
         //Cas trivial.
         if(count($uriParts) == 0) {
             return $crossedNodes;
@@ -352,14 +330,11 @@ class Router
     /**
      * Récupérer une route effective à partir d'un alias et de paramètres.
      *
-     * @param $routeAlias                    L'alias de la route.
-     *
-     * @param array $routeParameters         Les paramètres de la route si
-     *                                       la route doir avoir des paramètres.
-     *
-     * @return string                        La route effective.
+     * @param string $routeAlias                    L'alias de la route.
+     * @param array $routeParameters                Les paramètres de la route si la route doir avoir des paramètres.
+     * @return string                               La route effective.
      */
-    public function getRoute($routeAlias, $routeParameters = []) {
+    public function getRoute(string $routeAlias, array $routeParameters = []) : string {
         foreach($this->routes as $templateRoute => $route) {
             //Si on a retrouvé la route à partir de l'alias.
             if($route->alias == $routeAlias) {
@@ -373,8 +348,12 @@ class Router
 
     /**
      * Préparer une route effective avec des paramètres.
+     *
+     * @param array $templateRouteNodes
+     * @param array $routeParameters
+     * @return string
      */
-    private function prepareEffectiveRoute($templateRouteNodes, $routeParameters) {
+    private function prepareEffectiveRoute(array $templateRouteNodes, array $routeParameters) : string {
         $effectiveRoute = '';
 
         if(count($routeParameters) != 0) {

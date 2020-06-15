@@ -28,9 +28,11 @@ class Node
     private $type;
 
 
-
-
-    public function __construct($value) {
+    /**
+     * Node constructor.
+     * @param string $value
+     */
+    public function __construct(string $value) {
         $this->value = $value;
         $this->childNodes = [];
         $this->type = NodeType::NODE;
@@ -60,8 +62,11 @@ class Node
      *
      * La recherche est effectuée dans le niveau
      * des noeuds enfants uniquement.
+     *
+     * @param string $value
+     * @return mixed|null
      */
-    public function searchNodeInChildNodes($value) {
+    public function searchNodeInChildNodes(string $value) {
         foreach($this->childNodes as $index => $childNode) {
             if($childNode->value == $value) {
                 return $childNode;
@@ -74,8 +79,11 @@ class Node
      * Rechercher le noeud de valeur $value.
      *
      * La recherche est effectuée dans tous les sous-niveaux.
+     *
+     * @param string $value
+     * @return mixed|null
      */
-    public function searchNode($value) {
+    public function searchNode(string $value) {
         //On cherche dans les noeuds enfants (trivial).
        $node = $this->searchNodeInChildNodes($value);
        if($node != null) {
@@ -96,8 +104,10 @@ class Node
 
     /**
      * Récupérer les noeuds enfants de type ParameterNode.
+     *
+     * @return array
      */
-    public function searchChildParameterNodes() {
+    public function searchChildParameterNodes() : array {
         $childParameterNodes = [];
         foreach($this->childNodes as $index => $childNode) {
             if($childNode->type == NodeType::PARAMETER_NODE) {
@@ -140,10 +150,10 @@ class Node
 
 
     /**
-     * @param $name
+     * @param string $name
      * @return bool
      */
-    public function __get($name) {
+    public function __get(string $name) {
         if (isset($this->$name)) {
             return $this->$name;
         }
@@ -151,11 +161,11 @@ class Node
     }
 
     /**
-     * @param $name
+     * @param string $name
      * @param $value
      * @return bool
      */
-    public function __set($name, $value) {
+    public function __set(string $name, $value) {
         if (isset($this->$name)) {
             $this->$name = $value;
         }
