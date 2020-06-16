@@ -189,7 +189,7 @@ class Template
                 if(TNodeLabel::isTNodeLabel($aContent)) {
                     $TNodeStructure['label'] = $aContent;
                 } else {
-                    throw new TemplateSyntaxException("Template->getNextTNode() : noeud de template incorrect : $getNextTNode !");
+                    throw new TemplateSyntaxException("Template->getNextTNode() : type noeud de template inconnu : $getNextTNode !");
                 }
                 $TNodeStructure['otherContents'] = $contentsArray;
 
@@ -325,7 +325,7 @@ class Template
                 'Template->getTNodeTernary() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
         } else {
             $contents = $this->getSimpleTNodeContents($TNodeStructure['TNode']);
-            $contents = preg_split('/^ *'. TNodeLabel::TERNARY_EXPRESSION .' */', $contents, -1, PREG_SPLIT_NO_EMPTY);
+            $contents = preg_split('/^ *'. TNodeLabel::TERNARY_EXPRESSION .' +/', $contents, -1, PREG_SPLIT_NO_EMPTY);
             $contents = preg_split('/ *\?{1} */', $contents[0], -1, PREG_SPLIT_NO_EMPTY);
             $TNodeStructure['condition'] =  $contents[0];
             $contents = preg_split('/ *:{1} */', $contents[1], -1, PREG_SPLIT_NO_EMPTY);
@@ -375,7 +375,7 @@ class Template
             //Fusion des arbres.
             $tree = $this->mergeTrees($tree, $childTree);
         }
-        echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
+        //echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
         //Parsing arbre -> contenu.
         $parsedTContent = $this->parseTreeInWebLanguages($tree);
         return $parsedTContent;
@@ -533,7 +533,7 @@ class Template
         //Remplacement des neouds de type bloc asbtrait par les noeuds de type bloc non abstrait correspondant.
         foreach($blocksInChildTree as $key => $block) {
             foreach($abstractBlocksInParentTree as $key2 => $abstractBlock) {
-                if($abstractBlock->name == $block->name) {
+                if($block->hasSamePropertyThat("name", $abstractBlock)) {
                     $parent = $abstractBlock->parent;
                     $parent->replaceChild($abstractBlock, $block);
                     break;
@@ -696,7 +696,7 @@ class Template
     private function parseTNodeFor(TNode $TNodeFor) : string {
         $varExists = array_key_exists($TNodeFor->element, $this->vars);
         if($varExists) {
-            throw new TemplateSyntaxException(
+            throw new UnfindableTemplateVariableException(
                 "Template->parseTNodeFor() : nom de variable déjà utilisé dans le scope courant ! 
                  Variable concernée : " . $TNodeFor->element ." !");
         }
