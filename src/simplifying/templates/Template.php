@@ -30,6 +30,8 @@ class Template
     private $router;
     private $vars;
 
+    private $currentForId;
+
 
 
     /**
@@ -716,17 +718,30 @@ class Template
      */
     private function parseTNodeForSequence(TNode $TNodeFor) : string {
         $element = $TNodeFor->element;
-        //Implémentation du for avec séquence.
+        //Implémentation du for.
         $bounds = preg_split("/\.{2}/",  $TNodeFor->set, -1, PREG_SPLIT_NO_EMPTY);
         $lowerBound = $bounds[0];
         $upperBound = $bounds[1];
+        $nbElements = $upperBound - $lowerBound + 1;
+        $lastIndex = $upperBound - 1;
         $parsingContent = "";
+        $forId = "for".$TNodeFor->id;
+        $previousForId = $this->currentForId;
+        $this->vars[$forId]["scope"] = $previousForId == null ? null : $this->vars[$previousForId];
+        $this->currentForId = $forId;
+        $this->vars[$forId]["size"] = $nbElements;
+        $this->vars[$forId]["min"] = $lowerBound;
+        $this->vars[$forId]["max"] = $upperBound;
         for($i = $lowerBound; $i <= $upperBound; $i++) {
+            $this->vars[$forId]["isFirstIteration"] = $i == $lowerBound;
+            $this->vars[$forId]["isLastIteration"] = $i == $lastIndex;
             $this->vars[$element] = $i;
             $parsingContent .=  $this->parseChildrenTNode($TNodeFor);
         }
-        //Destruction de la variable du for.
+        //Destruction des variables du for.
+        $this->currentForId = $previousForId;
         unset($this->vars[$element]);
+        unset($this->vars[$forId]);
         return $parsingContent;
     }
 
@@ -740,15 +755,26 @@ class Template
         //Récupération de la valeur du set du for.
         $set = $this->parseTVar($TNodeFor->set);
         $element = $TNodeFor->element;
-        //Implémentation du foreach.
-        $parsingContent = "";
+        //Implémentation du for.
         $nbElements = count($set);
+        $lastIndex = $nbElements - 1;
+        $parsingContent = "";
+        $forId = "for" . $TNodeFor->id;
+        $previousForId = $this->currentForId;
+        $this->vars[$forId]["scope"] = $previousForId == null ? null : $this->vars[$previousForId];
+        $this->currentForId = $forId;
+        $this->vars[$forId]["size"] = $nbElements;
         for($i = 0; $i < $nbElements; $i++) {
+            $this->vars[$forId]["index"] = $i + 1;
+            $this->vars[$forId]["isFirstIteration"] = $i == 0;
+            $this->vars[$forId]["isLastIteration"] = $i == $lastIndex;
             $this->vars[$element] = $set[$i];
             $parsingContent .=  $this->parseChildrenTNode($TNodeFor);
         }
-        //Destruction de la variable du for.
+        //Destruction des variables du for.
+        $this->currentForId = $previousForId;
         unset($this->vars[$element]);
+        unset($this->vars[$forId]);
         return $parsingContent;
     }
 
@@ -790,7 +816,8 @@ class Template
                 if(isset($this->vars[$nameTVar])) {
                     $TVar = $this->vars[$nameTVar];
                 } else {
-                    if(preg_match('/\.{1}/', $nameTVar)) {
+                    $isALongTVar = preg_match('/\.{1}/', $nameTVar);
+                    if($isALongTVar) {
                         $partsTVar = preg_split("/ *\.{1} */", $nameTVar, -1, PREG_SPLIT_NO_EMPTY);
                         $set = array_shift($partsTVar);
                         switch($set) {
@@ -808,6 +835,9 @@ class Template
                                 break;
                             case TVarLabel::SESSION :
                                 $TVar = $this->parseLongTVar($nameTVar, $_SESSION, $partsTVar);
+                                break;
+                            case TNodeLabel::FOR :
+                                $TVar = $this->parseLongTVar($nameTVar, $this->vars[$this->currentForId], $partsTVar);
                                 break;
                             default:
                                 array_unshift($partsTVar, $set);

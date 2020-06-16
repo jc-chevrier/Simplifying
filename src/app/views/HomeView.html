@@ -14,14 +14,23 @@
         Vous êtes dans la HomeView.
         <<for ep.set : set2>
             <br>
-            Loop.
+            Loop index=<<val for.index>.
             <<for set2 : e>
                 <div>
-                    Loop -> valeur <<val e>.
+                    Loop -> valeur=<<val e> | index=<<val for.index> | taille=<<val for.size>
+                    | isFirstIteration=<<val for.isFirstIteration> | isLastIteration=<<val for.isLastIteration> |
+                    index du scope = <<val for.scope.index>.
+                    <<if for.isFirstIteration>
+                        Première itération.
+                     <<else>
+                            <<if for.isLastIteration>
+                                Dernière itération.
+                            <</if>
+                    <</if>
                 </div>
             <</for>
         <</for>
-        <<for 1..11 : e>
+        <<for 1..11    : e>
             <div>
                 Sequence -> valeur <<val e>.
             </div>
