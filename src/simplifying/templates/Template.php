@@ -343,15 +343,15 @@ class Template
 
 
     //------------------------------------------------------------------------------------------------------------------
-    // Parsing des templates en noeuds de tamplates syntaxiques puis en html.
+    // Parsing des templates en noeuds de tamplates syntaxiques puis en langages web (html, etc.).
 
 
 
     /**
-     * Parser un template en arbre syntaxique puis en langage web (html, etc.).
+     * Parser un template en arbre syntaxique puis en langages web (html, etc.).
      *
      * Processus de la méthode :
-     * template <=> tree <=> html.
+     * template <=> tree <=> langages web (html, etc.).
      *
      * Pour vérifier le contenu des arbres :
      * echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
@@ -376,7 +376,7 @@ class Template
             $tree = $this->mergeTrees($tree, $childTree);
         }
         //Parsing arbre -> contenu.
-        $parsedTContent = $this->parseTreeInHtml($tree);
+        $parsedTContent = $this->parseTreeInWebLanguages($tree);
         return $parsedTContent;
     }
 
@@ -520,7 +520,7 @@ class Template
 
 
     //------------------------------------------------------------------------------------------------------------------
-    // Parsing des noeuds de tamplates syntaxiques en html.
+    // Parsing des noeuds de tamplates syntaxiques en langages web (html, etc.).
 
 
 
@@ -531,7 +531,7 @@ class Template
      * @throws TemplateSyntaxException
      * @throws UnfindableTemplateVariableException
      */
-    private function parseTreeInHtml(TNode $TNode) : string {
+    private function parseTreeInWebLanguages(TNode $TNode) : string {
         $parsingContent = "";
         //Parsing du noeud de template en contenu.
         switch ($TNode->label) {
@@ -694,7 +694,7 @@ class Template
         $parsingContent = "";
         //Parsing des noeuds de template enfants en contenu.
         foreach($TNode->children as $key => $child) {
-            $parsingContent .= $this->parseTreeInHtml($child);
+            $parsingContent .= $this->parseTreeInWebLanguages($child);
         }
         return $parsingContent;
     }
