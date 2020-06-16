@@ -400,24 +400,24 @@ class Template
         //Parsing du template en tableau de noeuds de template.
         $sequence = 0;
         $TNodes = [];
-        $nextNode = $this->getNextTNode($content);
-        while($nextNode != false) {
-            if($nextNode->is(TNodeLabel::FOR)) {
-                $nextNode->id = $sequence;
+        $nextTNode = $this->getNextTNode($content);
+        while($nextTNode != false) {
+            if($nextTNode->is(TNodeLabel::FOR)) {
+                $nextTNode->id = $sequence;
                 $sequence++;
             }
 
-            $pos = strpos($content, $nextNode->TNode);
+            $pos = strpos($content, $nextTNode->TNode);
             $beforeContent = substr($content, 0, $pos);
             if($beforeContent != '') {
                 $beforeTNodeIgnored = new TNode(['label' => TNodeLabel::IGNORED, 'TNode' => $beforeContent]);
                 $TNodes[] = $beforeTNodeIgnored;
             }
 
-            $TNodes[] = $nextNode;
+            $TNodes[] = $nextTNode;
 
-            $content = substr_replace($content, "", 0, $pos + strlen($nextNode->TNode));
-            $nextNode = $this->getNextTNode($content);
+            $content = substr_replace($content, "", 0, $pos + strlen($nextTNode->TNode));
+            $nextTNode = $this->getNextTNode($content);
         }
 
         if($content != "") {
