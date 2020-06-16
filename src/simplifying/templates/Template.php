@@ -282,9 +282,8 @@ class Template
             throw new TemplateSyntaxException(
                 'Template->getTNodeRoute() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
         } else {
-            $contents = $this->getSimpleTNodeContents($TNodeStructure['TNode']);
-            $contents = preg_split('/ *'. TNodeLabel::ROUTE .' */', $contents, -1, PREG_SPLIT_NO_EMPTY);
-            $contents = preg_split('/ *:{1} */', $contents[0], -1, PREG_SPLIT_NO_EMPTY);
+            $contents = implode("", $TNodeStructure['otherContents']);
+            $contents = preg_split('/:{1}/', $contents, -1, PREG_SPLIT_NO_EMPTY);
             $TNodeStructure['routeAlias'] = array_shift($contents);
             $TNodeStructure['routeParameters'] = $contents;
             unset($TNodeStructure['otherContents']);
@@ -304,9 +303,8 @@ class Template
             throw new TemplateSyntaxException(
                 'Template->getTNodeFor() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
         } else {
-            $contents = $this->getSimpleTNodeContents($TNodeStructure['TNode']);
-            $contents = preg_split('/ *'. TNodeLabel::FOR .' */', $contents, -1, PREG_SPLIT_NO_EMPTY);
-            $contents = preg_split('/ *:{1} */', $contents[0], -1, PREG_SPLIT_NO_EMPTY);
+            $contents = implode("", $TNodeStructure['otherContents']);
+            $contents = preg_split('/:{1}/', $contents, -1, PREG_SPLIT_NO_EMPTY);
             $TNodeStructure['set'] = $contents[0];
             $TNodeStructure['element'] = $contents[1];
             unset($TNodeStructure['otherContents']);
@@ -327,12 +325,13 @@ class Template
                 'Template->getTNodeTernary() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
         } else {
             $contents = $this->getSimpleTNodeContents($TNodeStructure['TNode']);
-            $contents = preg_split('/ *'. TNodeLabel::TERNARY_EXPRESSION .' */', $contents, -1, PREG_SPLIT_NO_EMPTY);
+            $contents = preg_split('/^ *'. TNodeLabel::TERNARY_EXPRESSION .' */', $contents, -1, PREG_SPLIT_NO_EMPTY);
             $contents = preg_split('/ *\?{1} */', $contents[0], -1, PREG_SPLIT_NO_EMPTY);
             $TNodeStructure['condition'] =  $contents[0];
             $contents = preg_split('/ *:{1} */', $contents[1], -1, PREG_SPLIT_NO_EMPTY);
             $TNodeStructure['then'] =  $contents[0];
-            $TNodeStructure['else'] = $contents[1];
+            $contents = preg_split('/ *$/', $contents[1], -1, PREG_SPLIT_NO_EMPTY);
+            $TNodeStructure['else'] = $contents[0];
             unset($TNodeStructure['otherContents']);
             $TNode = new TNode($TNodeStructure);
             return $TNode;
@@ -376,7 +375,7 @@ class Template
             //Fusion des arbres.
             $tree = $this->mergeTrees($tree, $childTree);
         }
-        //echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
+        echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
         //Parsing arbre -> contenu.
         $parsedTContent = $this->parseTreeInWebLanguages($tree);
         return $parsedTContent;
