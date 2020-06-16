@@ -210,17 +210,9 @@ class Template
                         $getNextTNode = $this->getTNodeTernary($TNodeStructure);
                         break;
                     case TNodeLabel::ELSE :
-                        $getNextTNode = $this->getTNode1Content($TNodeStructure);
-                        break;
                     case TNodeLabel::END_IF :
-                        $getNextTNode = $this->getTNode1Content($TNodeStructure);
-                        break;
                     case TNodeLabel::END_IF_NOT :
-                        $getNextTNode = $this->getTNode1Content($TNodeStructure);
-                        break;
                     case TNodeLabel::END_BLOCK :
-                        $getNextTNode = $this->getTNode1Content($TNodeStructure);
-                        break;
                     case TNodeLabel::END_FOR :
                         $getNextTNode = $this->getTNode1Content($TNodeStructure);
                         break;
