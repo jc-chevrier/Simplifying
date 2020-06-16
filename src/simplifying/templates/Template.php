@@ -102,7 +102,7 @@ class Template
     private function getTContent(string $path) : string {
         $TContent = file_get_contents($path);
         if($TContent == false) {
-            throw new \InvalidArgumentException('Le chargement du template a échoué !');
+            throw new \InvalidArgumentException('Template->getTContent() : chargement du template a échoué !');
         }
         return $TContent;
     }
@@ -302,12 +302,11 @@ class Template
             throw new TemplateSyntaxException(
                 'Template->getTNodeFor() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
         } else {
-            $TNodeStructure['set'] = $TNodeStructure['otherContents'][0];
-            if($TNodeStructure['otherContents'][1] != ':') {
-                throw new TemplateSyntaxException(
-                    'Template->getTNodeFor() : syntaxe incorrecte dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
-            }
-            $TNodeStructure['element'] = $TNodeStructure['otherContents'][2];
+            $contents = $this->getSimpleTNodeContents($TNodeStructure['TNode']);
+            $contents = preg_split('/ *'. TNodeLabel::FOR .' */', $contents, -1, PREG_SPLIT_NO_EMPTY);
+            $contents = preg_split('/ *:{1} */', $contents[0], -1, PREG_SPLIT_NO_EMPTY);
+            $TNodeStructure['set'] = $contents[0];
+            $TNodeStructure['element'] = $contents[1];
             unset($TNodeStructure['otherContents']);
             $TNode = new TNode($TNodeStructure);
             return $TNode;
@@ -398,9 +397,22 @@ class Template
      */
     private function parseTemplateInTree(string $content) : TNode {
         //Parsing du template en tableau de noeuds de template.
+        $TNodes = $this->parseTemplateInArrayOfTNodes($content);
+        //Création de l'arbre à partir du tableau de noeuds de template.
+        $rootTNode = $this->orderTNodes($TNodes);
+        return $rootTNode;
+    }
+
+    /**
+     * @param string $content
+     * @return array
+     * @throws TemplateSyntaxException
+     */
+    private function parseTemplateInArrayOfTNodes(string $content) : array {
         $sequence = 0;
         $TNodes = [];
         $nextTNode = $this->getNextTNode($content);
+
         while($nextTNode != false) {
             if($nextTNode->is(TNodeLabel::FOR)) {
                 $nextTNode->id = $sequence;
@@ -425,10 +437,19 @@ class Template
             $TNodes[] = $TNodeIgnored;
         }
 
-        //Création de l'arbre à partir du tableau de noeuds de template.
+        return $TNodes;
+    }
+
+    /**
+     * @param array $TNodes
+     * @return TNode
+     * @throws TemplateSyntaxException
+     */
+    private function orderTNodes(array $TNodes) : TNode {
         $rootTNode = TNode::getATNodeRoot();
         $parentTNode = $rootTNode;
         $previousParentsTNode = [];
+
         foreach($TNodes as $key => $TNode) {
             switch ($TNode->label) {
                 case TNodeLabel::PARENT :
@@ -470,7 +491,7 @@ class Template
                     if(!$parentTNode->isComplementaryWith($TNode)) {
                         throw new TemplateSyntaxException(
                             "Template->parseTemplateInTree() : désordre dans les noeuds de template, noeud ouvrant : " .
-                             $parentTNode->TNode .", noeud fermant : " . $TNode->TNode . " !");
+                            $parentTNode->TNode .", noeud fermant : " . $TNode->TNode . " !");
                     }
                     $parentTNode = array_pop($previousParentsTNode);
                     if($parentTNode->is(TNodeLabel::IF)) {
@@ -481,6 +502,7 @@ class Template
                     $parentTNode->addChild($TNode);
             }
         }
+
         if(!$parentTNode->is(TNodeLabel::ROOT)) {
             throw new TemplateSyntaxException("Template->parseTemplateInTree() : désordre dans les noeuds de template !");
         }
@@ -666,13 +688,58 @@ class Template
      * @throws UnfindableTemplateVariableException
      */
     private function parseTNodeFor(TNode $TNodeFor) : string {
+        $varExists = array_key_exists($TNodeFor->element, $this->vars);
+        if($varExists) {
+            throw new TemplateSyntaxException(
+                "Template->parseTNodeFor() : nom de variable déjà utilisé dans le scope courant ! 
+                 Variable concernée : " . $TNodeFor->element ." !");
+        }
+        $isSequence = preg_match('/\.{2}/', $TNodeFor->set);
+        if($isSequence) {
+            $parsingContent = $this->parseTNodeForSequence($TNodeFor);
+        } else {
+            $parsingContent = $this->parseTNodeForeach($TNodeFor);
+        }
+        return $parsingContent;
+    }
+
+    /**
+     * @param TNode $TNodeFor
+     * @return string
+     * @throws TemplateSyntaxException
+     * @throws UnfindableTemplateVariableException
+     */
+    private function parseTNodeForSequence(TNode $TNodeFor) : string {
+        $element = $TNodeFor->element;
+        //Implémentation du for avec séquence.
+        $bounds = preg_split("/\.{2}/",  $TNodeFor->set, -1, PREG_SPLIT_NO_EMPTY);
+        $lowerBound = $bounds[0];
+        $upperBound = $bounds[1];
+        $parsingContent = "";
+        for($i = $lowerBound; $i <= $upperBound; $i++) {
+            $this->vars[$element] = $i;
+            $parsingContent .=  $this->parseChildrenTNode($TNodeFor);
+        }
+        //Destruction de la variable du for.
+        unset($this->vars[$element]);
+        return $parsingContent;
+    }
+
+    /**
+     * @param TNode $TNodeFor
+     * @return string
+     * @throws TemplateSyntaxException
+     * @throws UnfindableTemplateVariableException
+     */
+    private function parseTNodeForeach(TNode $TNodeFor) : string {
         //Récupération de la valeur du set du for.
         $set = $this->parseTVar($TNodeFor->set);
         $element = $TNodeFor->element;
-        //Implémentation du for.
+        //Implémentation du foreach.
         $parsingContent = "";
-        foreach($set as $key => $value) {
-            $this->vars[$element] = $value;
+        $nbElements = count($set);
+        for($i = 0; $i < $nbElements; $i++) {
+            $this->vars[$element] = $set[$i];
             $parsingContent .=  $this->parseChildrenTNode($TNodeFor);
         }
         //Destruction de la variable du for.
