@@ -74,7 +74,7 @@ class TNode
      */
     public function removeChild(TNode $child) : void {
         foreach($this->children as $key => $aChild) {
-            if($aChild->TNode === $child->TNode) {
+            if($aChild == $child) {
                 unset($aChild);
                 $this->nbChildren--;
                 return;
@@ -88,10 +88,9 @@ class TNode
      * @param TNode $newChild
      */
     public function replaceChild(TNode $oldChild, TNode $newChild) : void {
-        $nbChildren = $this->nbChildren;
-        for($i = 0; $i < $nbChildren; $i++) {
+        for($i = 0; $i < $this->nbChildren; $i++) {
             $child = $this->children[$i];
-            if($oldChild->TNode == $child->TNode) {
+            if($oldChild == $child) {
                 $this->children[$i] = $newChild;
                 $newChild->parent = $this;
                 return;
