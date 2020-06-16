@@ -636,11 +636,7 @@ class Template
         if($condition) {
             $parsingContent = $TNodeTernary->then;
         } else {
-            if($TNodeTernary->propertyExists('else')) {
-                $parsingContent = $TNodeTernary->else;
-            } else {
-                $parsingContent = "";
-            }
+            $parsingContent = $TNodeTernary->else;
         }
         return $parsingContent;
     }
