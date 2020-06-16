@@ -63,7 +63,7 @@ class Router
         //Noeud racine de l'arbre du serveur.
         $this->tree = new Node("root");
         //Route d'erreur par défaut.
-        $this->route('/error', function(){return'<html><body><div>Page inexistante sur le serveur.</div></body></html>';});
+        $this->route('/error', function(){return"<html><body><div>Page inexistante sur le serveur.</div></body></html>";});
     }
 
 
