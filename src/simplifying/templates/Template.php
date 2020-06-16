@@ -278,7 +278,7 @@ class Template
         $nbOtherContents = count($TNodeStructure['otherContents']);
         if($nbOtherContents != 1) {
             throw new TemplateSyntaxException(
-                'Template->getTNode2Contents() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
+                'Template->getTNodeRoute() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
         } else {
             $contents = $this->getSimpleTNodeContents($TNodeStructure['TNode']);
             $contents = preg_split('/ *'. TNodeLabel::ROUTE .' */', $contents, -1, PREG_SPLIT_NO_EMPTY);
@@ -361,7 +361,7 @@ class Template
      * @throws TemplateSyntaxException
      * @throws UnfindableTemplateVariableException
      */
-    private function parse() : string {
+    public function parse() : string {
         //Chargement de la hiérarchie de templates.
         $hierarchy = $this->getTHierarchy();
         $TContents = $hierarchy['TContents'];
