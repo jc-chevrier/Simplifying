@@ -374,6 +374,7 @@ class Template
             //Fusion des arbres.
             $tree = $this->mergeTrees($tree, $childTree);
         }
+        //echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
         //Parsing arbre -> contenu.
         $parsedTContent = $this->parseTreeInWebLanguages($tree);
         return $parsedTContent;
@@ -404,6 +405,8 @@ class Template
     }
 
     /**
+     * Parser un template en tableau de noeuds de template.
+     *
      * @param string $content
      * @return array
      * @throws TemplateSyntaxException
@@ -441,6 +444,8 @@ class Template
     }
 
     /**
+     * Ordonner en arbre les noeuds d'un tableau de noeuds de template.
+     *
      * @param array $TNodes
      * @return TNode
      * @throws TemplateSyntaxException
