@@ -7,15 +7,15 @@ use simplifying\routes\Router;
 class TParser
 {
     /**
-     * @var TNode   Arbre repéresentant le template à parser.
+     * @var TNode       Arbre repéresentant le template à parser.
      */
     private $tree;
     /**
-     * @var array   Paramètres du template.
+     * @var array       Paramètres externes du template.
      */
     private $externalParameters;
     /**
-     * @var Router  Router.
+     * @var Router      Router.
      */
     private $router;
     /**
