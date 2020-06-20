@@ -12,9 +12,21 @@ namespace simplifying\templates;
  */
 class TNode
 {
+    /**
+     * @var TNode $parent       Contexte : niveau supérieur / noeud parent du noeud.
+     */
     private $parent;
+    /**
+     * @var array $properties   Propriétés du noeud.
+     */
     private $properties;
+    /**
+     * @var array $children     Contexte : niveau inférieur / neouds enfants.
+     */
     private $children;
+    /**
+     * @var int $nbChildren     Taille du niveau inférieur, nombre de noeuds enfants.
+     */
     private $nbChildren;
 
 
@@ -43,12 +55,22 @@ class TNode
     }
 
 
+    /**
+     * @param string $keyProperty
+     * @return string
+     */
+    public function property(string $keyProperty) : string {
+        if(!isset($this->properties[$keyProperty])) {
+            throw new \InvalidArgumentException("TNode->property() : propriété inexistante : $keyProperty !");
+        }
+        return $this->properties[$keyProperty];
+    }
 
     /**
      * @param $keyProperty
      * @param $valueProperty
      */
-    public function addProperty(string $keyProperty, string $valueProperty) : void{
+    public function addProperty(string $keyProperty, string $valueProperty) : void {
         $this->properties[$keyProperty] = $valueProperty;
     }
 
@@ -59,6 +81,25 @@ class TNode
         unset($this->properties[$keyProperty]);
     }
 
+
+
+    /**
+     * @return bool
+     */
+    public function hasChildren() : bool {
+        return  $this->nbChildren != 0;
+    }
+
+    /**
+     * @param int $indexChild
+     * @return TNode
+     */
+    public function child(int $indexChild) : TNode {
+        if($indexChild < 0 || $indexChild >= $this->nbChildren) {
+            throw new \InvalidArgumentException("TNode->child() : index de noeud enfant inexistant : $indexChild !");
+        }
+        return $this->children[$indexChild];
+    }
 
     /**
      * @param TNode $child
@@ -98,6 +139,7 @@ class TNode
         }
         throw new \InvalidArgumentException("TNode->replaceChild() : noeud à remplacer introuvable !");
     }
+
 
 
     /**
@@ -160,15 +202,6 @@ class TNode
             $cloneOfThis->addChild($childClone);
             $child->cloneChildren($childClone);
         }
-    }
-
-
-
-    /**
-     * @return bool
-     */
-    public function hasChildren() : bool {
-        return  $this->nbChildren != 0;
     }
 
 

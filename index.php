@@ -25,3 +25,10 @@ $router->route('/test2/{id}/{id2}', function($id, $id2) {
 })->alias('test2');
 
 $router->run();
+
+//$scanner = new \simplifying\templates\TScanner(__DIR__  . "\\src\\app\\views\\HomeView.html");
+//$scanner->forEach(function($TNode, $key) {
+//   echo $key; print_r($TNode); echo "\n\n=====================================================\n";
+//});
+//$scanner->next();
+//echo $scanner->current();

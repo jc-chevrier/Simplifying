@@ -17,19 +17,37 @@ use simplifying\routes\Router;
  */
 class Template
 {
-    const EXTENSION_T_FILE = ".html";
-    
-    const REG_EXP_T_NODE = "<{2} *\/{0,1}[a-zA-Z]+ *[^<>]* *>{1}";
-
+    /**
+     * Extension des noeuds de template.
+     */
+    const EXTENSION_T = ".html";
+    /**
+     * @var string       Chemin relatif du répertoire racine des templates.
+     */
     private static $ROOT_T_RELATIVE_PATH = ".\\..\\..\\app\\views\\";
+    /**
+     * @var string       Chemin absolu du répertoire racine des templates.
+     */
     private static $ROOT_T_ABSOLUTE_PATH;
-
+    /**
+     * @var string      Nom du template.
+     */
     private $name;
-
+    /**
+     * @var array       Paramètres externes du template.
+     */
     private $externalParameters;
+    /**
+     * @var Router
+     */
     private $router;
+    /**
+     * @var array       Tableau des variables internes.
+     */
     private $vars;
-
+    /**
+     * @var string      Id du scope for en cours de parsing.
+     */
     private $currentForId;
 
 
@@ -48,9 +66,6 @@ class Template
         Template::initialiseRootTAbsolutePath();
     }
 
-    /**
-     *
-     */
     private static function initialiseRootTAbsolutePath() {
         if(Template::$ROOT_T_ABSOLUTE_PATH == null) {
             if(PathManager::isRelativePath(Template::$ROOT_T_RELATIVE_PATH)) {
@@ -62,11 +77,12 @@ class Template
     }
 
 
+
     /**
      * @param string $name
      * @param array $externalParameters
-     * @throws TemplateSyntaxException
-     * @throws UnfindableTemplateVariableException
+     * @throws TSyntaxException
+     * @throws TVariableException
      */
     public static function render(string $name, array $externalParameters = []) : void {
         $template = new Template($name, $externalParameters);
@@ -74,8 +90,8 @@ class Template
     }
 
     /**
-     * @throws TemplateSyntaxException
-     * @throws UnfindableTemplateVariableException
+     * @throws TSyntaxException
+     * @throws TVariableException
      */
     public function _render() : void {
         $parsedContent = $this->parse();
@@ -91,251 +107,7 @@ class Template
      * @return string
      */
     private function getTAbsolutePath(string $Tname) : string {
-        return Template::$ROOT_T_ABSOLUTE_PATH . $Tname . Template::EXTENSION_T_FILE;
-    }
-
-
-    /**
-     * Obtenir le contenu d'un template.
-     *
-     * @param string $path
-     * @return bool|string
-     */
-    private function getTContent(string $path) : string {
-        $TContent = file_get_contents($path);
-        if($TContent == false) {
-            throw new \InvalidArgumentException('Template->getTContent() : chargement du template a échoué !');
-        }
-        return $TContent;
-    }
-
-
-    /**
-     * Obtenir une hierarchie de templates.
-     *
-     * @return array
-     * @throws TemplateSyntaxException
-     */
-    private function getTHierarchy() : array {
-        $Tnames = [ $this->name ];
-        $TPath = $this->getTAbsolutePath($this->name);
-        $TPaths = [ $TPath ];
-        $TContent = $this->getTContent($TPath);
-        $TContents = [ $TContent ];
-
-        $TNodeParent = $this->getNextTNode($TContent);
-        while($TNodeParent != false && $TNodeParent->label === TNodeLabel::PARENT) {
-            $pathOfTParent = $this->getTAbsolutePath($TNodeParent->name);
-            $contentOfTParent = $this->getTContent($pathOfTParent);
-
-            array_unshift($Tnames, $TNodeParent->name);
-            array_unshift($TPaths, $pathOfTParent);
-            array_unshift($TContents, $contentOfTParent);
-
-            $TNodeParent = $this->getNextTNode($contentOfTParent);
-        }
-
-        return [ 'Tnames' => $Tnames,
-                 'TPaths' => $TPaths,
-                 'TContents' => $TContents ];
-    }
-
-
-
-
-
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Obtention de noeuds de template.
-
-
-
-    /**
-     * @param string $content
-     * @return bool|mixed
-     */
-    private function getNextTNodeContents(string $content) {
-        $matches = [];
-        $matchesFound = preg_match('/' . Template::REG_EXP_T_NODE . '/', $content, $matches);
-        if($matchesFound) {
-            return $matches[0];
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * @param string $content
-     * @return bool|mixed|TNode
-     * @throws TemplateSyntaxException
-     */
-    private function getNextTNode(string $content) {
-        //<<contents>> -> contents.
-        $getNextTNode = $this->getNextTNodeContents($content);
-        if($getNextTNode == false) {
-            return false;
-        } else {
-            //Récupération du noeud.
-            $contentsStr = $this->getSimpleTNodeContents($getNextTNode);
-            //Split sur les espaces.
-            $contentsArray = preg_split("/ +/", $contentsStr, -1, PREG_SPLIT_NO_EMPTY);
-
-            if(count($contentsArray) == 0) {
-                throw new TemplateSyntaxException("Template->getNextTNode() : noeud de template vide : $getNextTNode !");
-            } else {
-                //Récupération de la structure du noeud.
-                $TNodeStructure = [ 'TNode' => $getNextTNode ];
-                $aContent = strtolower(array_shift($contentsArray));
-                if(TNodeLabel::isTNodeLabel($aContent)) {
-                    $TNodeStructure['label'] = $aContent;
-                } else {
-                    throw new TemplateSyntaxException("Template->getNextTNode() : type noeud de template inconnu : $getNextTNode !");
-                }
-                $TNodeStructure['otherContents'] = $contentsArray;
-
-                //Structure du noeud -> Noeud de template.
-                switch ($TNodeStructure['label']) {
-                    case TNodeLabel::VALUE :
-                    case TNodeLabel::PARENT :
-                    case TNodeLabel::ABSTRACT_BLOCK :
-                    case TNodeLabel::BLOCK :
-                        $getNextTNode = $this->getTNode2Contents($TNodeStructure);
-                        break;
-                    case TNodeLabel::ROUTE :
-                        $getNextTNode = $this->getTNodeRoute($TNodeStructure);
-                        break;
-                    case TNodeLabel::IF :
-                    case TNodeLabel::IF_NOT :
-                        $getNextTNode = $this->getTNode2Contents($TNodeStructure, 'condition');
-                        break;
-                    case TNodeLabel::TERNARY_EXPRESSION :
-                        $getNextTNode = $this->getTNodeTernary($TNodeStructure);
-                        break;
-                    case TNodeLabel::ELSE :
-                    case TNodeLabel::END_IF :
-                    case TNodeLabel::END_IF_NOT :
-                    case TNodeLabel::END_BLOCK :
-                    case TNodeLabel::END_FOR :
-                        $getNextTNode = $this->getTNode1Content($TNodeStructure);
-                        break;
-                    case TNodeLabel::FOR :
-                        $getNextTNode = $this->getTNodeFor($TNodeStructure);
-                }
-
-                return $getNextTNode;
-            }
-        }
-    }
-
-    /**
-     * @param string $TNode
-     * @return bool|string
-     */
-    private function getSimpleTNodeContents(string $TNode) : string {
-        return substr($TNode, 2, -1);
-    }
-
-    /**
-     * @param  array $TNodeStructure
-     * @return TNode
-     * @throws TemplateSyntaxException
-     */
-    private function getTNode1Content(array $TNodeStructure) : TNode {
-        $nbOtherContents = count($TNodeStructure['otherContents']);
-        if($nbOtherContents != 0) {
-            throw new TemplateSyntaxException(
-                'Template->getTNode1Content() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
-        } else {
-            unset($TNodeStructure['otherContents']);
-            $TNode = new TNode($TNodeStructure);
-            return $TNode;
-        }
-    }
-
-    /**
-     * @param array $TNodeStructure
-     * @param string $keyProperty
-     * @return TNode
-     * @throws TemplateSyntaxException
-     */
-    private function getTNode2Contents(array $TNodeStructure, string $keyProperty = 'name') : TNode {
-        $nbOtherContents = count($TNodeStructure['otherContents']);
-        if($nbOtherContents != 1) {
-            throw new TemplateSyntaxException(
-                'Template->getTNode2Contents() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
-        } else {
-            $TNodeStructure[$keyProperty] = $TNodeStructure['otherContents'][0];
-            unset($TNodeStructure['otherContents']);
-            $TNode = new TNode($TNodeStructure);
-            return $TNode;
-        }
-    }
-
-    /**
-     * @param array $TNodeStructure
-     * @return TNode
-     * @throws TemplateSyntaxException
-     */
-    private function getTNodeRoute(array $TNodeStructure) : TNode {
-        $nbOtherContents = count($TNodeStructure['otherContents']);
-        if($nbOtherContents != 1) {
-            throw new TemplateSyntaxException(
-                'Template->getTNodeRoute() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
-        } else {
-            $contents = implode("", $TNodeStructure['otherContents']);
-            $contents = preg_split('/:{1}/', $contents, -1, PREG_SPLIT_NO_EMPTY);
-            $TNodeStructure['routeAlias'] = array_shift($contents);
-            $TNodeStructure['routeParameters'] = $contents;
-            unset($TNodeStructure['otherContents']);
-            $TNode = new TNode($TNodeStructure);
-            return $TNode;
-        }
-    }
-
-    /**
-     * @param array $TNodeStructure
-     * @return TNode
-     * @throws TemplateSyntaxException
-     */
-    private function getTNodeFor(array $TNodeStructure) : TNode {
-        $nbOtherContents = count($TNodeStructure['otherContents']);
-        if($nbOtherContents == 0) {
-            throw new TemplateSyntaxException(
-                'Template->getTNodeFor() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
-        } else {
-            $contents = implode("", $TNodeStructure['otherContents']);
-            $contents = preg_split('/:{1}/', $contents, -1, PREG_SPLIT_NO_EMPTY);
-            $TNodeStructure['set'] = $contents[0];
-            $TNodeStructure['element'] = $contents[1];
-            unset($TNodeStructure['otherContents']);
-            $TNode = new TNode($TNodeStructure);
-            return $TNode;
-        }
-    }
-
-    /**
-     * @param array $TNodeStructure
-     * @return TNode
-     * @throws TemplateSyntaxException
-     */
-    private function getTNodeTernary(array $TNodeStructure) : TNode {
-        $nbOtherContents = count($TNodeStructure['otherContents']);
-        if($nbOtherContents == 0) {
-            throw new TemplateSyntaxException(
-                'Template->getTNodeTernary() : nombre de propriétés incorrect dans ce noeud : ' . $TNodeStructure['TNode'].  ' !');
-        } else {
-            $contents = $this->getSimpleTNodeContents($TNodeStructure['TNode']);
-            $contents = preg_split('/^ *'. TNodeLabel::TERNARY_EXPRESSION .' +/', $contents, -1, PREG_SPLIT_NO_EMPTY);
-            $contents = preg_split('/ *\?{1} */', $contents[0], -1, PREG_SPLIT_NO_EMPTY);
-            $TNodeStructure['condition'] =  $contents[0];
-            $contents = preg_split('/ *:{1} */', $contents[1], -1, PREG_SPLIT_NO_EMPTY);
-            $TNodeStructure['then'] =  $contents[0];
-            $contents = preg_split('/ *$/', $contents[1], -1, PREG_SPLIT_NO_EMPTY);
-            $TNodeStructure['else'] = $contents[0];
-            unset($TNodeStructure['otherContents']);
-            $TNode = new TNode($TNodeStructure);
-            return $TNode;
-        }
+        return Template::$ROOT_T_ABSOLUTE_PATH . $Tname . Template::EXTENSION_T;
     }
 
 
@@ -351,169 +123,55 @@ class Template
      * Parser un template en arbre syntaxique puis en langages web (html, etc.).
      *
      * Processus de la méthode :
-     * template <=> tree <=> langages web (html, etc.).
-     *
-     * Pour vérifier le contenu des arbres :
-     * echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
-     * echo $tree;
+     * template(s) <=> arbre(s) <=> langages web (html, etc.).
      *
      * @return string
-     * @throws TemplateSyntaxException
-     * @throws UnfindableTemplateVariableException
+     * @throws TSyntaxException
+     * @throws TVariableException
      */
     public function parse() : string {
-        //Chargement de la hiérarchie de templates.
-        $hierarchy = $this->getTHierarchy();
-        $TContents = $hierarchy['TContents'];
-        //Parsing template -> arbre.
-        $firstTContent = array_shift($TContents);
-        //Parsing en arbre n-aire du template this.
-        $tree = $this->parseTemplateInTree($firstTContent);
-        foreach($TContents as $key => $TChildContent) {
-            //Parsing des templates parents si existant.
-            $childTree = $this->parseTemplateInTree($TChildContent);
-            //Fusion des arbres.
+        //Parsing du template en arbre et des templates parents en arbres.
+        $trees = $this->parseInHierarchyOfTrees();
+        $tree = array_shift($trees);
+        foreach($trees as $key => $childTree) {
+            //Merge / fusion des arbres.
             $tree = $this->mergeTrees($tree, $childTree);
         }
-        //echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
         //Parsing arbre -> contenu.
         $parsedTContent = $this->parseTreeInWebLanguages($tree);
         return $parsedTContent;
     }
 
-
-
-
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Parsing des templates en arbres syntaxiques et merge des arbres.
-
-
+    /**
+     * @throws TSyntaxException
+     */
+    private function parseInHierarchyOfTrees() : array {
+        $TPath = $this->getTAbsolutePath($this->name);
+        $tree = $this->parseTemplateInTree($TPath);
+        $trees = [];
+        $trees[] = $tree;
+        $firstTNode = $tree->hasChildren() ? $tree->child(0) : false;
+        while($firstTNode != false && $firstTNode->is(TNodeLabel::PARENT)) {
+            $TPath = $this->getTAbsolutePath($firstTNode->name);
+            $tree = $this->parseTemplateInTree($TPath);
+            array_unshift($trees, $tree);
+            $firstTNode = $tree->hasChildren() ? $tree->child(0) : false;
+        }
+        return $trees;
+    }
 
     /**
      * Parser un template en arbre syntaxique.
      *
-     * @param string $content
-     * @return TNode
-     * @throws TemplateSyntaxException
-     */
-    private function parseTemplateInTree(string $content) : TNode {
-        //Parsing du template en tableau de noeuds de template.
-        $TNodes = $this->parseTemplateInArrayOfTNodes($content);
-        //Création de l'arbre à partir du tableau de noeuds de template.
-        $rootTNode = $this->orderTNodes($TNodes);
-        return $rootTNode;
-    }
-
-    /**
-     * Parser un template en tableau de noeuds de template.
+     * echo $tree->toString(function($keyProperty) {if($keyProperty == 'TNode') {return false; } return true; });
      *
-     * @param string $content
-     * @return array
-     * @throws TemplateSyntaxException
-     */
-    private function parseTemplateInArrayOfTNodes(string $content) : array {
-        $sequence = 0;
-        $TNodes = [];
-        $nextTNode = $this->getNextTNode($content);
-
-        while($nextTNode != false) {
-            if($nextTNode->is(TNodeLabel::FOR)) {
-                $nextTNode->id = $sequence;
-                $sequence++;
-            }
-
-            $pos = strpos($content, $nextTNode->TNode);
-            $beforeContent = substr($content, 0, $pos);
-            if($beforeContent != '') {
-                $beforeTNodeIgnored = new TNode(['label' => TNodeLabel::IGNORED, 'TNode' => $beforeContent]);
-                $TNodes[] = $beforeTNodeIgnored;
-            }
-
-            $TNodes[] = $nextTNode;
-
-            $content = substr_replace($content, "", 0, $pos + strlen($nextTNode->TNode));
-            $nextTNode = $this->getNextTNode($content);
-        }
-
-        if($content != "") {
-            $TNodeIgnored = new TNode(['label' => TNodeLabel::IGNORED, 'TNode' => $content]);
-            $TNodes[] = $TNodeIgnored;
-        }
-
-        return $TNodes;
-    }
-
-    /**
-     * Ordonner en arbre les noeuds d'un tableau de noeuds de template.
-     *
-     * @param array $TNodes
+     * @param string $TPath
      * @return TNode
-     * @throws TemplateSyntaxException
+     * @throws TSyntaxException
      */
-    private function orderTNodes(array $TNodes) : TNode {
-        $rootTNode = TNode::getATNodeRoot();
-        $parentTNode = $rootTNode;
-        $previousParentsTNode = [];
-
-        foreach($TNodes as $key => $TNode) {
-            switch ($TNode->label) {
-                case TNodeLabel::PARENT :
-                    if(!($parentTNode->is(TNodeLabel::ROOT) && !$parentTNode->hasChildren())) {
-                        throw new TemplateSyntaxException(
-                            "Template->parseTemplateInTree() : un noeud <<parent ...> doit toujours être déclaré en premier 
-                             noeud d'un template ! Noeud concerné : " . $TNode->TNode . " !");
-                    }
-                    break;
-                case TNodeLabel::FOR :
-                case TNodeLabel::BLOCK :
-                case TNodeLabel::IF_NOT :
-                    $parentTNode->addChild($TNode);
-                    $previousParentsTNode[] = $parentTNode;
-                    $parentTNode = $TNode;
-                    break;
-                case TNodeLabel::IF :
-                    $TNodeThen = new TNode(['label' => TNodeLabel::THEN]);
-                    $parentTNode->addChild($TNode);
-                    $TNode->addChild($TNodeThen);
-                    $previousParentsTNode[] = $parentTNode;
-                    $previousParentsTNode[] = $TNode;
-                    $parentTNode = $TNodeThen;
-                    break;
-                case TNodeLabel::ELSE :
-                    if(!$parentTNode->is(TNodeLabel::THEN)) {
-                        throw new TemplateSyntaxException(
-                            "Template->parseTemplateInTree() : désordre dans les noeuds de tamplate de condition, noeud 
-                             concerné : " . $TNode->TNode . " !");
-                    }
-                    $TNodeIf = $previousParentsTNode[count($previousParentsTNode) - 1];
-                    $TNodeIf->addChild($TNode);
-                    $parentTNode = $TNode;
-                    break;
-                case TNodeLabel::END_BLOCK :
-                case TNodeLabel::END_FOR :
-                case TNodeLabel::END_IF :
-                case TNodeLabel::END_IF_NOT :
-                    if(!$parentTNode->isComplementaryWith($TNode)) {
-                        throw new TemplateSyntaxException(
-                            "Template->parseTemplateInTree() : désordre dans les noeuds de template, noeud ouvrant : " .
-                            $parentTNode->TNode .", noeud fermant : " . $TNode->TNode . " !");
-                    }
-                    $parentTNode = array_pop($previousParentsTNode);
-                    if($parentTNode->is(TNodeLabel::IF)) {
-                        $parentTNode = array_pop($previousParentsTNode);
-                    }
-                    break;
-                default :
-                    $parentTNode->addChild($TNode);
-            }
-        }
-
-        if(!$parentTNode->is(TNodeLabel::ROOT)) {
-            throw new TemplateSyntaxException("Template->parseTemplateInTree() : désordre dans les noeuds de template !");
-        }
-
-        return $rootTNode;
+    private function parseTemplateInTree(string $TPath) : TNode {
+        $tree = TAnalyzer::parseTemplateInTree($TPath);
+        return $tree;
     }
 
     /**
@@ -556,8 +214,8 @@ class Template
     /**
      * @param TNode $TNode
      * @return string
-     * @throws TemplateSyntaxException
-     * @throws UnfindableTemplateVariableException
+     * @throws TSyntaxException
+     * @throws TVariableException
      */
     private function parseTreeInWebLanguages(TNode $TNode) : string {
         $parsingContent = "";
@@ -594,7 +252,7 @@ class Template
     /**
      * @param TNode $TNode
      * @return string
-     * @throws UnfindableTemplateVariableException
+     * @throws TVariableException
      */
     private function parseTNodeVal(TNode $TNode) : string {
         return $this->parseTVar($TNode->name);
@@ -603,7 +261,7 @@ class Template
     /**
      * @param TNode $TNodeRoute
      * @return string
-     * @throws UnfindableTemplateVariableException
+     * @throws TVariableException
      */
     private function parseTNodeRoute(TNode $TNodeRoute) : string {
         $nbParameters = count($TNodeRoute->routeParameters);
@@ -630,22 +288,21 @@ class Template
     /**
      * @param TNode $TNodeIf
      * @return string
-     * @throws UnfindableTemplateVariableException
-     * @throws TemplateSyntaxException
+     * @throws TVariableException
+     * @throws TSyntaxException
      */
     private function parseTNodeIf(TNode $TNodeIf) : string {
         //Récupération de la valeur de la condition.
         $condition = $this->parseTVar($TNodeIf->condition);
         //Implémentation de la condition.
         if($condition) {
-            $childTNodeThen = $TNodeIf->searchChildTNodes(function($child){return $child->is(TNodeLabel::THEN);})[0];
+            $childTNodeThen = $TNodeIf->child(0);
             $parsingContent = $this->parseChildrenTNode($childTNodeThen);
         } else {
-            $searched = $TNodeIf->searchChildTNodes(function($child){return $child->is(TNodeLabel::ELSE);});
-            if(count($searched) == 0) {
+            if($TNodeIf->nbChildren == 1) {
                 $parsingContent = "";
             } else {
-                $childTNodeElse = $searched[0];
+                $childTNodeElse = $TNodeIf->child(1);
                 $parsingContent = $this->parseChildrenTNode($childTNodeElse);
             }
         }
@@ -655,7 +312,7 @@ class Template
     /**
      * @param TNode $TNodeTernary
      * @return string
-     * @throws UnfindableTemplateVariableException
+     * @throws TVariableException
      */
     private function parseTNodeTernary(TNode $TNodeTernary) : string {
         //Récupération de la valeur de la condition.
@@ -672,8 +329,8 @@ class Template
     /**
      * @param TNode $TNodeIfNot
      * @return string
-     * @throws TemplateSyntaxException
-     * @throws UnfindableTemplateVariableException
+     * @throws TSyntaxException
+     * @throws TVariableException
      */
     private function parseTNodeIfNot(TNode $TNodeIfNot) : string {
         //Récupération de la valeur de la condition.
@@ -690,13 +347,13 @@ class Template
     /**
      * @param TNode $TNodeFor
      * @return string
-     * @throws TemplateSyntaxException
-     * @throws UnfindableTemplateVariableException
+     * @throws TSyntaxException
+     * @throws TVariableException
      */
     private function parseTNodeFor(TNode $TNodeFor) : string {
         $varExists = array_key_exists($TNodeFor->element, $this->vars);
         if($varExists) {
-            throw new UnfindableTemplateVariableException(
+            throw new TVariableException(
                 "Template->parseTNodeFor() : nom de variable déjà utilisé dans le scope courant ! 
                  Variable concernée : " . $TNodeFor->element ." !");
         }
@@ -712,8 +369,8 @@ class Template
     /**
      * @param TNode $TNodeFor
      * @return string
-     * @throws TemplateSyntaxException
-     * @throws UnfindableTemplateVariableException
+     * @throws TSyntaxException
+     * @throws TVariableException
      */
     private function parseTNodeForSequence(TNode $TNodeFor) : string {
         $element = $TNodeFor->element;
@@ -747,8 +404,8 @@ class Template
     /**
      * @param TNode $TNodeFor
      * @return string
-     * @throws TemplateSyntaxException
-     * @throws UnfindableTemplateVariableException
+     * @throws TSyntaxException
+     * @throws TVariableException
      */
     private function parseTNodeForeach(TNode $TNodeFor) : string {
         //Récupération de la valeur du set du for.
@@ -780,8 +437,8 @@ class Template
     /**
      * @param TNode $TNode
      * @return string
-     * @throws TemplateSyntaxException
-     * @throws UnfindableTemplateVariableException
+     * @throws TSyntaxException
+     * @throws TVariableException
      */
     private function parseChildrenTNode(TNode $TNode) : string {
         $parsingContent = "";
@@ -795,7 +452,7 @@ class Template
     /**
      * @param string $nameTVar
      * @return array|mixed
-     * @throws UnfindableTemplateVariableException
+     * @throws TVariableException
      */
     private function parseTVar(string $nameTVar) {
         switch($nameTVar) {
@@ -844,7 +501,7 @@ class Template
                                 break;
                         }
                     } else {
-                        throw new UnfindableTemplateVariableException(
+                        throw new TVariableException(
                             "Template->parseTVar() : la variable $nameTVar est introuvable !");
                     }
                 }
@@ -857,12 +514,12 @@ class Template
      * @param $set
      * @param array $partsTVar
      * @return array|mixed
-     * @throws UnfindableTemplateVariableException
+     * @throws TVariableException
      */
     private function parseLongTVar(string $nameTVar, $set, array $partsTVar) {
         $nbPartsVal = count($partsTVar);
         if($nbPartsVal == 0) {
-            throw new UnfindableTemplateVariableException(
+            throw new TVariableException(
                 "Template->parseLongTVar() : la variable $nameTVar est introuvable !");
         }
 
@@ -875,10 +532,10 @@ class Template
                     $TVar = $TVar->$partTVar;
                 } else {
                     if($TVar == $this->vars) {
-                        throw new UnfindableTemplateVariableException(
+                        throw new TVariableException(
                             "Template->parseLongTVar() : la variable $nameTVar est introuvable !");
                     } else {
-                        throw new UnfindableTemplateVariableException(
+                        throw new TVariableException(
                             "Template->parseLongTVar() : $partTVar est introuvable dans $nameTVar !");
                     }
                 }
