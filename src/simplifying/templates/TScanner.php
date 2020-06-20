@@ -92,6 +92,7 @@ class TScanner implements \Iterator {
      * @since 5.0.0
      */
     public function next() {
+        $this->sequence++;
         $matches = [];
         $matchesFound = preg_match("/".TScanner::REG_EXP_T_NODE."/sm", $this->TContent, $matches, PREG_OFFSET_CAPTURE, $this->offset);
         if($matchesFound) {
@@ -107,7 +108,6 @@ class TScanner implements \Iterator {
                 $this->currentTNode = ["TNode" => $nextTNode, "isIgnoredTNode" => true];
                 $this->offset = $nextOffset;
             }
-            $this->sequence++;
         } else {
             if($this->offset < $this->TContentLength) {
                 $nextTNode = substr($this->TContent, $this->offset);
