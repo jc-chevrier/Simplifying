@@ -55,18 +55,17 @@ class Router
         //Route courante nulle.
         $this->currentRoute = null;
         //Racine des routes du serveur.
-        $root = explode('/', $_SERVER['SCRIPT_NAME']);
+        $script_name = $_SERVER['SCRIPT_NAME'];
+        $root = explode('/', $script_name);
         //Fichier à la racine des routes.
         $this->ROOT_FILE = '/' . $root[count($root) - 1];
         //Repertoire(s) à la racine des routes.
-        $this->ROOT_DIRECTORY = Util::removeOccurrences($this->ROOT_FILE, $_SERVER['SCRIPT_NAME']);
+        $this->ROOT_DIRECTORY = Util::removeOccurrences($this->ROOT_FILE, $script_name);
         //Noeud racine de l'arbre du serveur.
-        $this->tree = new Node("root");
+        $this->tree = new UriNode("root");
         //Route d'erreur par défaut.
         $this->route('/error', function(){return"<html><body><div>Page inexistante sur le serveur.</div></body></html>";});
     }
-
-
 
     /**
      * Obtenir le singleton router de l'extérieur.
@@ -159,24 +158,24 @@ class Router
     }
 
 
-
     /**
      * Ajouter une route au serveur.
      *
-     * @param string $templateRoute        -> route modèle
-     * @param callable $serverResponse     -> réponse liée à la route
+     * @param string $templateRoute -> route modèle
+     * @param callable $action
      * @return Route
      */
-    public function route(string $templateRoute, callable $serverResponse) : Route {
+    public function route(string $templateRoute, callable $action) : Route {
         //La route / est enregistrée en tant que "slash".
         if($templateRoute == "/") {
             $templateRoute = "/slash";
         }
         //Ajout dans l'arbre.
-        list($templateRoute, $templateRouteNodes) = $this->addRouteInTree($templateRoute);
+        list($templateRouteNormalized, $templateRouteNodes) = $this->addRouteInTree($templateRoute);
         //Ajout dans les routes.
-        $this->routes[$templateRoute] = new Route($templateRoute, $templateRouteNodes, $serverResponse);
-        return $this->routes[$templateRoute];
+        $route = new Route($templateRouteNormalized, $templateRouteNodes, $action);
+        $this->routes[$templateRouteNormalized] = $route;
+        return $route;
     }
 
     /**
@@ -222,7 +221,7 @@ class Router
             //Si aucun noeud enfant existe.
             if($node == null) {
                 //On en crée un.
-                $childNode = $isParameter ? new ParameterNode($uriPart) : new Node($uriPart);
+                $childNode = $isParameter ? new ParameterUriNode($uriPart) : new UriNode($uriPart);
                 $parentNode->addChild($childNode);
                 $parentNode = $childNode;
             //Sinon.
@@ -255,12 +254,8 @@ class Router
             $this->currentRoute = null;
         //Sinon.
         } else {
-            $templateRoute = '';
             //On récupère la route modèle.
-            foreach($nodes as $index => $node) {
-                $templateRoute .= '/' . $node->value;
-            }
-
+            $templateRoute = array_reduce($nodes, function($acc, $node){$acc .= '/' . $node->value; return $acc;}, '');
             //Si la route cherchée existe.
             if(isset($this->routes[$templateRoute])) {
                 //On rend la route effective.
@@ -278,11 +273,11 @@ class Router
      * Chercher une route modèle via l'arbre du serveur.
      *
      * @param array $uriParts
-     * @param Node $parentNode
+     * @param UriNode $parentNode
      * @param array $crossedNodes
      * @return array|null
      */
-    private function searchModelRouteInTreeHelper(array $uriParts, Node $parentNode, array $crossedNodes = []) : array {
+    private function searchModelRouteInTreeHelper(array $uriParts, UriNode $parentNode, array $crossedNodes = []) : array {
         //Cas trivial.
         if(count($uriParts) == 0) {
             return $crossedNodes;
@@ -363,7 +358,7 @@ class Router
 
         foreach($templateRouteNodes as $index => $node) {
             $effectiveRoute .= '/';
-            if($node->type == NodeType::PARAMETER_NODE) {
+            if($node->type == UriNodeType::PARAMETER_URI_NODE) {
                 if(isset($routeParameters[$node->value])) {
                     $effectiveRoute .= $routeParameters[$node->value];
                 } else {

@@ -3,10 +3,14 @@
 namespace simplifying\templates;
 
 /**
- * Class TAnalyzer
+ * Class TAnalyzer.
  *
- * T <=> Template.
- * var <=> variable.
+ * Cette classe est un analyseur de la structure syntaxique
+ * des templates. Cet analyseur analyse le code d'un template
+ * et produit à partir son analyse l'arbre syntaxique correspondant
+ * au template en question.
+ *
+ * T <=> Template
  *
  * @author CHEVRIER Jean-Christophe
  * @package simplifying\templates
@@ -65,8 +69,8 @@ class TAnalyzer
      */
     private function parseTemplateInArrayOfTNodes() : array {
         $TNodes = [];
-        $this->TScanner->forEach(function($nextTNodeStr, $key, &$TNodes) {
-            $nextTNode = $this->analyzeNextTNode($nextTNodeStr);
+        $this->TScanner->forEach(function($nextTNodeArray, $key, &$TNodes) {
+            $nextTNode = $this->analyzeNextTNode($nextTNodeArray);
             if($nextTNode->is(TNodeLabel::FOR)) {
                 $nextTNode->id = $key;
             }

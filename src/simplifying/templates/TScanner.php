@@ -2,7 +2,18 @@
 
 namespace simplifying\templates;
 
-
+/**
+ * Classe TScanner.
+ *
+ * Cette classe est un itérateur / scanner permettant d'itérer
+ * sur les noeuds de template des templates. C'est un outil indispensable
+ * à l'analyseur.
+ *
+ * T <=> Template.
+ *
+ * @author CHEVRIER Jean-Christophe
+ * @package simplifying\templates
+ */
 class TScanner implements \Iterator {
     /**
      * Expression régulière des noeuds de template.
@@ -21,10 +32,9 @@ class TScanner implements \Iterator {
      */
     private $TContentLength;
     /**
-     * @var int         La position dans le contenu.
+     * @var int         La position courante dans le contenu.
      */
     private $offset;
-
     /**
      * @var string      Noeud courant
      */

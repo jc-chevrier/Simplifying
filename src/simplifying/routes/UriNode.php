@@ -10,7 +10,7 @@ namespace simplifying\routes;
  * @author CHEVRIER Jean-Christophe
  * @package simplifying\routes
  */
-class Node
+class UriNode
 {
     /**
      * La valeur d'un noeud.
@@ -35,7 +35,7 @@ class Node
     public function __construct(string $value) {
         $this->value = $value;
         $this->childNodes = [];
-        $this->type = NodeType::NODE;
+        $this->type = UriNodeType::URI_NODE;
     }
 
 
@@ -48,7 +48,7 @@ class Node
      */
     public function addChild($childNode) {
         if(is_string($childNode)) {
-            $this->childNodes[] = new Node($childNode);
+            $this->childNodes[] = new UriNode($childNode);
         } else {
             $this->childNodes[] = $childNode;
         }
@@ -110,7 +110,7 @@ class Node
     public function searchChildParameterNodes() : array {
         $childParameterNodes = [];
         foreach($this->childNodes as $index => $childNode) {
-            if($childNode->type == NodeType::PARAMETER_NODE) {
+            if($childNode->type == UriNodeType::PARAMETER_URI_NODE) {
                 $childParameterNodes[] = $childNode;
             }
         }

@@ -8,8 +8,8 @@ namespace simplifying\routes;
  * @author CHEVRIER Jean-Christophe
  * @package simplifying\routes
  */
-class NodeType
+class UriNodeType
 {
-    const NODE = "Node";
-    const PARAMETER_NODE = "ParameterNode";
+    const URI_NODE = "UriNode";
+    const PARAMETER_URI_NODE = "ParameterUriNode";
 }

@@ -2,10 +2,16 @@
 
 namespace simplifying\templates;
 
-use simplifying\PathManager;
+use simplifying\PathTools;
 
 /**
  * Classe Template.
+ *
+ * Cette classe implémente un système de templates.
+ *
+ * Les fichiers templates sont transformés en arbres
+ * syntaxiques, ouis ces arbres syntaxiques sont tranformés
+ * en langages web.
  *
  * T <=> Template.
  * reg exp <=> regular expression.
@@ -23,7 +29,7 @@ class Template
     /**
      * @var string       Chemin relatif du répertoire racine des templates.
      */
-    private static $ROOT_T_RELATIVE_PATH = ".\\..\\..\\app\\views\\";
+   private static $ROOT_T_RELATIVE_PATH = ".." . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "app" . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR;
     /**
      * @var string       Chemin absolu du répertoire racine des templates.
      */
@@ -56,8 +62,9 @@ class Template
      */
     private static function initialiseRootTAbsolutePath() {
         if(Template::$ROOT_T_ABSOLUTE_PATH == null) {
-            if(PathManager::isRelativePath(Template::$ROOT_T_RELATIVE_PATH)) {
-                Template::$ROOT_T_ABSOLUTE_PATH = PathManager::parseInAbsolutePath(Template::$ROOT_T_RELATIVE_PATH, __DIR__);
+            if(PathTools::isRelativePath(Template::$ROOT_T_RELATIVE_PATH)) {
+                chdir(__DIR__);
+                Template::$ROOT_T_ABSOLUTE_PATH = realpath(Template::$ROOT_T_RELATIVE_PATH);
             } else {
                 Template::$ROOT_T_ABSOLUTE_PATH = Template::$ROOT_T_RELATIVE_PATH;
             }
@@ -99,7 +106,7 @@ class Template
      * @return string
      */
     private function getTAbsolutePath(string $TName) : string {
-        return Template::$ROOT_T_ABSOLUTE_PATH . $TName . Template::EXTENSION_T;
+        return Template::$ROOT_T_ABSOLUTE_PATH . DIRECTORY_SEPARATOR . $TName . Template::EXTENSION_T;
     }
 
 
@@ -118,10 +125,7 @@ class Template
         //Parsing template -> hierarchie d'arbres.
         $trees = $this->parseTemplateInHierarchyOfTrees();
         //Merge / fusion des arbres.
-        $tree = array_shift($trees);
-        foreach($trees as $key => $childTree) {
-            $tree = $this->mergeTrees($tree, $childTree);
-        }
+        $tree = array_reduce($trees, [Template::class, "mergeTrees"], array_shift($trees));
         //Parsing arbre -> langages web.
         $parsedTContent = $this->parseTreeInWebLanguages($tree);
         return $parsedTContent;

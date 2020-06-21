@@ -100,7 +100,7 @@ class Route
         $this->parameters = [];
         foreach($this->templateRouteNodes as $index => $node) {
             $value = array_shift($values);
-            if($node->type == NodeType::PARAMETER_NODE) {
+            if($node->type == UriNodeType::PARAMETER_URI_NODE) {
                 $this->parameters[$node->value] = $value;
             }
         }
