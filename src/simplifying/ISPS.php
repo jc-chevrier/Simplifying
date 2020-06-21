@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ISP <=> Initialisation Simplifying Project
+ * ISP <=> Initialisation Simplifying Project Script
  * R <=> Repository
  * FS <=> File separator
  * AP <=> Absolute Path
