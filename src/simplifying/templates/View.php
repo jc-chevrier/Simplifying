@@ -15,8 +15,8 @@ class View
      */
     public static function render($content)
     {
-        echo <<<HTML_HERE_DOC
+        echo <<<VIEW_HERE_DOC
         $content
-HTML_HERE_DOC;
+VIEW_HERE_DOC;
     }
 }
