@@ -8,7 +8,7 @@ use \simplifying\templates\Template as Template;
 
 $router = Router::getInstance();
 
-$router->route('/test/{id}', function() {
+$router->addRoute('/test/{id}', function() {
     $set = [];
     $set2_1 = [ "1", "1", "1" ];
     $set2_2 = [ "2", "2", "2" ];
@@ -20,7 +20,7 @@ $router->route('/test/{id}', function() {
     Template::render('HomeView', [ "set" => $set, "isConnected" => $isConnected ]);
 });
 
-$router->route('/test2/{id}/{id2}', function($id, $id2) {
+$router->addRoute('/test2/{id}/{id2}', function($id, $id2) {
     echo $id . "---" . $id2;
 })->alias('test2');
 

@@ -64,7 +64,7 @@ class Router
         //Noeud racine de l'arbre du serveur.
         $this->tree = new UriNode("root");
         //Route d'erreur par défaut.
-        $this->route('/error', function(){return"<html><body><div>Page inexistante sur le serveur.</div></body></html>";});
+        $this->addRoute('/error', function(){return"<html><body><div>Page inexistante sur le serveur.</div></body></html>";});
     }
 
     /**
@@ -165,7 +165,7 @@ class Router
      * @param callable $action
      * @return Route
      */
-    public function route(string $templateRoute, callable $action) : Route {
+    public function addRoute(string $templateRoute, callable $action) : Route {
         //La route / est enregistrée en tant que "slash".
         if($templateRoute == "/") {
             $templateRoute = "/slash";
@@ -185,7 +185,7 @@ class Router
      * @return Route
      */
     public function routeError(string $serverResponseForError) : Route {
-        return $this->route("/error", $serverResponseForError);
+        return $this->addRoute("/error", $serverResponseForError);
     }
 
 
