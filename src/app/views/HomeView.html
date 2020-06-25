@@ -18,13 +18,15 @@
                 <div>
                     Loop -> valeur=<<val e> | index=<<val for.index> | taille=<<val for.size>
                     | isFirstIteration=<<val for.isFirstIteration> | isLastIteration=<<val for.isLastIteration> |
-                    index du scope = <<val for.scope.index>.
+                    index du scope=<<val for.scope.index>.
                     <<if for.isFirstIteration>
                         Première itération.
-                     <<else>
-                            <<if for.isLastIteration>
-                                Dernière itération.
-                            <</if>
+                    <<else>
+                        <<if for.isLastIteration>
+                            Dernière itération.
+                        <<else>
+                            Ni première, ni dernière itération.
+                        <</if  >
                     <</if>
                 </div>
             <</for>
@@ -54,6 +56,6 @@
         <a href='<<route test2:#cr.id:#ep.set.1.0>'>
             Lien vers le test2 : <<val cr.id> : <<val ep.set.1.0>.
         </a>
-        <<ternary ep.isConnected ? Est connecté!   : N'est pas connecté!    >
+        <<ternary ep.isConnected ? Est connecté! : N'est pas connecté!    >
     </div>
 <</block>

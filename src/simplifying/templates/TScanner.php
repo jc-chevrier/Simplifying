@@ -71,7 +71,6 @@ class TScanner implements \Iterator {
 
 
 
-
     /**
      * @param string $path
      * @return string

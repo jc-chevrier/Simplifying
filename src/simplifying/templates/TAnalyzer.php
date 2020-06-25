@@ -70,7 +70,7 @@ class TAnalyzer
     private function parseTemplateInArrayOfTNodes() : array {
         $TNodes = [];
         $this->TScanner->forEach(function($nextTNodeArray, $key, &$TNodes) {
-            $nextTNode = $this->analyzeNextTNode($nextTNodeArray);
+            $nextTNode = $this->analyzeTNode($nextTNodeArray);
             if($nextTNode->is(TNodeLabel::FOR)) {
                 $nextTNode->id = $key;
             }
@@ -157,7 +157,7 @@ class TAnalyzer
      * @return bool|mixed|TNode
      * @throws TSyntaxException
      */
-    private function analyzeNextTNode(array $nextTNodeArray) : TNode {
+    private function analyzeTNode(array $nextTNodeArray) : TNode {
         //Analyse d'un noeud de template de type IGNORED.
         if($nextTNodeArray['isIgnoredTNode']) {
             $nextTNode = new TNode(['TNode' => $nextTNodeArray['TNode'], 'label' => TNodeLabel::IGNORED]);
@@ -170,7 +170,7 @@ class TAnalyzer
             //Split sur les espaces.
             $contentsArray = preg_split("/ +/", $contentsStr, -1, PREG_SPLIT_NO_EMPTY);
             if(count($contentsArray) == 0) {
-                throw new TSyntaxException("TAnalyzer->analyzeNextTNode() : noeud de template vide : $nextTNode !");
+                throw new TSyntaxException("TAnalyzer->analyzeTNode() : noeud de template vide : $nextTNode !");
             } else {
                 //Récupération de la structure du noeud.
                 $TNodeStructure = [ 'TNode' => $nextTNode ];
@@ -178,7 +178,7 @@ class TAnalyzer
                 if(TNodeLabel::isTNodeLabel($aContent)) {
                     $TNodeStructure['label'] = $aContent;
                 } else {
-                    throw new TSyntaxException("TAnalyzer->analyzeNextTNode() : type de noeud de template inconnu : $nextTNode !");
+                    throw new TSyntaxException("TAnalyzer->analyzeTNode() : type de noeud de template inconnu : $nextTNode !");
                 }
                 $TNodeStructure['otherContents'] = $contentsArray;
 
