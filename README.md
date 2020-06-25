@@ -19,11 +19,6 @@
 
 <hr>
 
-<b> Usages </b>: 
-<br> Aller dans la branche example du repertoire GIT du micro-framework pour voir des exemples d'utilisation. 
-
-<hr>
-
 <b> Version actuelle </b> : 
 <br> 1.1.
 
