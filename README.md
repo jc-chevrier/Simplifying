@@ -32,4 +32,4 @@
 <b> Toutes les versions </b> : 
 <br> 1.0. : première version
 <br> 1.1. : passage de récursif à itératif dans les méthodes de conversion des templates en html
-<br> 1.2. : refonte du micro-framework (version en cours de programmation)
+<br> 2.0. : refonte du micro-framework (version en cours de programmation, pas encore disponible)
