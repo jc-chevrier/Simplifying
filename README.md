@@ -15,17 +15,7 @@
 <br> Micro-framework entièrement en PHP, professionel, et pratique d'utilisation.  
 <br> Il propose :
 <br> (1) un système de routes de serveur
-<br>     -> paramètres de route 
-<br>	 -> alias de route
-<br>     -> redirection
-<br>	 -> route d'erreur par défaut
-<br>	 -> arbre n-aire de routes du serveur	
 <br> (2) un système de templates
-<br>	 -> heritages / familles de templates
-<br>	 -> macros implémentables et implémentées
-<br>	 -> macros de valeur
-<br>	 -> paramètres passables de l'extérieur accessibles dans le template courant
-<br>	 -> valeurs internes accessibles dans tout l'heritage de templates
 
 <hr>
 
@@ -42,3 +32,4 @@
 <b> Toutes les versions </b> : 
 <br> 1.0. : première version
 <br> 1.1. : passage de récursif à itératif dans les méthodes de conversion des templates en html
+<br> 1.2. : refonte du micro-framework (version en cours de programmation)
