@@ -130,7 +130,7 @@ class TParser
             }
             $routeParameters[$i] = $routeParameter;
         }
-        return $this->router->getRoute($TNodeRoute->routeAlias, $routeParameters);
+        return call_user_func(TConfiguration::getInstance()->routeBuilder, $TNodeRoute->routeAlias, $routeParameters);
     }
 
     /**
