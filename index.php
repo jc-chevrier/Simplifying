@@ -1,17 +1,16 @@
 <?php
 
+
 require_once('Autoloader.php');
 Autoloader::register();
 
+
 use \simplifying\routes\Router as Router;
 use \simplifying\templates\Template as Template;
-use \simplifying\templates\TConfiguration as TConfiguration;
 
-TConfiguration::getInstance()->routeBuilder = function ($routeAlias, $routeParameters) {
-  return Router::getInstance()->getRoute($routeAlias, $routeParameters);
-};
 
 $router = Router::getInstance();
+
 $router->addRoute('/test/{id}', function() {
     $set = [];
     $set2_1 = [ "1", "1", "1" ];
@@ -23,7 +22,9 @@ $router->addRoute('/test/{id}', function() {
     $isConnected = false;
     Template::render('HomeView', [ "set" => $set, "isConnected" => $isConnected ]);
 });
+
 $router->addRoute('/test2/{id}/{id2}', function($id, $id2) {
     echo $id . "---" . $id2;
 })->alias('test2');
+
 $router->run();
